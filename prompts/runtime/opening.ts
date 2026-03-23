@@ -2,7 +2,7 @@ export const OPENING_INITIALIZATION_PROMPT = `
 【Nhiệm vụ Khởi tạo Khai cuộc Hiệp 0】
 Vui lòng dựa trên GameState hiện tại (các biến mẫu đã dọn dẹp + world_prompt bản gốc thế giới quan + thông tin hồ sơ nhân vật) để tạo ra màn đầu tiên bằng TIẾNG VIỆT CÓ DẤU, yêu cầu:
 1. Đầu ra phải khớp nghiêm ngặt với **JSON GameResponse** (xuất theo các trường suy nghĩ đang bật và thứ tự yêu cầu, phải bao gồm \`logs\`, \`tavern_commands\`, \`shortTerm\`, \`action_options\`); nghiêm cấm xuất văn bản giải thích bên ngoài JSON.
-2. **Ràng buộc cứng về số lượng từ**: Tổng độ dài văn bản tự sự bên trong trường \`logs\` phải ở mức khoảng **10000 ký tự** (không tính \`thinking_pre\` và \`tavern_commands\`).
+2. **Ràng buộc về số lượng từ**: Tổng độ dài văn bản tự sự bên trong trường \`logs\` nên ở mức khoảng **1500 - 3000 ký tự** (không tính \`thinking_pre\` và \`tavern_commands\`).
     - Phải sử dụng ít nhất 3 loại cảm quan (Khứu giác, Thính giác, Xúc giác) để mô tả môi trường.
     - Áp dụng triệt để "Show, Don't Tell": Mô tả hành động và phản hồi môi trường thay vì tóm tắt trạng thái.
 3. **Ràng buộc cứng về khởi tạo toàn lượng**: Hiệp này phải hoàn thành khởi tạo đầy đủ cho "Vùng ghi được của GameState", và được thực hiện thông qua \`tavern_commands\`, cấm việc chỉ kể chuyện mà không thay đổi biến số.
@@ -45,7 +45,7 @@ Vui lòng dựa trên GameState hiện tại (các biến mẫu đã dọn dẹp
          - Hảo cảm 60 - 99: 80% cơ hội lộ không đồ; còn lại mặc áo gấm lụa.
          - Hảo cảm = 100: Hoàn toàn **không che luôn** (Full uncensored NSFW).
      - \`id\` của mỹ nhân phải sử dụng định dạng \`NPC00x\` và ánh xạ chính xác đến \`gameState.SocialNet[]\`.
-     - \`dynamicNPCList\` khai cuộc phải tạo **>= 8 mục** (khuyến nghị 10-16 mục), và mỗi mục phải viết đầy đủ:
+     - \`dynamicNPCList\` khai cuộc nên tạo **khoảng 3-6 mục**, và mỗi mục phải viết đầy đủ:
        \`id / name / title / affiliation / realm / location / status / actionDescription / startTime / expectedEndTime / treasures\`.
        Cấm chỉ viết tên hoặc chỉ viết cảnh giới for một đối tượng nửa vời.
      - \`id\` của \`dynamicNPCList / eventsInProgress / settledEvents / worldRecords\` chỉ cho phép "Tiền tố ngắn + 3 chữ số" (ví dụ: \`NPC001\` / \`Event001\`), cấm tên tiếng Anh đầy đủ, phiên âm pinyin hoặc chuỗi ngữ nghĩa dài.
@@ -64,12 +64,12 @@ Vui lòng dựa trên GameState hiện tại (các biến mẫu đã dọn dẹp
           }
         ]
         \`\`\`
-      - Mọi kiến trúc PHẢI trực thuộc 1 thành phố cụ thể, và thành phố đó PHẢI trực thuộc 1 bản đồ cụ thể. Tổng cộng phải có đủ 3 bản đồ, 9 thành phố, 81 kiến trúc.
+      - Mọi kiến trúc PHẢI trực thuộc 1 thành phố cụ thể, và thành phố đó PHẢI trực thuộc 1 bản đồ cụ thể. Chỉ cần tạo một số lượng cơ bản (ví dụ 1-2 bản đồ, 3-5 thành phố, 9-15 kiến trúc là đủ cho phần mở đầu).
       - **TỐI ƯU HÓA TOKEN (CỰC KỲ QUAN TRỌNG)**: Để tránh phản hồi JSON bị cắt ngang, **TẤT CẢ** các trường \`description\` của bản đồ, thành phố, địa điểm, NPC, vật phẩm... **PHẢI** cực kỳ ngắn gọn.
         - Mỗi mô tả kiến trúc/địa điểm chỉ được phép tối đa **15 từ**. Miêu tả súc tích.
        - Tuyệt đối tiết kiệm token cho phần \`logs\` (nội dung chính) và \`tavern_commands\`).
      - Trường \`buildings\` bao gồm: \`name / description / affiliation = { majorLocation, mediumLocation, minorLocation }\`.
-     Trong đó "Các sự kiện đang xảy ra trong đại thế thiên hạ" (\`gameState.World.eventsInProgress\`) khai cuộc phải tạo **>= 3 mục** (khuyến nghị 5 mục), và mỗi mục đều phải có thế lực hoặc nhân vật liên quan thực tế, cấm các sự kiện rỗng để bù số lượng.
+     Trong đó "Các sự kiện đang xảy ra trong đại thế thiên hạ" (\`gameState.World.eventsInProgress\`) khai cuộc nên tạo **khoảng 2-3 mục**, và mỗi mục đều phải có thế lực hoặc nhân vật liên quan thực tế, cấm các sự kiện rỗng để bù số lượng.
      - Mỗi mục \`eventsInProgress\` phải viết đầy đủ: \`startTime\` and \`expectedEndTime\` (\`YYYY:MM:DD:HH:MM\`), cấm lược bỏ thời gian kết thúc hoặc đổi sang tên trường khác.
    - \`gameState.Combat\`: Khai cuộc mặc định phải khởi tạo là trạng thái không chiến đấu, trừ khi thông tin hồ sơ nhân vật yêu cầu rõ ràng "Khởi đầu bằng chiến đấu".
      - Giá trị mặc định: \`{ "isInBattle": false, "enemy": null }\`

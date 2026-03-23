@@ -27,8 +27,8 @@ export const getActionOptionsPrompt = (
 export const constructWordCountRequirementPrompt = (minLength: number): string => {
     const safeValue = Number.isFinite(minLength) ? Math.max(50, Math.floor(minLength)) : 800;
     return [
-        `<WordCount>Nội dung bên trong thẻ <Main Body> lần này **BẮT BUỘC PHẢI TRÊN ${safeValue} CHỮ**.</WordCount>`,
-        'Lưu ý: Không được viết tóm tắt. Hãy sử dụng tối đa quỹ token để mô tả chi tiết từng hành động, biểu cảm, bối cảnh và nội tâm NPC.'
+        `<WordCount>Độ dài nội dung <Main Body> mong muốn khoảng **${safeValue} chữ**.</WordCount>`,
+        'Lưu ý: Khuyến khích mô tả chi tiết từng hành động, biểu cảm, bối cảnh và nội tâm NPC.'
     ].join('\n');
 };
 

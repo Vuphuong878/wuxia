@@ -29,8 +29,8 @@ export const WritingRequirements: PromptStructure = {
 - Sử dụng môi trường làm ẩn dụ cho tâm trạng: Một cơn gió lạnh cắt ngang cuộc đối thoại căng thẳng, hoặc ánh nắng chói chang phơi bày sự lúng túng.
 
 4. Ràng buộc Số lượng Ký tự (Dynamic Injection)
-- <WordCount>Nội dung chính trong "logs" BẮT BUỘC phải vượt quá **1,000 - 10,000 ký tự**</WordCount>
-- TUYỆT ĐỐI không được ngắn gọn. Hãy kéo dài các đoạn miêu tả không khí và phản ứng nội tâm của NPC (trong giới hạn) để làm phong phú nội dung.
+- <WordCount>Nội dung chính trong "logs" nên có khoảng **500 - 2000 chữ**</WordCount>
+- Hãy miêu tả không khí và phản ứng nội tâm của NPC (trong giới hạn) để làm phong phú nội dung.
 - Nội dung chính chỉ bao gồm dẫn truyện và đối thoại trong logs (không tính dòng 【Phán định】).
 
 5. Cấu trúc Phản hồi JSON (Bắt buộc)
