@@ -76,7 +76,7 @@ export class TextGenService {
             messages: options.messages,
             max_tokens: options.max_tokens || 131000,
             temperature: options.temperature || 0.8,
-            stream: false,
+            stream: true, // Enabled streaming
           }),
         });
 
@@ -94,75 +94,83 @@ export class TextGenService {
             errorMessage.toLowerCase().includes('daily free allocation') ||
             errorMessage.toLowerCase().includes('neurons');
 
-          // Check if this error is transient (4006, 429, 500 range)
-          const isTransient = is4006 ||
-            response.status === 429 ||
-            response.status >= 500;
+          const isTransient = is4006 || response.status === 429 || response.status >= 500;
 
           if (isTransient && i < urls.length - 1) {
-            console.warn(`[TextGenService] Worker ${normalizedUrl} lỗi (${response.status}/${errorMessage.slice(0, 50)}). Đang tìm link dự phòng hoạt động...`);
-
-            // Search for the next healthy link
+            console.warn(`[TextGenService] Worker ${normalizedUrl} lỗi (${response.status}/${errorMessage.slice(0, 50)}). Đang tìm link dự phòng...`);
             let foundHealthy = false;
             for (let nextIdx = i + 1; nextIdx < urls.length; nextIdx++) {
-              const nextUrl = urls[nextIdx];
-              console.log(`[TextGenService] Kiểm tra độ khả dụng của link dự phòng (${nextIdx + 1}/${urls.length}): ${nextUrl}...`);
-              if (await this.verifyWorkerHealth(nextUrl)) {
-                console.log(`[TextGenService] Tìm thấy link dự phòng hoạt động: ${nextUrl}. Chuyển sang sử dụng...`);
+              if (await this.verifyWorkerHealth(urls[nextIdx])) {
                 i = nextIdx;
                 foundHealthy = true;
                 break;
               }
             }
-
             if (foundHealthy) {
               await new Promise(r => setTimeout(r, 100));
-              continue; // Re-run with updated i
-            } else {
-              console.error(`[TextGenService] Đã thử hết tất cả các link dự phòng nhưng không có link nào khả dụng.`);
-              throw new Error(`Đã thử hết nhưng tất cả đều lỗi (Lỗi cuối: ${response.status})`);
+              continue;
             }
           }
-
           throw new Error(errorMessage);
         }
 
-        const data = await response.json() as any;
-
-        // Robust response parsing
+        // Handle streaming response (SSE)
         let text = "";
-        if (data.response) {
-          text = data.response;
-        } else if (data.result) {
-          text = typeof data.result === 'string' ? data.result : data.result.response || "";
-        } else if (data.output) {
-          text = typeof data.output === 'string' ? data.output : data.output.response || "";
+        let errorDataFromStream: any = null;
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (reader) {
+          let done = false;
+          while (!done) {
+            const { value, done: doneReading } = await reader.read();
+            done = doneReading;
+            const chunk = decoder.decode(value, { stream: !done });
+            
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const dataStr = line.slice(6).trim();
+                if (dataStr === '[DONE]') continue;
+                try {
+                  const data = JSON.parse(dataStr);
+                  if (data.error) errorDataFromStream = data;
+                  const delta = data.response || data.result?.response || data.choices?.[0]?.delta?.content || "";
+                  text += delta;
+                } catch (e) { }
+              } else if (line.trim() && !line.startsWith(':')) {
+                try {
+                  const data = JSON.parse(line);
+                  if (data.error) errorDataFromStream = data;
+                  const delta = data.response || data.result?.response || "";
+                  text += delta;
+                } catch (e) { }
+              }
+            }
+          }
+        } else {
+          const data = await response.json() as any;
+          if (data.error) errorDataFromStream = data;
+          text = data.response || data.result?.response || data.choices?.[0]?.message?.content || "";
         }
 
-        if (!text) {
-          if (data.error) {
-            const errorStr = String(data.error);
-            const is4006Inside = errorStr.includes('4006') || errorStr.toLowerCase().includes('daily free allocation');
+        if (!text && errorDataFromStream) {
+          const errorStr = String(errorDataFromStream.error);
+          const is4006Inside = errorStr.includes('4006') || errorStr.toLowerCase().includes('daily free allocation');
 
-            if (is4006Inside && i < urls.length - 1) {
-              console.warn(`[TextGenService] Worker ${normalizedUrl} báo lỗi 4006 trong dữ liệu. Đang tìm link dự phòng...`);
-              // Similar to above, search for next healthy link
-              let foundHealthy = false;
-              for (let nextIdx = i + 1; nextIdx < urls.length; nextIdx++) {
-                if (await this.verifyWorkerHealth(urls[nextIdx])) {
-                  i = nextIdx;
-                  foundHealthy = true;
-                  break;
-                }
+          if (is4006Inside && i < urls.length - 1) {
+            console.warn(`[TextGenService] Worker ${normalizedUrl} báo lỗi 4006. Đang tìm link dự phòng...`);
+            let foundHealthy = false;
+            for (let nextIdx = i + 1; nextIdx < urls.length; nextIdx++) {
+              if (await this.verifyWorkerHealth(urls[nextIdx])) {
+                i = nextIdx;
+                foundHealthy = true;
+                break;
               }
-              if (foundHealthy) continue;
             }
-            throw new Error(`Worker API Error: ${data.error}`);
+            if (foundHealthy) continue;
           }
-
-          // OpenAI format check
-          const openaiText = (data as any).choices?.[0]?.message?.content;
-          if (openaiText) text = openaiText.trim();
+          throw new Error(`Worker API Error: ${errorStr}`);
         }
 
         // Check for refusal phrases or empty text
