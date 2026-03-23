@@ -91,22 +91,7 @@ const ChatList: React.FC<Props> = ({
             className="flex-1 overflow-y-auto px-4 md:px-12 py-6 space-y-8 scroll-smooth custom-scrollbar /20"
             ref={scrollRef}
         >
-            <div className="flex justify-end mb-4">
-                <button
-                    onClick={() => {
-                        if (window.confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử và bắt đầu một cuộc trò chuyện mới không?")) {
-                            onClearHistory?.();
-                        }
-                    }}
-                    className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-serif uppercase tracking-widest text-emerald-400/60 hover:text-emerald-400 border border-emerald-900/30 hover:border-emerald-500/50 bg-emerald-900/10 hover:bg-emerald-900/20 rounded-lg transition-all"
-                    title="Bắt đầu cuộc trò chuyện mới (Xóa lịch sử)"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    <span>Tạo hội thoại mới</span>
-                </button>
-            </div>
+
             {history.length === 0 && (
                 <div className="flex flex-col items-center justify-center h-full opacity-30">
                     <div className="text-6xl font-serif text-wuxia-gold mb-4 select-none">Jianghu</div>
