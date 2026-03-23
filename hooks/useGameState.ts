@@ -281,10 +281,17 @@ export const useGameState = () => {
         ...(raw || {}),
         bodyLengthRequirement: (() => {
             const candidate = raw?.bodyLengthRequirement as unknown;
-            if (typeof candidate === 'number' && Number.isFinite(candidate)) return Math.max(50, Math.floor(candidate));
+            if (typeof candidate === 'number' && Number.isFinite(candidate)) {
+                // Force update from legacy default (10000) to current default
+                if (candidate === 10000) return defaultGameSettings.bodyLengthRequirement;
+                return Math.max(50, Math.floor(candidate));
+            }
             if (typeof candidate === 'string') {
                 const n = Number(candidate.replace(/[^\d]/g, ''));
-                if (Number.isFinite(n) && n > 0) return Math.max(50, Math.floor(n));
+                if (Number.isFinite(n) && n > 0) {
+                    if (n === 10000) return defaultGameSettings.bodyLengthRequirement;
+                    return Math.max(50, Math.floor(n));
+                }
             }
             return defaultGameSettings.bodyLengthRequirement;
         })(),

@@ -954,7 +954,11 @@ const normalizeGameSettings = (raw?: any): any => {
     const result: any = {
         ...settings,
         // 450 tokens ≈ a balanced turn length for wuxia narrative
-        bodyLengthRequirement: Number(settings.bodyLengthRequirement) || 1500,
+        bodyLengthRequirement: (() => {
+            const val = Number(settings.bodyLengthRequirement);
+            if (val === 10000) return 1500;
+            return val || 1500;
+        })(),
         // Default to 2nd-person (Ngôi thứ hai) — most immersive for interactive fiction
         narrativePerspective: typeof settings.narrativePerspective === 'string' ? settings.narrativePerspective : 'Ngôi thứ hai',
         jsonMode: typeof settings.jsonMode === 'string' ? settings.jsonMode : 'auto',
