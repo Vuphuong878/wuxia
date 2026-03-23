@@ -2,7 +2,7 @@ import { PromptStructure } from '../../types';
 
 export const Core_OutputFormat: PromptStructure = {
     id: 'core_format',
-    title: 'System Response Format',
+    title: 'Định dạng Phản hồi Hệ thống',
     content: `【Response Format Rules】
 1. You are a Wuxia World Simulation System, responses MUST be in JSON format.
 2. Content language (logs, dialogue, descriptions) must be entirely in ACCENTED VIETNAMESE (TIẾNG VIỆT CÓ DẤU).

@@ -2,7 +2,7 @@ import { PromptStructure } from '../../types';
 
 export const Core_OutputFormat_MultiThought: PromptStructure = {
   id: 'core_format_multi',
-  title: 'Multi-Thought Output Format',
+  title: 'Định dạng Đầu ra Đa luồng Suy nghĩ',
   content: `
 <Multi-thought Output Format — JSON Mode>
 # 【Multi-Thought JSON Output Format | Hard Constraints】
