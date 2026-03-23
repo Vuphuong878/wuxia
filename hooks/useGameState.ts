@@ -26,6 +26,7 @@ import { DefaultPrompts } from '../prompts';
 import { defaultMidToLongMemoryPrompt, defaultShortToMidMemoryPrompt, defaultExtraSystemPrompt, legacyDefaultAdditionalSystemPrompt } from '../prompts/runtime/defaults';
 import { festivalList } from '../data/world';
 import * as dbService from '../services/dbService';
+import { PromptSyncService } from '../services/promptSyncService';
 import { THEMES } from '../styles/themes';
 import { createEmptyApiSettings, normalizeApiSettings } from '../utils/apiConfig';
 import { estimateHistoryTokens } from '../utils/tokenEstimate';
@@ -345,6 +346,7 @@ export const useGameState = () => {
     });
 
     const [prompts, setPrompts] = useState<PromptStructure[]>(DefaultPrompts);
+    // Removed legacy syncPrompts, now using PromptSyncService
     const [festivals, setFestivals] = useState<FestivalStructure[]>(festivalList);
     const [currentTheme, setCurrentTheme] = useState<ThemePreset>('ink');
     const [contextSize, setContextSize] = useState(0);
@@ -405,8 +407,10 @@ export const useGameState = () => {
                     }
                 }
 
-                if (promptsRes.status === 'fulfilled' && promptsRes.value) {
-                    setPrompts(promptsRes.value as PromptStructure[]);
+                if (promptsRes.status === 'fulfilled') {
+                    const loaded = (promptsRes.value as PromptStructure[]) || [];
+                    const synced = await PromptSyncService.syncPrompts(loaded);
+                    setPrompts(synced);
                 }
 
                 if (festivalsRes.status === 'fulfilled' && festivalsRes.value) {
@@ -442,6 +446,18 @@ export const useGameState = () => {
             }
         };
         init();
+    }, []);
+
+    // Remote Prompts Background Update Listener
+    useEffect(() => {
+        const handleRemoteUpdate = (event: any) => {
+            if (event.detail) {
+                console.log('[useGameState] Applying remote prompt updates...');
+                setPrompts(event.detail);
+            }
+        };
+        window.addEventListener('prompts-updated-remotely', handleRemoteUpdate);
+        return () => window.removeEventListener('prompts-updated-remotely', handleRemoteUpdate);
     }, []);
 
     // Theme Application
