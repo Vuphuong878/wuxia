@@ -823,6 +823,7 @@ const App: React.FC = () => {
                         <TeamModal
                             character={state.character}
                             teammates={state.social}
+                            allAvatars={allAvatars}
                             onClose={() => setters.setShowTeam(false)}
                         />
                     )}
@@ -831,12 +832,14 @@ const App: React.FC = () => {
                         <>
                             <SocialModal
                                 socialList={state.social}
+                                allAvatars={allAvatars}
                                 onClose={() => setters.setShowSocial(false)}
                                 playerName={state.character.name}
                                 onToggleMajorRole={actions.updateNpcMajorRole}
                             />
                             <MobileSocial
                                 socialList={state.social}
+                                allAvatars={allAvatars}
                                 onClose={() => setters.setShowSocial(false)}
                                 playerName={state.character.name}
                                 onToggleMajorRole={actions.updateNpcMajorRole}

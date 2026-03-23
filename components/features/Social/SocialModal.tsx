@@ -19,6 +19,7 @@ const SocialModal: React.FC<Props> = ({ socialList, onClose, playerName = "Sơ n
     const showFemaleExtensions = currentNPC?.gender === 'Female' && Boolean(currentNPC?.isMainCharacter);
 
     const resolveAvatar = (npc: NpcStructure) => {
+        if (!allAvatars) return npc.avatar;
         return allAvatars[npc.id] || allAvatars[npc.name] || npc.avatar;
     };
 

@@ -28,7 +28,7 @@ import { festivalList } from '../data/world';
 import * as dbService from '../services/dbService';
 import { PromptSyncService } from '../services/promptSyncService';
 import { THEMES } from '../styles/themes';
-import { createEmptyApiSettings, normalizeApiSettings } from '../utils/apiConfig';
+import { createEmptyApiSettings, normalizeApiSettings, DEFAULT_TEXT_GEN_WORKER_URL, DEFAULT_IMAGE_GEN_WORKER_URL } from '../utils/apiConfig';
 import { estimateHistoryTokens } from '../utils/tokenEstimate';
 
 const normalizeTavernSettings = (raw?: Partial<TavernSettingsStructure> | null): TavernSettingsStructure => ({
@@ -260,9 +260,39 @@ export const useGameState = () => {
         importedFonts: [],
         defaultFontSizeChat: 16,
         defaultLineHeightChat: 1.6,
-        imageGenWorkerUrl: 'https://wuxia-image-gen.vudinhtrungv1010.workers.dev',
-        textGenWorkerUrl: 'https://wuxia-nemotron-worker.vudinhtrungv1010.workers.dev'
+        imageGenWorkerUrl: DEFAULT_IMAGE_GEN_WORKER_URL || '',
+        textGenWorkerUrl: DEFAULT_TEXT_GEN_WORKER_URL || ''
     });
+
+    const normalizeVisualSettings = (raw?: Partial<VisualSettings> | null): VisualSettings => {
+        const defaults: VisualSettings = {
+            timeFormat: 'Truyền thống',
+            renderLayers: 30,
+            areaSettings: {},
+            importedFonts: [],
+            defaultFontSizeChat: 16,
+            defaultLineHeightChat: 1.6,
+            imageGenWorkerUrl: DEFAULT_IMAGE_GEN_WORKER_URL || '',
+            textGenWorkerUrl: DEFAULT_TEXT_GEN_WORKER_URL || ''
+        };
+
+        if (!raw) return defaults;
+
+        const result = { ...defaults, ...raw };
+
+        // Migration: If the URL is the old hardcoded one, force it to the new default
+        const oldImageGenUrl = 'https://wuxia-image-gen.vudinhtrungv1010.workers.dev';
+        const oldTextGenUrl = 'https://wuxia-nemotron-worker.vudinhtrungv1010.workers.dev';
+
+        if (result.imageGenWorkerUrl === oldImageGenUrl) {
+            result.imageGenWorkerUrl = DEFAULT_IMAGE_GEN_WORKER_URL || '';
+        }
+        if (result.textGenWorkerUrl === oldTextGenUrl) {
+            result.textGenWorkerUrl = DEFAULT_TEXT_GEN_WORKER_URL || '';
+        }
+
+        return result;
+    };
     const defaultGameSettings: GameSettings = {
         bodyLengthRequirement: 3000,
         narrativePerspective: 'Ngôi thứ hai',
@@ -417,11 +447,8 @@ export const useGameState = () => {
                     setFestivals(festivalsRes.value as FestivalStructure[]);
                 }
 
-                if (visualRes.status === 'fulfilled' && visualRes.value) {
-                    setVisualConfig(prev => ({
-                        ...prev,
-                        ...(visualRes.value as Partial<VisualSettings>)
-                    }));
+                if (visualRes.status === 'fulfilled') {
+                    setVisualConfig(normalizeVisualSettings(visualRes.value as Partial<VisualSettings>));
                 }
 
                 if (gameRes.status === 'fulfilled' && gameRes.value) {

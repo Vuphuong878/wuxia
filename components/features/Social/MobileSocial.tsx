@@ -7,6 +7,7 @@ interface Props {
     onClose: () => void;
     playerName?: string;
     onToggleMajorRole?: (npcId: string, nextIsMajor: boolean) => void;
+    allAvatars: Record<string, string>;
 }
 
 const Tag: React.FC<{ label: string }> = ({ label }) => (
@@ -36,11 +37,15 @@ const RelationTag: React.FC<{ label: string; value?: string; accent?: string }> 
     </div>
 );
 
-const MobileSocial: React.FC<Props> = ({ socialList, onClose, playerName = "Young Hero", onToggleMajorRole }) => {
+const MobileSocial: React.FC<Props> = ({ socialList, onClose, playerName = "Young Hero", onToggleMajorRole, allAvatars }) => {
     const [selectedId, setSelectedId] = useState<string | null>(
         socialList.length > 0 ? socialList[0].id : null
     );
 
+    const resolveAvatar = (npc: NpcStructure) => {
+        if (!allAvatars) return npc.avatar;
+        return allAvatars[npc.id] || allAvatars[npc.name] || npc.avatar;
+    };
     const currentNPC = socialList.find(n => n.id === selectedId);
     const showFemaleExtensions = currentNPC?.gender === 'Female' && Boolean(currentNPC?.isMainCharacter);
     
@@ -130,7 +135,11 @@ const MobileSocial: React.FC<Props> = ({ socialList, onClose, playerName = "Youn
                                     <div className="flex items-center gap-2">
                                         <div className={`w-9 h-9 rounded-none flex items-center justify-center font-serif font-bold text-base border-2 ${npc.gender === 'Female' ? 'border-pink-800/60 bg-pink-900/20 text-pink-500' : 'border-wuxia-cyan/30 bg-wuxia-cyan/10 text-wuxia-cyan'
                                             }`}>
-                                            {npc.name[0]}
+                                            {resolveAvatar(npc) ? (
+                                                <img src={resolveAvatar(npc)} alt={npc.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                npc.name[0]
+                                            )}
                                         </div>
                                         <div>
                                             <div className={`font-serif font-bold text-sm ${selectedId === npc.id ? 'text-wuxia-gold' : 'text-gray-300'
@@ -154,10 +163,10 @@ const MobileSocial: React.FC<Props> = ({ socialList, onClose, playerName = "Youn
                     {currentNPC ? (
                         <>
                             {/* NPC Banner Image 16:9 */}
-                            {currentNPC.avatar && (
+                            {resolveAvatar(currentNPC) && (
                                 <div className="aspect-video w-full rounded-none border border-wuxia-gold/20 overflow-hidden relative mb-2 shadow-lg">
                                     <img 
-                                        src={currentNPC.avatar} 
+                                        src={resolveAvatar(currentNPC)} 
                                         alt={currentNPC.name} 
                                         className="w-full h-full object-cover object-top" 
                                     />
