@@ -554,36 +554,7 @@ const mergeRelationshipVariables = (a: any, b: any): Array<{ targetName: string;
     return out.length > 0 ? out : undefined;
 };
 
-const mergeInternalEjaculationRecords = (a: any, b: any): any[] | undefined => {
-    const merged = new Map<string, any>();
-    const process = (raw: any) => {
-        if (!Array.isArray(raw)) return;
-        raw.forEach((item) => {
-            const dateRaw = typeof item?.date === 'string' ? item.date.trim() : '';
-            const date = dateRaw ? (normalizeCanonicalGameTime(dateRaw) || dateRaw) : '';
-            const description = typeof item?.description === 'string' ? item.description.trim() : '';
-            const conceptionCheckDateRaw = typeof item?.conceptionCheckDate === 'string' ? item.conceptionCheckDate.trim() : '';
-            const conceptionCheckDate = conceptionCheckDateRaw ? (normalizeCanonicalGameTime(conceptionCheckDateRaw) || conceptionCheckDateRaw) : '';
-            if (!date && !description && !conceptionCheckDate) return;
-            const key = `${date}__${description}`;
-            const existing = merged.get(key);
-            if (!existing) {
-                merged.set(key, { date: date || 'Unknown time', description, conceptionCheckDate: conceptionCheckDate || 'Unknown time' });
-                return;
-            }
-            merged.set(key, {
-                date: getBetterText(existing.date, date) || existing.date || 'Unknown time',
-                description: getBetterText(existing.description, description) || existing.description || '',
-                conceptionCheckDate: getBetterText(existing.conceptionCheckDate, conceptionCheckDate) || existing.conceptionCheckDate || 'Unknown time'
-            });
-        });
-    };
 
-    process(a);
-    process(b);
-    const out = Array.from(merged.values());
-    return out.length > 0 ? out : undefined;
-};
 
 export const standardizeSingleNPC = (rawNpc: any, fallbackIndex: number): any => {
     const npc = rawNpc && typeof rawNpc === 'object' ? rawNpc : {};
@@ -643,26 +614,6 @@ const mergeNPCObject = (leftRaw: any, rightRaw: any, fallbackIndex: number): any
     const right = standardizeSingleNPC(rightRaw, fallbackIndex);
     const mergedMemories = standardizationNPCMemory([...(left.memories || []), ...(right.memories || [])]);
 
-    const mergedWomb = (() => {
-        const leftWomb = left?.womb && typeof left.womb === 'object' ? left.womb : undefined;
-        const rightWomb = right?.womb && typeof right.womb === 'object' ? right.womb : undefined;
-        if (!leftWomb && !rightWomb) return undefined;
-        const mergedRecords = mergeInternalEjaculationRecords(leftWomb?.ejaculationRecords, rightWomb?.ejaculationRecords);
-        return {
-            status: getBetterText(
-                getFieldText(leftWomb, 'status'),
-                getFieldText(rightWomb, 'status')
-            ) || 'Unknown',
-            cervixStatus: getBetterText(
-                getFieldText(leftWomb, 'cervixStatus'),
-                getFieldText(rightWomb, 'cervixStatus')
-            ) || 'Unknown',
-            ...(mergedRecords
-                ? { ejaculationRecords: mergedRecords }
-                : {})
-        };
-    })();
-
     const mergedEquip = (() => {
         const leftEquip = left?.currentEquipment && typeof left.currentEquipment === 'object' ? left.currentEquipment : undefined;
         const rightEquip = right?.currentEquipment && typeof right.currentEquipment === 'object' ? right.currentEquipment : undefined;
@@ -707,31 +658,6 @@ const mergeNPCObject = (leftRaw: any, rightRaw: any, fallbackIndex: number): any
         appearanceDescription: getBetterText(getFieldText(left, 'appearanceDescription'), getFieldText(right, 'appearanceDescription')),
         bodyDescription: getBetterText(getFieldText(left, 'bodyDescription'), getFieldText(right, 'bodyDescription')),
         clothingStyle: getBetterText(getFieldText(left, 'clothingStyle'), getFieldText(right, 'clothingStyle')),
-        breastSize: getBetterText(getFieldText(left, 'breastSize'), getFieldText(right, 'breastSize')),
-        nippleColor: getBetterText(getFieldText(left, 'nippleColor'), getFieldText(right, 'nippleColor')),
-        vaginaColor: getBetterText(getFieldText(left, 'vaginaColor'), getFieldText(right, 'vaginaColor')),
-        anusColor: getBetterText(getFieldText(left, 'anusColor'), getFieldText(right, 'anusColor')),
-        buttockSize: getBetterText(getFieldText(left, 'buttockSize'), getFieldText(right, 'buttockSize')),
-        privateTraits: getBetterText(getFieldText(left, 'privateTraits'), getFieldText(right, 'privateTraits')),
-        privateFullDescription: getBetterText(getFieldText(left, 'privateFullDescription'), getFieldText(right, 'privateFullDescription')),
-        womb: mergedWomb,
-        isVirgin: typeof right?.isVirgin === 'boolean'
-            ? right.isVirgin
-            : (typeof left?.isVirgin === 'boolean' ? left.isVirgin : undefined),
-        firstNightClaimer: getBetterText(getFieldText(left, 'firstNightClaimer'), getFieldText(right, 'firstNightClaimer')),
-        firstNightTime: (() => {
-            const leftTimeRaw = getFieldText(left, 'firstNightTime');
-            const rightTimeRaw = getFieldText(right, 'firstNightTime');
-            const l = leftTimeRaw ? (normalizeCanonicalGameTime(leftTimeRaw) || leftTimeRaw) : undefined;
-            const r = rightTimeRaw ? (normalizeCanonicalGameTime(rightTimeRaw) || rightTimeRaw) : undefined;
-            return getBetterText(l, r);
-        })(),
-        firstNightDescription: getBetterText(getFieldText(left, 'firstNightDescription'), getFieldText(right, 'firstNightDescription')),
-        count_oral: Math.max(Number(left?.count_oral) || 0, Number(right?.count_oral) || 0),
-        count_breast: Math.max(Number(left?.count_breast) || 0, Number(right?.count_breast) || 0),
-        count_vaginal: Math.max(Number(left?.count_vaginal) || 0, Number(right?.count_vaginal) || 0),
-        count_anal: Math.max(Number(left?.count_anal) || 0, Number(right?.count_anal) || 0),
-        count_orgasm: Math.max(Number(left?.count_orgasm) || 0, Number(right?.count_orgasm) || 0),
         attack: Number.isFinite(Number(right?.attack))
             ? Number(right.attack)
             : (Number.isFinite(Number(left?.attack)) ? Number(left.attack) : undefined),
@@ -972,16 +898,12 @@ const normalizeGameSettings = (raw?: any): any => {
         enableMultiThinking: settings.enableMultiThinking === true,
 
         storyStyle: typeof settings.storyStyle === 'string' ? settings.storyStyle : 'Thông thường',
-        ntlHaremTier: typeof settings.ntlHaremTier === 'string' ? settings.ntlHaremTier : 'Không giới hạn',
         extraPrompt: typeof settings.extraPrompt === 'string' ? settings.extraPrompt : ''
     };
-    // Optional fields — only set if the user has explicitly configured them,
-    // so the UI's `!== false` / `=== true` checks can distinguish "not set" from "off".
     if (settings.enableClaudeMode !== undefined) result.enableClaudeMode = settings.enableClaudeMode === true;
     if (settings.enableTagIntegrityCheck !== undefined) result.enableTagIntegrityCheck = settings.enableTagIntegrityCheck === true;
     if (settings.enableTagAutoFix !== undefined) result.enableTagAutoFix = settings.enableTagAutoFix !== false;
     if (settings.enableRetryOnParseFail !== undefined) result.enableRetryOnParseFail = settings.enableRetryOnParseFail !== false;
-    if (settings.enableNsfwMode !== undefined) result.enableNsfwMode = settings.enableNsfwMode === true;
     if (settings.enableVariableCalibration !== undefined) result.enableVariableCalibration = settings.enableVariableCalibration === true;
     if (settings.enableRealWorldMode !== undefined) result.enableRealWorldMode = settings.enableRealWorldMode === true;
     if (typeof settings.realityPerspective === 'string') result.realityPerspective = settings.realityPerspective;

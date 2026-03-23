@@ -130,8 +130,7 @@ export interface VisualSettings {
     textGenWorkerUrl?: string;
 }
 
-export type StoryStyleType = 'Hậu cung' | 'Tu luyện' | 'Thông thường' | 'Tu la tràng' | 'Thuần ái' | 'NTL Hậu cung';
-export type NTLHaremTier = 'Cấm loạn luân' | 'Giả loạn luân' | 'Không giới hạn';
+export type StoryStyleType = 'Tu luyện' | 'Thông thường' | 'Tu la tràng' | 'Thuần ái';
 
 export interface GameSettings {
     bodyLengthRequirement: number; // Độ dài tối thiểu của thân bài logs
@@ -145,12 +144,10 @@ export interface GameSettings {
     enableTagAutoFix?: boolean; // Tự động sửa lỗi tag xml
     enableRetryOnParseFail?: boolean; // Tự động thử lại khi parse thất bại
     enableMultiThinking: boolean; // Chuyển đổi prompt COT sang biến thể đa tư duy
-    enableNsfwMode?: boolean; // Thêm prompt NSFW
     enableExtraPrompt?: boolean; // Bật Prompt bổ sung tùy chỉnh
     enableRealWorldMode?: boolean; // Bật chế độ thực tế
     customRealWorldRules?: string; // Quy tắc thực tế tùy chỉnh
     storyStyle: StoryStyleType; // Phong cách truyện chèn vào context assistant trước COT
-    ntlHaremTier: NTLHaremTier; // Bộ chọn bậc NTL
     extraPrompt: string; // Prompt tùy chỉnh chèn vào cuối cùng
 }
 

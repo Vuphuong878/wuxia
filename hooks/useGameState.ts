@@ -23,7 +23,7 @@ import {
     CoreStats
 } from '../types';
 import { DefaultPrompts } from '../prompts';
-import { defaultMidToLongMemoryPrompt, defaultShortToMidMemoryPrompt, defaultExtraSystemPrompt, legacyDefaultAdditionalSystemPrompt } from '../prompts/runtime/defaults';
+import { defaultMidToLongMemoryPrompt, defaultShortToMidMemoryPrompt, defaultExtraSystemPrompt } from '../prompts/runtime/defaults';
 import { festivalList } from '../data/world';
 import * as dbService from '../services/dbService';
 import { PromptSyncService } from '../services/promptSyncService';
@@ -93,7 +93,8 @@ export const useGameState = () => {
             levelUpExp: 0,
             playerBuffs: [],
             personality: '',
-            isDead: false
+            isDead: false,
+            id: 'player'
         };
     };
     const createEmptyEnvironment = (): EnvironmentInfo => ({
@@ -299,12 +300,10 @@ export const useGameState = () => {
         enableActionOptions: true,
         enablePseudoCotInjection: true,
         enableMultiThinking: false,
-        enableNsfwMode: false,
         enablePreventSpeaking: true,
         enableDisclaimerOutput: true,
         enableRealWorldMode: false,
         storyStyle: 'Thông thường',
-        ntlHaremTier: 'Không giới hạn',
         extraPrompt: defaultExtraSystemPrompt
     };
     const normalizeGameSettings = (raw?: Partial<GameSettings> | null): GameSettings => ({
@@ -332,21 +331,16 @@ export const useGameState = () => {
         enableActionOptions: raw?.enableActionOptions !== false,
         enablePseudoCotInjection: raw?.enablePseudoCotInjection !== false,
         enableMultiThinking: raw?.enableMultiThinking === true,
-        enableNsfwMode: raw?.enableNsfwMode === true,
         enablePreventSpeaking: raw?.enablePreventSpeaking !== false,
         enableDisclaimerOutput: raw?.enableDisclaimerOutput !== false,
         enableRealWorldMode: raw?.enableRealWorldMode === true,
-        storyStyle: raw?.storyStyle === 'Hậu cung' || raw?.storyStyle === 'Tu luyện' || raw?.storyStyle === 'Thông thường' || raw?.storyStyle === 'Tu la tràng' || raw?.storyStyle === 'Thuần ái' || raw?.storyStyle === 'NTL Hậu cung'
+        storyStyle: raw?.storyStyle === 'Tu luyện' || raw?.storyStyle === 'Thông thường' || raw?.storyStyle === 'Tu la tràng' || raw?.storyStyle === 'Thuần ái'
             ? raw.storyStyle
             : defaultGameSettings.storyStyle,
-        ntlHaremTier: raw?.ntlHaremTier === 'Cấm loạn luân' || raw?.ntlHaremTier === 'Giả loạn luân' || raw?.ntlHaremTier === 'Không giới hạn'
-            ? raw.ntlHaremTier
-            : defaultGameSettings.ntlHaremTier,
         extraPrompt: (() => {
             const candidate = typeof raw?.extraPrompt === 'string' ? raw.extraPrompt : defaultExtraSystemPrompt;
             const trimmed = candidate.trim();
             if (!trimmed) return defaultExtraSystemPrompt;
-            if (trimmed === legacyDefaultAdditionalSystemPrompt.trim()) return defaultExtraSystemPrompt;
             return candidate;
         })()
     });

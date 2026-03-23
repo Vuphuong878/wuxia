@@ -46,12 +46,12 @@ const getChunkedEnvVars = (baseName: string): string[] => {
     return results;
 };
 
-// For Netlify deployment, we use the remote API project URL
-export const DEFAULT_TEXT_GEN_WORKER_URLS = ['https://wuxia-api-serverless-rotating.netlify.app/api/nemotron'];
+// For Cloudflare deployment, we use the consolidated worker URL
+export const DEFAULT_TEXT_GEN_WORKER_URLS = ['https://wuxia-api.vdt99.workers.dev/api/nemotron'];
 
 export const DEFAULT_TEXT_GEN_WORKER_URL = DEFAULT_TEXT_GEN_WORKER_URLS[0];
 
-export const DEFAULT_IMAGE_GEN_WORKER_URLS = ['https://wuxia-api-serverless-rotating.netlify.app/api/image-gen'];
+export const DEFAULT_IMAGE_GEN_WORKER_URLS = ['https://wuxia-api.vdt99.workers.dev/api/image-gen'];
 export const DEFAULT_IMAGE_GEN_WORKER_URL = DEFAULT_IMAGE_GEN_WORKER_URLS[0];
 
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import GameButton from '../../../ui/GameButton';
-import { WorldGenConfig, CharacterData, Talent, Background, GameDifficulty, StoryStyleType, NTLHaremTier, TalentRank } from '../../../../types';
+import { WorldGenConfig, CharacterData, Talent, Background, GameDifficulty, StoryStyleType, TalentRank } from '../../../../types';
 import { PresetTalent, PresetBackground } from '../../../../data/presets';
 import { OrnateBorder } from '../../../ui/decorations/OrnateBorder';
 import InlineSelect from '../../../ui/InlineSelect';
@@ -96,17 +96,11 @@ const SECT_DENSITY_OPTIONS: Array<{ value: WorldGenConfig['sectDensity']; label:
 const STORY_STYLE_OPTIONS: Array<{ value: StoryStyleType; label: string }> = [
     { value: 'Thông thường', label: 'Thông thường (Cốt truyện tự nhiên)' },
     { value: 'Tu luyện', label: 'Tu luyện (Vượt cấp, tranh đoạt)' },
-    { value: 'Hậu cung', label: 'Hậu cung (Nhiều hồng tri kỷ)' },
     { value: 'Tu la tràng', label: 'Tu la tràng (Drama, tranh giành tình cảm)' },
-    { value: 'Thuần ái', label: 'Thuần ái (Chung thủy, một đối một)' },
-    { value: 'NTL Hậu cung', label: 'NTL Hậu cung (Cốt truyện người lớn đặc thù)' },
+    { value: 'Thuần ái', label: 'Thuần ái (Chung thủy, một đối một)' }
 ];
 
-const NTL_HAREM_TIER_OPTIONS: Array<{ value: NTLHaremTier; label: string }> = [
-    { value: 'Cấm loạn luân', label: 'Trong sạch (Cấm loạn luân)' },
-    { value: 'Giả loạn luân', label: 'Mập mờ (Giả loạn luân/Không huyết thống)' },
-    { value: 'Không giới hạn', label: 'Không giới hạn (Toàn bộ nội dung)' },
-];
+
 
 const STAT_LABELS: Record<string, string> = {
     strength: 'Sức mạnh',
@@ -188,9 +182,7 @@ const MobileNewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, r
         sectDensity: 'Standing like trees',
         tianjiaoSetting: '',
         difficulty: 'normal' as GameDifficulty,
-        enableNsfw: false,
         storyStyle: 'Thông thường',
-        ntlHaremTier: 'Cấm loạn luân',
     });
 
     // --- State: Character Config ---
@@ -666,29 +658,6 @@ const MobileNewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, r
                                                 onChange={(storyStyle) => setWorldConfig({ ...worldConfig, storyStyle })}
                                             />
                                         </div>
-                                        {worldConfig.enableNsfw && (
-                                            <div className="space-y-2 group">
-                                                <label className="text-sm text-wuxia-gold group-hover:text-amber-300 transition-colors font-serif font-bold italic block">Mức độ NTR/Hậu cung</label>
-                                                <InlineSelect
-                                                    value={worldConfig.ntlHaremTier}
-                                                    options={NTL_HAREM_TIER_OPTIONS}
-                                                    onChange={(ntlHaremTier) => setWorldConfig({ ...worldConfig, ntlHaremTier })}
-                                                />
-                                            </div>
-                                        )}
-
-                                        <div className="space-y-4 pt-2 border-t border-wuxia-gold/10 mt-2">
-                                            <div className="flex items-center justify-between group p-3 bg-wuxia-gold/5 rounded-lg border border-wuxia-gold/10 active:border-wuxia-gold/30 transition-all">
-                                                <div className="space-y-0.5">
-                                                    <label className="text-sm font-medium text-wuxia-gold group-hover:text-amber-300 transition-colors block italic">Chế độ NSFW</label>
-                                                    <p className="text-[10px] text-wuxia-gold/50 italic">Kích hoạt các nội dung nhạy cảm và 18+</p>
-                                                </div>
-                                                <ToggleSwitch
-                                                    checked={!!worldConfig.enableNsfw}
-                                                    onChange={(val) => setWorldConfig(prev => ({ ...prev, enableNsfw: val }))}
-                                                />
-                                            </div>
-                                        </div>
                                     </div>
 
                                     <div className="space-y-2 relative group">
@@ -1112,9 +1081,7 @@ const MobileNewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, r
                                     <p>Ngoại hình: <span className="text-wuxia-gold">{charAppearance.trim() || 'Chưa điền'}</span></p>
                                     <p>Thân thế: <span className="text-wuxia-gold">{selectedBackground.name}</span></p>
                                     <p>Thiên bẩm: <span className="text-wuxia-gold">{selectedTalents.map(t => t.name).join(', ') || 'Không có'}</span></p>
-                                    <div className="pt-2 border-t border-wuxia-gold/10 mt-2 space-y-1">
-                                        <p>Chế độ NSFW: <span className={worldConfig.enableNsfw ? "text-green-400" : "text-wuxia-gold/40"}>{worldConfig.enableNsfw ? 'Đã bật' : 'Tắt'}</span></p>
-                                    </div>
+
                                 </div>
                             </OrnateBorder>
 

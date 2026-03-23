@@ -13,7 +13,7 @@ interface Props {
 const GameSettings: React.FC<Props> = ({ settings, onSave }) => {
     const [form, setForm] = useState<GameSettingsType>(settings);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [openMenu, setOpenMenu] = useState<'perspective' | 'style' | 'ntl' | null>(null);
+    const [openMenu, setOpenMenu] = useState<'perspective' | 'style' | null>(null);
     const rootRef = useRef<HTMLDivElement | null>(null);
 
     const narrativePersonOptions: Array<{ value: GameSettingsType['narrativePerspective']; label: string }> = [
@@ -23,18 +23,12 @@ const GameSettings: React.FC<Props> = ({ settings, onSave }) => {
     ];
 
     const storyStyleOptions: Array<{ value: GameSettingsType['storyStyle']; label: string }> = [
-        { value: 'Hậu cung', label: 'Hậu cung (Harem)' },
         { value: 'Tu luyện', label: 'Tu tiên' },
         { value: 'Thông thường', label: 'Tổng hợp' },
         { value: 'Tu la tràng', label: 'Tu La trường / Chiến đấu ác liệt' },
-        { value: 'Thuần ái', label: 'Tình yêu thuần khiết' },
-        { value: 'NTL Hậu cung', label: 'Harem NTL' }
+        { value: 'Thuần ái', label: 'Tình yêu thuần khiết' }
     ];
-    const ntlHaremSettingsOptions: Array<{ value: GameSettingsType['ntlHaremTier']; label: string }> = [
-        { value: 'Cấm loạn luân', label: 'Cấm loạn luân' },
-        { value: 'Giả loạn luân', label: 'Loạn luân giả' },
-        { value: 'Không giới hạn', label: 'Không giới hạn' }
-    ];
+
     useEffect(() => {
         setForm(settings);
     }, [settings]);
@@ -144,18 +138,7 @@ const GameSettings: React.FC<Props> = ({ settings, onSave }) => {
                     <div className="text-xs text-paper-white/40 font-medium mt-1">Sẽ được tiêm vào cuối ngữ cảnh vòng này dưới dạng tin nhắn Trợ lý AI, trước tin nhắn lịch sử COT giả.</div>
                 </div>
 
-                {form.storyStyle === 'NTL Hậu cung' && (
-                    <div className="space-y-2 col-span-2">
-                        <label className="text-sm text-wuxia-gold font-bold tracking-wide">Mức độ Harem NTL</label>
-                        <InlineSelect
-                            value={form.ntlHaremTier}
-                            options={ntlHaremSettingsOptions}
-                            onChange={(value) => realTimeUpdates({ ntlHaremTier: value as GameSettingsType['ntlHaremTier'] })}
-                            buttonClassName="bg-transparent border-wuxia-gold/20 hover:border-wuxia-gold/40 py-2.5"
-                        />
-                        <div className="text-[10px] text-paper-white/40 font-medium mt-1">Điều chỉnh cường độ cốt truyện Harem NTL theo phong cách đã chọn.</div>
-                    </div>
-                )}
+
             </div>
 
             <div className="space-y-3">

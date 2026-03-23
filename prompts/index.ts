@@ -40,7 +40,7 @@ import { WritingPerspectiveFirst, WritingPerspectiveSecond, WritingPerspectiveTh
 import { WritingRequirements } from './writing/requirements';
 import { WritingNoControl } from './writing/noControl';
 import { WritingStyle } from './writing/style';
-import { WritingNsfwStyle } from './writing/nsfwStyle';
+
 import { WritingEmotionGuard } from './writing/emotionGuard';
 
 export const DefaultPrompts: PromptStructure[] = [
@@ -85,6 +85,6 @@ export const DefaultPrompts: PromptStructure[] = [
     WritingRequirements,
     WritingNoControl,
     WritingStyle,
-    WritingNsfwStyle,
+
     WritingEmotionGuard
 ];

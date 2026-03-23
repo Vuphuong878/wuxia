@@ -9,9 +9,7 @@ export const constructWorldviewAnchorPrompt = (worldConfig: WorldGenConfig, char
 - Mật độ tông môn: ${worldConfig.sectDensity}
 - Thiết lập thiên kiêu: ${worldConfig.tianjiaoSetting || '[Thiết lập thiên kiêu/vũ lực chưa thiết lập]'}
 - Độ khó trò chơi: ${worldConfig.difficulty || 'normal'}
-${worldConfig.enableNsfw ? '- Chế độ nội dung: NSFW (Người lớn/Sắc khí cao/Không giới hạn cảnh nóng)' : ''}
 - Phong cách truyện: ${worldConfig.storyStyle || 'Thông thường'}
-${worldConfig.storyStyle === 'NTL Hậu cung' ? `- Bậc NTL Hậu cung: ${worldConfig.ntlHaremTier || 'Cấm loạn luân'}` : ''}
 
 【Điểm neo hồ sơ nhân vật chính】
 - Họ tên/Giới tính/Tuổi: ${charData.name}/${charData.gender}/${charData.age}

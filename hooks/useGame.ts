@@ -48,8 +48,7 @@ import { storyMemoryRecallCOTPrompt as storyMemoryRetrievalCOTPrompt, storyMemor
 import {
     DEFAULT_COT_PROMPT as defaultCOTFakeHistoryMessagePrompt,
     defaultMultipleReasoningCOTHistoryPrompt,
-    defaultExtraSystemPrompt,
-    legacyDefaultAdditionalSystemPrompt
+    defaultExtraSystemPrompt
 } from '../prompts/runtime/defaults';
 import { buildAICharacterDeclarationPrompt } from '../prompts/runtime/roleIdentity';
 import {
@@ -62,7 +61,7 @@ import { constructStorylineStyleAssistantPrompt } from '../prompts/runtime/story
 import { CoreChainOfThoughtMulti as Core_ChainOfThought_MultiThought } from '../prompts/core/cotMulti';
 import { Core_OutputFormat_MultiThought } from '../prompts/core/formatMulti';
 import { WritingNoControl as Writing_PreventSpeaking } from '../prompts/writing/noControl';
-import { detailedNsfwRules } from '../prompts/runtime/nsfwEngine';
+
 import {
     normalizeEnvironment,
     buildFullLocation,
@@ -360,25 +359,20 @@ export const useGame = () => {
         narrativePerspective: (raw?.narrativePerspective === 'Ngôi thứ nhất' || raw?.narrativePerspective === 'Ngôi thứ hai' || raw?.narrativePerspective === 'Ngôi thứ ba'
             ? raw.narrativePerspective
             : (gameConfig?.narrativePerspective || 'Ngôi thứ hai')) as 'Ngôi thứ nhất' | 'Ngôi thứ hai' | 'Ngôi thứ ba',
-        storyStyle: (raw?.storyStyle === 'Hậu cung' || raw?.storyStyle === 'Tu luyện' || raw?.storyStyle === 'Thông thường' || raw?.storyStyle === 'Tu la tràng' || raw?.storyStyle === 'Thuần ái' || raw?.storyStyle === 'NTL Hậu cung'
+        storyStyle: (raw?.storyStyle === 'Tu luyện' || raw?.storyStyle === 'Thông thường' || raw?.storyStyle === 'Tu la tràng' || raw?.storyStyle === 'Thuần ái'
             ? raw.storyStyle
             : (gameConfig?.storyStyle || 'Thông thường')) as any,
-        ntlHaremTier: (raw?.ntlHaremTier === 'Cấm loạn luân' || raw?.ntlHaremTier === 'Giả loạn luân' || raw?.ntlHaremTier === 'Không giới hạn'
-            ? raw.ntlHaremTier
-            : (gameConfig?.ntlHaremTier || 'Không giới hạn')) as any,
         extraPrompt: typeof raw?.extraPrompt === 'string'
             ? (() => {
                 const candidate = raw.extraPrompt;
                 const trimmed = candidate.trim();
                 if (!trimmed) return defaultExtraSystemPrompt;
-                if (trimmed === legacyDefaultAdditionalSystemPrompt.trim()) return defaultExtraSystemPrompt;
                 return candidate;
             })()
             : (() => {
                 const candidate = typeof gameConfig?.extraPrompt === 'string' ? gameConfig.extraPrompt : defaultExtraSystemPrompt;
                 const trimmed = candidate.trim();
                 if (!trimmed) return defaultExtraSystemPrompt;
-                if (trimmed === legacyDefaultAdditionalSystemPrompt.trim()) return defaultExtraSystemPrompt;
                 return candidate;
             })()
     });
@@ -1121,15 +1115,7 @@ export const useGame = () => {
             return nextPool;
         };
 
-        const applyNsfwStylePromptSwitch = (
-            pool: PromptStructure[],
-            enabled: boolean
-        ): PromptStructure[] => {
-            return pool.map(p => {
-                if (p.id === 'write_nsfw_style') return { ...p, enabled: enabled };
-                return p;
-            });
-        };
+
         const applyPreventSpeakingPromptSwitch = (
             pool: PromptStructure[],
             enabled: boolean
@@ -1148,18 +1134,12 @@ export const useGame = () => {
             promptPool,
             normalizedGameConfig.enableMultiThinking === true
         );
-        effectivePromptPool = applyNsfwStylePromptSwitch(
-            effectivePromptPool,
-            normalizedGameConfig.enableNsfwMode === true
-        );
+
         effectivePromptPool = applyPreventSpeakingPromptSwitch(
             effectivePromptPool,
             normalizedGameConfig.enablePreventSpeaking !== false
         );
-        effectivePromptPool = applyNsfwStylePromptSwitch(
-            effectivePromptPool,
-            normalizedGameConfig.enableNsfwMode === true
-        );
+
         const playerName = statePayload?.Role?.name || statePayload?.role?.name || statePayload?.character?.name || statePayload?.Role?.['Full Name'] || character?.name || 'Unnamed';
         const renderPromptText = (content: string) => content.replace(/\$\{playerName\}/g, playerName);
         const aiCharacterDeclaration = buildAICharacterDeclarationPrompt(playerName);
@@ -1273,10 +1253,10 @@ export const useGame = () => {
             `Xuất lời cảnh báo: ${normalizedGameConfig.enableDisclaimerOutput ? 'Mở' : 'Đóng'}`,
             `Tiêm giả COT: ${normalizedGameConfig.enablePseudoCotInjection ? 'Mở' : 'Đóng'}`,
             `Chế độ đa suy nghĩ: ${normalizedGameConfig.enableMultiThinking ? 'Mở' : 'Đóng'}`,
-            `Chế độ NSFW: ${normalizedGameConfig.enableNsfwMode ? 'Mở' : 'Đóng'}`,
+
 
             `Chế độ thế giới thực: ${normalizedGameConfig.enableRealWorldMode ? 'Mở' : 'Đóng'}`,
-            ntlTierLine,
+
             ...(normalizedGameConfig.enableExtraPrompt && normalizedGameConfig.extraPrompt
                 ? [
                     '',
@@ -1291,12 +1271,7 @@ export const useGame = () => {
                     normalizedGameConfig.customRealWorldRules?.trim() || 'Thế giới vận hành theo các luật Nhân Quả, Vận Động, Thời Gian và Tương Quan Thực Tế. Mọi diễn biến phải đảm bảo tính chân thực và logic tối cao của một thế giới võ hiệp thực thụ. Mọi cuộc chiến dựa trên thực lực, tu vi, pháp bảo và thiên thời. Sinh linh tuân thủ các quy luật sinh học, lão hóa và giới hạn của bản chất. Tuyệt đối cấm các bước nhảy vọt logic hoặc buff sức mạnh vô căn cứ.'
                 ]
                 : []),
-            ...(normalizedGameConfig.enableNsfwMode
-                ? [
-                    '',
-                    detailedNsfwRules
-                ]
-                : []),
+
             '',
             '【Gợi ý ngôi kể tương ứng】',
             activePerspectiveContent || 'Chưa cấu hình',
@@ -1403,10 +1378,7 @@ export const useGame = () => {
         // Sync NSFW and Female Protagonist settings to global game config
         setGameConfig(prev => ({
             ...prev,
-            enableNsfwMode: prev.enableNsfwMode || worldConfig.enableNsfw === true,
-
             storyStyle: worldConfig.storyStyle || prev.storyStyle || 'Thông thường',
-            ntlHaremTier: worldConfig.ntlHaremTier || prev.ntlHaremTier || 'Cấm loạn luân'
         }));
 
         const openingBase = createStartingBasicStatus(charData, worldConfig);
@@ -1709,7 +1681,7 @@ export const useGame = () => {
                 {
                     enableCotInjection: openingGameConfig.enablePseudoCotInjection !== false,
                     leadingSystemPrompt: openingContext.contextPieces.aiCharacterDeclaration,
-                    styleAssistantPrompt: constructStorylineStyleAssistantPrompt(openingGameConfig.storyStyle, openingGameConfig?.ntlHaremTier),
+                    styleAssistantPrompt: constructStorylineStyleAssistantPrompt(openingGameConfig.storyStyle),
                     outputProtocolPrompt: openingOutputProtocolPrompt,
                     cotPseudoHistoryPrompt: buildCotDisguisePrompt(openingGameConfig),
                     lengthRequirementPrompt: openingLengthRequirementPrompt,
@@ -1960,7 +1932,7 @@ export const useGame = () => {
             : 'Not configured';
         const cotEnabled = normalizedSnapshotGameConfig.enablePseudoCotInjection !== false;
         const cotPseudoPrompt = cotEnabled ? buildCotDisguisePrompt(normalizedSnapshotGameConfig) : '';
-        const styleAssistantPrompt = constructStorylineStyleAssistantPrompt(normalizedSnapshotGameConfig.storyStyle, normalizedSnapshotGameConfig?.ntlHaremTier);
+        const styleAssistantPrompt = constructStorylineStyleAssistantPrompt(normalizedSnapshotGameConfig.storyStyle);
         const outputProtocolPrompt = builtContext.contextPieces.outputProtocolPrompt;
         const disclaimerRequirementPrompt = builtContext.contextPieces.disclaimerOutputPrompt;
         const sections: ContextSegment[] = [];
@@ -2220,7 +2192,7 @@ export const useGame = () => {
                 {
                     enableCotInjection: runtimeGameConfig.enablePseudoCotInjection !== false,
                     leadingSystemPrompt: builtContext.contextPieces.aiCharacterDeclaration,
-                    styleAssistantPrompt: constructStorylineStyleAssistantPrompt(runtimeGameConfig.storyStyle, runtimeGameConfig?.ntlHaremTier),
+                    styleAssistantPrompt: constructStorylineStyleAssistantPrompt(runtimeGameConfig.storyStyle),
                     outputProtocolPrompt,
                     cotPseudoHistoryPrompt: buildCotDisguisePrompt(runtimeGameConfig),
                     lengthRequirementPrompt,

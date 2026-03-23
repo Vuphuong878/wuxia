@@ -2,7 +2,7 @@
 export * from './models/character';
 export * from './models/environment';
 export * from './models/system';
-import { StoryStyleType, NTLHaremTier } from './models/system';
+import { StoryStyleType } from './models/system';
 export * from './models/world';
 export * from './models/item';
 export * from './models/social';
@@ -14,8 +14,6 @@ export * from './models/story';
 export * from './models/battle';
 
 // New types for the advanced chat system
-
-
 
 export interface GameLog {
     sender: string;
@@ -84,10 +82,7 @@ export interface WorldGenConfig {
     sectDensity: 'Rare' | 'Moderate' | 'Standing like trees';
     tianjiaoSetting: string; // Setting regarding prodigies
     difficulty: GameDifficulty; // Added difficulty
-    enableNsfw?: boolean; // New setting
     storyStyle?: StoryStyleType; // New setting
-    ntlHaremTier?: NTLHaremTier; // New setting
 }
 
 export type SaveType = 'manual' | 'auto';
-
