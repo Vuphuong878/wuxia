@@ -26,12 +26,12 @@ const RealWorldSettings: React.FC<Props> = ({ settings, onSave }) => {
         <div className="flex flex-col gap-6 animate-fadeIn h-full p-4 overflow-y-auto">
             <div className="bg-black/40 border border-wuxia-gold/20 rounded-lg p-6 backdrop-blur-sm">
                 <h3 className="text-xl font-bold text-wuxia-gold mb-4 flex items-center gap-2">
-                    <span className="text-2xl">🌍</span> Chế độ Thế giới thực
+                    <span className="text-2xl"></span> Chế độ Thế giới thực
                 </h3>
-                
+
                 <p className="text-gray-300 mb-6 leading-relaxed">
-                    Khi kích hoạt, thế giới sẽ vận hành theo các quy luật thực tế nghiêm ngặt. 
-                    Mọi diễn biến, chiến đấu và tương tác sẽ tuân thủ logic vật lý, sinh học và nhân quả. 
+                    Khi kích hoạt, thế giới sẽ vận hành theo các quy luật thực tế nghiêm ngặt.
+                    Mọi diễn biến, chiến đấu và tương tác sẽ tuân thủ logic vật lý, sinh học và nhân quả.
                     Tuyệt đối không có các tình tiết phi logic hoặc tăng sức mạnh vô căn cứ.
                 </p>
 
@@ -40,8 +40,8 @@ const RealWorldSettings: React.FC<Props> = ({ settings, onSave }) => {
                         <div className="text-lg font-medium text-white">Kích hoạt Chế độ Thực tế</div>
                         <div className="text-sm text-gray-400">Thiết lập thế giới theo logic Thiên Đạo Vận Hành.</div>
                     </div>
-                    <ToggleSwitch 
-                        checked={!!form.enableRealWorldMode} 
+                    <ToggleSwitch
+                        checked={!!form.enableRealWorldMode}
                         onChange={handleToggle}
                         color="gold"
                     />
@@ -58,7 +58,7 @@ const RealWorldSettings: React.FC<Props> = ({ settings, onSave }) => {
                             Đã lưu thành công!
                         </span>
                     )}
-                    <GameButton 
+                    <GameButton
                         onClick={handleSave}
                         variant="primary"
                         size="md"
