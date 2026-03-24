@@ -2,6 +2,8 @@ import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom';
 import { CharacterData, NpcStructure, VisualSettings } from '../../types';
 import IconGlyph from '../ui/Icon/IconGlyph';
+import { RadarChart, RadarData } from '../shared/RadarChart';
+import { StatBar } from '../shared/StatBar';
 import { ImageService } from '../../services/imageService';
 import { TextGenService } from '../../services/textGenService';
 import { Sparkles } from 'lucide-react';
@@ -43,6 +45,26 @@ const getDynamicAvatar = (role: CharacterData, allAvatars?: Record<string, strin
     // No longer returning static default assets.
     // Return null to trigger Icon fallback or AI generation.
     return null;
+};
+
+const STAT_COLORS: Record<string, string> = {
+    strength: '#ef4444',      // Red
+    agility: '#22c55e',       // Green
+    constitution: '#eab308',  // Yellow/Gold
+    rootBone: '#3b82f6',      // Blue
+    intelligence: '#a855f7',  // Purple
+    luck: '#f97316',          // Orange
+    tamTinh: '#06b6d4',       // Cyan
+};
+
+const STAT_LABELS: Record<string, string> = {
+    strength: 'Sức mạnh',
+    agility: 'Thân pháp',
+    constitution: 'Thể chất',
+    rootBone: 'Căn cốt',
+    intelligence: 'Ngộ tính',
+    luck: 'Phúc duyên',
+    tamTinh: 'Tâm tính',
 };
 
 // Custom very thin bar for Vitals to match the mockup
@@ -213,6 +235,23 @@ const NpcSlot: React.FC<{ npc: NpcStructure; visualConfig: VisualSettings; isGen
 };
 
 const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visualConfig, onUpdateCharacter, isProfile = false, isGenerating = false, generatingNames, allAvatars }) => {
+    const radarData = useMemo(() => {
+        const stats = {
+            strength: Role.strength,
+            agility: Role.agility,
+            constitution: Role.constitution,
+            rootBone: Role.rootBone,
+            intelligence: Role.intelligence,
+            luck: Role.luck,
+            tamTinh: Role.tamTinh || 5
+        };
+        return Object.entries(stats).map(([key, val]) => ({
+            label: STAT_LABELS[key] || key,
+            value: val,
+            color: STAT_COLORS[key] || '#e6c86e'
+        })) as RadarData[];
+    }, [Role]);
+
 
     const Money = Role.money || { gold: 0, silver: 0, copper: 0 };
     const presentNpcs = Social.filter(n => n.isPresent);
@@ -401,27 +440,40 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
                             </p>
                         </div>
 
-                        {/* ── Core Stats (Thiên bẩm cốt cách) ── */}
-                        <div className="px-5 py-4 bg-transparent border border-white/[0.05] rounded-xl group/core">
-                            <h3 className="text-[9px] text-wuxia-gold uppercase tracking-[0.3em] font-black mb-3 flex items-center gap-2">
-                                <span className="opacity-40 text-wuxia-gold font-mono">#</span> Thiên bẩm cốt cách
+                        {/* ── Core Stats (Thuộc tính) ── */}
+                        <div className="px-5 py-4 bg-black/20 border border-white/[0.05] rounded-xl group/core shadow-inner">
+                            <h3 className="text-[9px] text-wuxia-gold uppercase tracking-[0.3em] font-black mb-4 flex items-center gap-2">
+                                <span className="opacity-40 text-wuxia-gold font-mono">#</span> Thuộc tính
                             </h3>
-                            <div className="space-y-2">
+                            
+                            <div className="flex flex-col items-center mb-6 py-4 bg-black/40 rounded-xl border border-wuxia-gold/5 shadow-inner">
+                                <RadarChart data={radarData} size={220} maxValue={30} />
+                            </div>
+
+                            <div className="space-y-4">
                                 {[
-                                    { label: 'Sức mạnh', current: Role.strength, base: Role.baseStats?.strength },
-                                    { label: 'Thân pháp', current: Role.agility, base: Role.baseStats?.agility },
-                                    { label: 'Thể chất', current: Role.constitution, base: Role.baseStats?.constitution },
-                                    { label: 'Căn cốt', current: Role.rootBone, base: Role.baseStats?.rootBone },
-                                    { label: 'Ngộ tính', current: Role.intelligence, base: Role.baseStats?.intelligence },
-                                    { label: 'Phúc duyên', current: Role.luck, base: Role.baseStats?.luck },
-                                    { label: 'Tâm tính', current: Role.tamTinh, base: Role.baseStats?.tamTinh },
+                                    { key: 'strength', label: 'Sức mạnh', current: Role.strength, base: Role.baseStats?.strength },
+                                    { key: 'agility', label: 'Thân pháp', current: Role.agility, base: Role.baseStats?.agility },
+                                    { key: 'constitution', label: 'Thể chất', current: Role.constitution, base: Role.baseStats?.constitution },
+                                    { key: 'rootBone', label: 'Căn cốt', current: Role.rootBone, base: Role.baseStats?.rootBone },
+                                    { key: 'intelligence', label: 'Ngộ tính', current: Role.intelligence, base: Role.baseStats?.intelligence },
+                                    { key: 'luck', label: 'Phúc duyên', current: Role.luck, base: Role.baseStats?.luck },
+                                    { key: 'tamTinh', label: 'Tâm tính', current: Role.tamTinh || 5, base: Role.baseStats?.tamTinh },
                                 ].map(stat => (
-                                    <div key={stat.label} className="flex justify-between items-center text-[10px]">
-                                        <span className="text-paper-white/60 font-serif uppercase tracking-widest">{stat.label}</span>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-paper-white font-mono font-black">{stat.current}</span>
-                                            <span className="text-[8px] text-paper-white/30 font-mono truncate max-w-[80px]">(Gốc: {stat.base ?? stat.current})</span>
+                                    <div key={stat.key} className="space-y-1.5 group/stat">
+                                        <div className="flex justify-between items-end px-1">
+                                            <span className="text-paper-white/40 text-[9px] font-serif uppercase tracking-widest group-hover/stat:text-wuxia-gold/60 transition-colors">{stat.label}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-paper-white font-mono font-black text-xs leading-none">{stat.current}</span>
+                                                <span className="text-[8px] text-paper-white/20 font-mono italic">({stat.base ?? stat.current})</span>
+                                            </div>
                                         </div>
+                                        <StatBar 
+                                            value={stat.current} 
+                                            maxValue={30} 
+                                            color={STAT_COLORS[stat.key] || '#e6c86e'} 
+                                            label=""
+                                        />
                                     </div>
                                 ))}
                             </div>

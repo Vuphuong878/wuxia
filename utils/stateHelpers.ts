@@ -305,7 +305,8 @@ export const VIETNAMESE_SUBKEY_MAP: Record<string, string> = {
     
     // Category Markers
     "Thuộc tính": "",
-    "Lục đạo thuộc tính": "",
+    "Thất đạo thuộc tính": "",
+    "Thất đạo": "",
     "Sống còn": "",
     "Attributes": "",
     "Survival": "",

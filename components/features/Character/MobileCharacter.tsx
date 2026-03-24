@@ -1,10 +1,25 @@
 import React from 'react';
 import { CharacterData } from '../../../types';
+import { RadarChart, RadarData } from '../../shared/RadarChart';
 
 interface Props {
     character: CharacterData;
     onClose: () => void;
+    allAvatars?: Record<string, string>;
 }
+
+// Utility to match LeftPanel logic
+const getDynamicAvatar = (role: CharacterData, allAvatars?: Record<string, string>) => {
+    if (allAvatars && allAvatars[role.id]) return allAvatars[role.id];
+    if (allAvatars && allAvatars[role.name]) return allAvatars[role.name];
+    if (role.avatar && !role.avatar.includes('default')) {
+        if (role.avatar.startsWith('data:image/')) return role.avatar;
+        let url = role.avatar.startsWith('/') ? role.avatar : `/images/${role.avatar}`;
+        if (!url.match(/\.(png|jpe?g|webp|gif)$/i)) url += '.png';
+        return url;
+    }
+    return null;
+};
 
 const VitalBar: React.FC<{ label: string; current: number; max: number; color: string }> = ({ label, current, max, color }) => {
     const pct = Math.min((current / (max || 1)) * 100, 100);
@@ -34,17 +49,19 @@ const BodyRow: React.FC<{ name: string; current: number; max: number }> = ({ nam
     );
 };
 
-const MobileCharacter: React.FC<Props> = ({ character, onClose }) => {
+const MobileCharacter: React.FC<Props> = ({ character, onClose, allAvatars }) => {
     const Money = character.money || { gold: 0, silver: 0, copper: 0 };
+    const avatarUrl = getDynamicAvatar(character, allAvatars);
+
     const attributes = [
-        { key: 'Sức mạnh', val: character.strength, base: character.baseStats?.strength },
-        { key: 'Thân pháp', val: character.agility, base: character.baseStats?.agility },
-        { key: 'Thể chất', val: character.constitution, base: character.baseStats?.constitution },
-        { key: 'Căn cốt', val: character.rootBone, base: character.baseStats?.rootBone },
-        { key: 'Ngộ tính', val: character.intelligence, base: character.baseStats?.intelligence },
-        { key: 'Phúc duyên', val: character.luck, base: character.baseStats?.luck },
-        { key: 'Tâm tính', val: character.tamTinh, base: character.baseStats?.tamTinh },
-    ];
+        { label: 'Sức mạnh', value: character.strength, base: character.baseStats?.strength },
+        { label: 'Thân pháp', value: character.agility, base: character.baseStats?.agility },
+        { label: 'Thể chất', value: character.constitution, base: character.baseStats?.constitution },
+        { label: 'Căn cốt', value: character.rootBone, base: character.baseStats?.rootBone },
+        { label: 'Ngộ tính', value: character.intelligence, base: character.baseStats?.intelligence },
+        { label: 'Phúc duyên', value: character.luck, base: character.baseStats?.luck },
+        { label: 'Tâm tính', value: character.tamTinh, base: character.baseStats?.tamTinh },
+    ] as RadarData[];
 
     const bodyParts = [
         { name: 'Đầu', current: character.headCurrentHp, max: character.headMaxHp },
@@ -83,7 +100,7 @@ const MobileCharacter: React.FC<Props> = ({ character, onClose }) => {
             <div className="bg-ink-black border border-wuxia-gold/30 w-full max-w-[520px] h-[82vh] flex flex-col shadow-[0_0_60px_rgba(0,0,0,0.95)] relative overflow-hidden rounded-2xl"
                 style={{ background: 'linear-gradient(135deg, rgba(15,8,4,1) 0%, rgba(5,3,2,1) 100%)' }}>
                 <div className="h-12 shrink-0 border-b border-ink-gray/60 bg-ink-gray/40 flex items-center justify-between px-4">
-                    <h3 className="text-wuxia-gold font-serif font-bold text-base tracking-[0.3em]">Thuộc tính nhân vật</h3>
+                    <h3 className="text-wuxia-gold font-serif font-bold text-base tracking-[0.3em]">Hồ sơ nhân vật</h3>
                     <button
                         onClick={onClose}
                         className="w-8 h-8 flex items-center justify-center rounded-full bg-ink-black/50 border border-gray-700 text-gray-400 hover:text-wuxia-red hover:border-wuxia-red transition-all"
@@ -97,45 +114,56 @@ const MobileCharacter: React.FC<Props> = ({ character, onClose }) => {
 
                 <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 space-y-4 bg-ink-black/5">
                     <div className="bg-ink-gray/40 border border-ink-gray rounded-xl p-4">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <div className="text-xl text-wuxia-gold font-serif font-bold">{character.name}</div>
-                                <div className="text-[11px] text-gray-400 mt-1">{character.title || 'No title'}</div>
+                        <div className="flex items-start gap-4">
+                            {/* Avatar Section */}
+                            <div className="w-20 h-24 shrink-0 bg-black/40 border-2 border-wuxia-gold/20 rounded-lg overflow-hidden relative group">
+                                {avatarUrl ? (
+                                    <img src={avatarUrl} alt={character.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-wuxia-gold/20">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    </div>
+                                )}
+                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent h-6 flex items-end justify-center pb-1">
+                                    <span className="text-[8px] text-wuxia-gold/60 uppercase tracking-tighter">Căn cốt</span>
+                                </div>
                             </div>
-                            <div className="text-right">
-                                <div className="text-[10px] text-gray-500">Cảnh giới</div>
-                                <div className="text-wuxia-red font-bold text-sm">{character.realm}</div>
+
+                            <div className="flex-1">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <div className="text-xl text-wuxia-gold font-serif font-bold">{character.name}</div>
+                                        <div className="text-[11px] text-gray-400 mt-1">{character.title || character.background || 'Vô danh tiểu tốt'}</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-[10px] text-gray-500 uppercase tracking-widest">Cảnh giới</div>
+                                        <div className="text-wuxia-red font-bold text-sm drop-shadow-[0_0_8px_rgba(190,18,60,0.5)]">{character.realm}</div>
+                                    </div>
+                                </div>
+                                <div className="mt-3 flex flex-wrap gap-2 text-[9px]">
+                                    <span className="px-1.5 py-0.5 bg-ink-gray/40 border border-ink-gray rounded text-gray-300">Giới tính {character.gender}</span>
+                                    <span className="px-1.5 py-0.5 bg-ink-gray/40 border border-ink-gray rounded text-gray-300">Tuổi {character.age}</span>
+                                    <span className="px-1.5 py-0.5 bg-ink-gray/40 border border-ink-gray rounded text-gray-300 font-mono">Nặng {character.currentWeight}/{character.maxWeight}kg</span>
+                                </div>
                             </div>
                         </div>
-                        <div className="mt-3 flex flex-wrap gap-2 text-[10px]">
-                            <span className="px-2 py-1 bg-ink-gray/40 border border-ink-gray rounded text-gray-300">Giới tính {character.gender}</span>
-                            <span className="px-2 py-1 bg-ink-gray/40 border border-ink-gray rounded text-gray-300">Tuổi {character.age}</span>
-                            <span className="px-2 py-1 bg-ink-gray/40 border border-ink-gray rounded text-gray-300 font-mono">Cân nặng {character.currentWeight}/{character.maxWeight}</span>
-                            <span className="px-2 py-1 bg-ink-gray/40 border border-ink-gray rounded text-gray-300 font-mono">Vàng {Money.gold}</span>
-                            <span className="px-2 py-1 bg-ink-gray/40 border border-ink-gray rounded text-gray-300 font-mono">Bạc {Money.silver}</span>
-                            <span className="px-2 py-1 bg-ink-gray/40 border border-ink-gray rounded text-gray-300 font-mono">Đồng {Money.copper}</span>
+
+                        <div className="mt-3 flex flex-wrap gap-2 text-[10px] pt-3 border-t border-ink-gray/30">
+                            <span className="flex items-center gap-1 px-2 py-1 bg-ink-gray/40 border border-ink-gray rounded text-wuxia-gold font-mono"><span className="opacity-50 text-[8px]">V:</span>{Money.gold}</span>
+                            <span className="flex items-center gap-1 px-2 py-1 bg-ink-gray/40 border border-ink-gray rounded text-gray-300 font-mono"><span className="opacity-50 text-[8px]">B:</span>{Money.silver}</span>
+                            <span className="flex items-center gap-1 px-2 py-1 bg-ink-gray/40 border border-ink-gray rounded text-orange-400 font-mono"><span className="opacity-50 text-[8px]">Đ:</span>{Money.copper}</span>
                         </div>
                         {character.personality && (
-                            <div className="mt-4 pt-3 border-t border-ink-gray/60 italic text-[11px] text-gray-400 leading-relaxed">
-                                <span className="text-wuxia-gold/70 not-italic mr-2">Tính cách:</span>
+                            <div className="mt-4 pt-3 border-t border-ink-gray/60 italic text-[11px] text-gray-400 leading-relaxed bg-black/10 p-2 rounded-lg">
+                                <span className="text-wuxia-gold/70 not-italic mr-2 font-bold uppercase tracking-tighter">Tính cách:</span>
                                 {character.personality}
                             </div>
                         )}
                     </div>
 
-                    <div className="bg-ink-gray/40 border border-ink-gray rounded-xl p-4">
-                        <div className="text-[10px] text-wuxia-gold/70 tracking-[0.3em] mb-3">Lục đạo thuộc tính</div>
-                        <div className="grid grid-cols-3 gap-2">
-                            {attributes.map((attr) => (
-                                <div key={attr.key} className="border border-gray-800 rounded-lg px-2 py-2 text-center hover:border-wuxia-gold/50 transition-colors">
-                                    <div className="text-[9px] text-gray-500">{attr.key}</div>
-                                    <div className="text-wuxia-gold font-mono font-bold text-sm">{attr.val}</div>
-                                    {attr.base !== undefined && (
-                                        <div className="text-[8px] text-gray-600 mt-1">Gốc: {attr.base}</div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                    <div className="bg-ink-gray/40 border border-ink-gray rounded-xl p-4 overflow-hidden">
+                        <div className="text-[10px] text-wuxia-gold/70 tracking-[0.3em] mb-1 uppercase font-bold text-center">Thuộc tính</div>
+                        <RadarChart data={attributes} size={250} maxValue={30} className="w-full" />
                     </div>
 
                     <div className="bg-ink-gray/40 border border-ink-gray rounded-xl p-4 space-y-3">

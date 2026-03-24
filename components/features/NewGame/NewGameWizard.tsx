@@ -6,7 +6,9 @@ import { OrnateBorder } from '../../ui/decorations/OrnateBorder';
 import InlineSelect from '../../ui/InlineSelect';
 import ToggleSwitch from '../../ui/ToggleSwitch';
 import * as dbService from '../../../services/dbService';
-import { Dices, Save, Download, LogOut, X } from 'lucide-react';
+import { Dices, Save, Download, LogOut, X, Plus, Minus, Users, Swords, Check } from 'lucide-react';
+import { RadarChart, RadarData } from '../../shared/RadarChart';
+import { StatBar } from '../../shared/StatBar';
 
 interface Props {
     onComplete: (
@@ -20,7 +22,7 @@ interface Props {
     requestConfirm?: (options: { title?: string; message: string; confirmText?: string; cancelText?: string; danger?: boolean }) => Promise<boolean>;
 }
 
-const STEPS = ['Thế giới quan', 'Nền tảng nhân vật', 'Thân thế xuất thân', 'Thiên bẩm linh căn', 'Xác nhận tạo'];
+const STEPS = ['Thế giới quan', 'Hồ sơ hiệp khách', 'Thuộc tính nhân vật', 'Thân thế xuất thân', 'Bất lợi bẩm sinh', 'Thiên phú linh khiếu', 'Xác nhận tạo'];
 
 const WORLD_NAMES = ['Thương Khung Giới', 'Huyền Âm Thế Giới', 'Thái Hư Kiếm Vực', 'Trọng Tiêu Thần Giới', 'Vạn Kiếm Thánh Địa', 'Hỗn Độn Thần Vực', 'Tử Tiêu Cửu Thiên', 'Huyết Sát Giang Hồ', 'Phong Lôi Vũ Giới', 'Thiên Long Bát Bộ Giới', 'Cửu Châu Kiếm Giới', 'Mặc Sắc Vô Biên Giới', 'Bách Kiếm Tông Thế Giới', 'Thiên Địa Huyền Hoàng Giới', 'Trường Hà Vạn Cổ Giới', 'Hồng Hoang Thần Giới', 'Kiếm Vũ Thiên Duyên Giới', 'Vô Cực Vạn Giới', 'Tiêu Diêu Vũ Giới', 'Đại Thiên Địa Giới', 'Thanh Hoá', 'Nam Định'];
 const DYNASTY_PRESETS = ['Anh hùng tranh đỉnh, cuối triều đại suy tàn, bốn phương nổi loạn', 'Thiên hạ đại loạn, quần hùng cát cứ, giang sơn phân liệt', 'Thịnh thế thái bình, triều đình hưng thịnh nhưng ẩn chứa mưu đồ', 'Loạn thế xuân thu, chư hầu tranh bá, kẻ sĩ tứ phương tụ hội', 'Triều đại khai quốc, anh kiệt vân tập, vươn tay lập cơ nghiệp', 'Ma đạo quật khởi, chính tà đối lập, thiên hạ đại chiến sắp nổ ra', 'Bắc phương dị tộc nam xâm, biên cương nguy cấp, anh hùng xuất thế', 'Cố quốc phồn hoa, đế đô hào hoa náo nhiệt, tranh quyền đoạt vị thâm', 'Thiên tử mất quyền, quyền thần lộng hành, chư hầu mỗi người một cõi', 'Vương triều mạt thế, dân gian lầm than, hào kiệt tứ khởi khởi nghĩa'];
@@ -104,12 +106,60 @@ const STORY_STYLE_OPTIONS: Array<{ value: StoryStyleType; label: string }> = [
 
 const STAT_LABELS: Record<string, string> = {
     strength: 'Sức mạnh',
-    agility: 'Thân pháp', // Updated from 'Nhanh nhẹn' to 'Thân pháp' for better wuxia feel
+    agility: 'Thân pháp',
     constitution: 'Thể chất',
     rootBone: 'Căn cốt',
     intelligence: 'Ngộ tính',
-    luck: 'Phúc duyên', // Updated from 'Khí vận'
-    tamTinh: 'Tâm tính', // New stat
+    luck: 'Phúc duyên',
+    tamTinh: 'Tâm tính',
+};
+
+const STAT_COLORS: Record<string, string> = {
+    strength: '#ef4444',      // Red
+    agility: '#22c55e',       // Green
+    constitution: '#eab308',  // Yellow
+    rootBone: '#3b82f6',      // Blue
+    intelligence: '#a855f7',  // Purple
+    luck: '#f97316',          // Orange
+    tamTinh: '#06b6d4',       // Cyan
+};
+
+const STAT_ICONS: Record<string, React.ReactNode> = {
+    strength: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+            <path d="M14.5 7L12 4.5L9.5 7" /><path d="M12 4.5V21" /><path d="M7 16l5 5 5-5" /><path d="M2 12h20" />
+        </svg>
+    ),
+    agility: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        </svg>
+    ),
+    constitution: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+    ),
+    rootBone: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+            <path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+        </svg>
+    ),
+    intelligence: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+        </svg>
+    ),
+    luck: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+    ),
+    tamTinh: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+            <circle cx="12" cy="12" r="10" /><path d="M12 2a10 10 0 0 1 0 20" />
+        </svg>
+    ),
 };
 const GENDER_LABELS: Record<string, string> = { 'Male': 'Nam', 'Female': 'Nữ' };
 
@@ -204,6 +254,12 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
         strength: 5, agility: 5, constitution: 5, rootBone: 5, intelligence: 5, luck: 5, tamTinh: 5
     });
 
+    const radarData = useMemo(() => Object.entries(stats).map(([key, val]) => ({
+        label: STAT_LABELS[key] || key,
+        value: val,
+        color: STAT_COLORS[key] || '#e6c86e'
+    })) as RadarData[], [stats]);
+
     // Talents & Background
     const [selectedBackground, setSelectedBackground] = useState<Background>(PresetBackground[0]);
     const [selectedTalents, setSelectedTalents] = useState<Talent[]>([]);
@@ -227,8 +283,9 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
     const randomAppearance = () => setCharAppearance(randomFrom(APPEARANCE_PRESETS));
     const randomPersonality = () => setCharPersonality(randomFrom(PERSONALITY_PRESETS));
     const gachaBackground = () => {
-        const idx = Math.floor(Math.random() * allBackgroundOptions.length);
-        setSelectedBackground(allBackgroundOptions[idx]);
+        if (filteredBackgroundOptions.length === 0) return;
+        const idx = Math.floor(Math.random() * filteredBackgroundOptions.length);
+        setSelectedBackground(filteredBackgroundOptions[idx]);
     };
     const gachaTalent = () => {
         const totalPoints = BASE_TALENT_POINTS + selectedTalents.filter(t => t.cost < 0).reduce((sum, t) => sum + Math.abs(t.cost), 0);
@@ -244,6 +301,7 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
     const [customTalent, setCustomTalent] = useState<Talent>({ name: '', description: '', effect: '', rank: 'Thường', cost: 2 });
     const [talentFilter, setTalentFilter] = useState<'all' | TalentRank>('all');
     const [showCustomTalent, setShowCustomTalent] = useState(false);
+    const [showCustomDebuff, setShowCustomDebuff] = useState(false);
     const [customBackground, setCustomBackground] = useState<Background>({ name: '', description: '', effect: '' });
     const [showCustomBackground, setShowCustomBackground] = useState(false);
     const [openingStreaming, setOpeningStreaming] = useState(true);
@@ -305,14 +363,23 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
         const description = raw?.description?.trim() || '';
         const effect = raw?.effect?.trim() || '';
         if (!name || !description || !effect) return null;
-        return { name, description, effect, rank: raw.rank || 'Thường', cost: raw.cost ?? 2 };
+        return {
+            ...raw,
+            name,
+            description,
+            effect,
+            rank: raw.rank || 'Thường',
+            cost: raw.cost ?? 2,
+            conflictsWith: raw.conflictsWith || [],
+            excludedBackgrounds: raw.excludedBackgrounds || []
+        };
     };
     const standardizeBackground = (raw: Background): Background | null => {
         const name = raw?.name?.trim() || '';
         const description = raw?.description?.trim() || '';
         const effect = raw?.effect?.trim() || '';
         if (!name || !description || !effect) return null;
-        return { name, description, effect };
+        return { name, description, effect, rank: raw.rank || 'Bình thường' };
     };
     const mergeAndDeduplicateTalents = (rawList: Talent[]): Talent[] => {
         const map = new Map<string, Talent>();
@@ -336,6 +403,24 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
         () => [...PresetBackground, ...customBackgroundList.filter(item => !PresetBackground.some(p => p.name === item.name))],
         [customBackgroundList]
     );
+
+    const filteredBackgroundOptions = useMemo(() => {
+        const diff = worldConfig.difficulty;
+        return allBackgroundOptions.filter(bg => {
+            const rank = bg.rank || 'Bình thường';
+            // Mapping:
+            // relaxed, easy -> All (Dễ, Bình thường, Khó, Cực khó)
+            // normal -> Bình thường, Khó, Cực khó
+            // hard -> Khó, Cực khó
+            // extreme -> Cực khó
+            if (diff === 'relaxed' || diff === 'easy') return true;
+            if (diff === 'normal') return ['Bình thường', 'Khó', 'Cực khó'].includes(rank);
+            if (diff === 'hard') return ['Khó', 'Cực khó'].includes(rank);
+            if (diff === 'extreme') return rank === 'Cực khó';
+            return true;
+        });
+    }, [allBackgroundOptions, worldConfig.difficulty]);
+
     const allTalentOptions = useMemo(
         () => [...PresetTalent, ...customTalentList.filter(item => !PresetTalent.some(p => p.name === item.name))],
         [customTalentList]
@@ -379,6 +464,7 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
     const handleStatChange = (key: keyof typeof stats, delta: number) => {
         const current = stats[key];
         if (delta > 0 && remainingPoints <= 0) return;
+        if (delta > 0 && current >= 20) return; // 20-point cap
         if (delta < 0 && current <= 1) return;
         setStats({ ...stats, [key]: current + delta });
     };
@@ -396,6 +482,21 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
         if (selectedTalents.find(x => x.name === t.name)) {
             setSelectedTalents(selectedTalents.filter(x => x.name !== t.name));
         } else {
+            // Check Background Exclusion
+            if (t.excludedBackgrounds?.includes(selectedBackground.name)) {
+                alert(`Thân thế "${selectedBackground.name}" không thể chọn thiên bẩm này!`);
+                return;
+            }
+
+            // Check Talent Conflicts
+            const conflict = selectedTalents.find(s =>
+                t.conflictsWith?.includes(s.name) || s.conflictsWith?.includes(t.name)
+            );
+            if (conflict) {
+                alert(`Xung đột! Không thể chọn cùng với "${conflict.name}".`);
+                return;
+            }
+
             if (t.cost > 0 && t.cost > remainingTalentPoints) {
                 alert(`Không đủ điểm! Cần ${t.cost} điểm, còn ${remainingTalentPoints} điểm.`);
                 return;
@@ -432,6 +533,25 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
         }
     };
 
+    const addCustomDebuff = async () => {
+        const normalized = standardizeTalent(customTalent);
+        if (!normalized) {
+            alert("Vui lòng điền đầy đủ bất lợi tùy chỉnh (Tên/Mô tả/Hiệu ứng)");
+            return;
+        }
+
+        const nextCustomTalentList = mergeAndDeduplicateTalents([...customTalentList, normalized]);
+        setCustomTalentList(nextCustomTalentList);
+        setSelectedTalents([...selectedTalents, normalized]);
+        setCustomTalent({ name: '', description: '', effect: '', rank: 'Khó', cost: -2 });
+        setShowCustomDebuff(false);
+        try {
+            await dbService.saveSetting(CUSTOM_TALENT_STORAGE_KEY, nextCustomTalentList);
+        } catch (error) {
+            console.error('Failed to save custom debuff', error);
+        }
+    };
+
     const addCustomBackground = async () => {
         const name = customBackground.name.trim();
         const description = customBackground.description.trim();
@@ -440,7 +560,7 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
             alert("Vui lòng điền đầy đủ thân thế tùy chỉnh (Tên/Mô tả/Hiệu ứng)");
             return;
         }
-        const nextBg: Background = { name, description, effect };
+        const nextBg: Background = { name, description, effect, rank: 'Bình thường' };
         const nextCustomBackgroundList = mergeAndDeduplicateBackgrounds([...customBackgroundList, nextBg]);
         setCustomBackgroundList(nextCustomBackgroundList);
         setSelectedBackground(nextBg);
@@ -456,7 +576,7 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
     const handleGenerate = async () => {
         if (!charName.trim()) {
             alert("Vui lòng nhập tên nhân vật trước");
-            setStep(1);
+            setStep(1); // Go to Hồ sơ step
             return;
         }
 
@@ -520,14 +640,14 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
 
                 <div className="hidden md:flex h-16 border-b border-wuxia-gold/10 items-center justify-between px-8 bg-black/40">
                     <div className="flex items-center gap-6">
-                        <h2 className="text-2xl font-serif font-bold text-wuxia-gold tracking-widest">Biên niên sử sáng tác</h2>
+                        <h2 className="text-2xl font-serif font-bold text-wuxia-gold tracking-widest">Sáng tác</h2>
                         {saveMsg && (
                             <div className="text-[10px] font-mono text-wuxia-gold/80 bg-wuxia-gold/10 px-2 py-1 rounded border border-wuxia-gold/20 animate-fade-in">
                                 {saveMsg}
                             </div>
                         )}
                     </div>
-                    
+
                     <div className="flex items-center gap-8">
                         <div className="flex gap-2">
                             {STEPS.map((s, idx) => (
@@ -552,7 +672,7 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
                 </div>
                 <div className="md:hidden border-b border-wuxia-gold/10 bg-black/50 px-4 py-3">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-serif font-bold text-wuxia-gold tracking-wider">Biên niên sử sáng tác</h2>
+                        <h2 className="text-lg font-serif font-bold text-wuxia-gold tracking-wider">Sáng tác</h2>
                         <span className="text-[11px] text-wuxia-gold/40 font-mono">{step + 1}/{STEPS.length}</span>
                     </div>
                     <div className="mt-2 text-xs text-wuxia-gold font-bold tracking-widest">{currentStepLabel}</div>
@@ -680,392 +800,592 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
                         </div>
                     )}
 
-                    {/* STEP 2: CHARACTER BASIC */}
+                    {/* STEP 2: PROFILE (Hồ sơ) */}
                     {step === 1 && (
-                        <div className="animate-slide-in max-w-4xl mx-auto">
-                            <h3 className="text-lg md:text-xl font-serif font-bold text-wuxia-gold border-b border-wuxia-gold/30 pb-3 mb-6">Hồ sơ hiệp khách</h3>
+                        <div className="animate-slide-in relative z-10 w-full">
+                            <h3 className="text-2xl font-serif font-bold text-wuxia-gold border-b border-wuxia-gold/30 pb-3 mb-8 flex items-center gap-3">
+                                <span className="bg-wuxia-gold/20 p-2 rounded-full"><Users className="w-5 h-5" /></span>
+                                Hồ sơ hiệp khách
+                            </h3>
 
-                            <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-                                {/* Left: Info */}
-                                <div className="md:col-span-2 space-y-6">
-                                    <OrnateBorder className="p-6">
-                                        <div className="space-y-2">
-                                            <span className="text-sm font-medium text-wuxia-gold/70 group-hover:text-wuxia-gold transition-colors block italic">Họ và Tên</span>
-                                            <div className="relative">
-                                                <input
-                                                    type="text"
-                                                    value={charName}
-                                                    onChange={(e) => setCharName(e.target.value)}
-                                                    className="w-full bg-transparent border-b border-wuxia-gold/30 py-2 pr-10 focus:border-wuxia-gold outline-none text-wuxia-gold placeholder-wuxia-gold/30 transition-all font-serif italic text-lg"
-                                                    placeholder="Nhập danh tính..."
-                                                />
-                                                <button
-                                                    onClick={randomCharName}
-                                                    title={`Random tên ${charGender === 'Female' ? 'nữ' : 'nam'}`}
-                                                    className="absolute right-0 bottom-2 w-8 h-8 flex items-center justify-center rounded-md hover:bg-wuxia-gold/15 text-wuxia-gold transition-all duration-200 text-lg hover:scale-110 active:scale-95"
-                                                ><Dices className="w-4 h-4" /></button>
+                            <div className="grid grid-cols-1 md:grid-cols-5 gap-10 items-stretch">
+                                {/* Info Panel */}
+                                <div className="md:col-span-2 flex flex-col">
+                                    <OrnateBorder className="p-8 bg-black/40 backdrop-blur-md h-full">
+                                        <div className="space-y-2 relative group">
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-sm text-wuxia-gold/70 font-serif font-bold italic block group-hover:text-amber-300 transition-colors">Họ và tên</label>
+                                                <button onClick={randomCharName} className="text-wuxia-gold/50 hover:text-wuxia-gold transition-colors" title="Tên ngẫu nhiên">
+                                                    <Dices className="w-4 h-4" />
+                                                </button>
                                             </div>
+                                            <input
+                                                value={charName}
+                                                onChange={e => setCharName(e.target.value)}
+                                                placeholder="Nhập tôn hiệu của bạn..."
+                                                className="w-full bg-transparent border-b border-wuxia-gold/20 focus:border-wuxia-gold py-3 text-wuxia-gold outline-none transition-all font-serif text-xl tracking-widest placeholder-wuxia-gold/20 italic"
+                                            />
                                         </div>
-                                    </OrnateBorder>
 
-                                    <OrnateBorder className="p-6">
-                                        <div className="space-y-4">
-                                            <div className="space-y-2">
-                                                <span className="text-sm font-medium text-wuxia-gold/70 group-hover:text-wuxia-gold transition-colors block italic">Giới tính</span>
-                                                <div className="flex gap-4 p-1 bg-black/40 rounded-lg border border-wuxia-gold/20">
-                                                    {['Male', 'Female'].map((gender) => (
-                                                        <button
-                                                            key={gender}
-                                                            onClick={() => setCharGender(gender as 'Male' | 'Female')}
-                                                            className={`flex-1 py-2 rounded-md transition-all ${charGender === gender
-                                                                ? 'bg-wuxia-gold/20 text-wuxia-gold border border-wuxia-gold/50 shadow-[0_0_10px_rgba(230,200,110,0.3)]'
-                                                                : 'text-wuxia-gold/40 hover:text-wuxia-gold/70'
-                                                                }`}
-                                                        >
-                                                            {gender === 'Male' ? 'Nam' : 'Nữ'}
-                                                        </button>
-                                                    ))}
+                                        <div className="grid grid-cols-2 gap-8 mt-8">
+                                            <div className="space-y-4">
+                                                <label className="text-sm text-wuxia-gold/70 font-serif font-bold italic block">Giới tính</label>
+                                                <div className="flex gap-4">
+                                                    <button onClick={() => setCharGender('Male')} className={`flex-1 py-3 rounded border transition-all ${charGender === 'Male' ? 'bg-wuxia-gold/20 border-wuxia-gold text-wuxia-gold shadow-[0_0_15px_rgba(230,200,110,0.2)]' : 'border-wuxia-gold/10 text-wuxia-gold/40 hover:border-wuxia-gold/30'}`}>Nam</button>
+                                                    <button onClick={() => setCharGender('Female')} className={`flex-1 py-3 rounded border transition-all ${charGender === 'Female' ? 'bg-wuxia-gold/20 border-wuxia-gold text-wuxia-gold shadow-[0_0_15px_rgba(230,200,110,0.2)]' : 'border-wuxia-gold/10 text-wuxia-gold/40 hover:border-wuxia-gold/30'}`}>Nữ</button>
                                                 </div>
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-sm text-wuxia-gold/70 font-serif font-bold italic block">Ngày sinh</label>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <CompactDropdown
-                                                        value={birthMonth}
-                                                        options={monthOptions}
-                                                        suffix="Tháng"
-                                                        open={monthOpen}
-                                                        onToggle={() => {
-                                                            setMonthOpen((prev) => !prev);
-                                                            setDayOpen(false);
-                                                        }}
-                                                        onSelect={(next) => {
-                                                            setBirthMonth(next);
-                                                            setMonthOpen(false);
-                                                        }}
-                                                        containerRef={monthRef}
-                                                    />
-                                                    <CompactDropdown
-                                                        value={birthDay}
-                                                        options={dayOptions}
-                                                        suffix="Ngày"
-                                                        open={dayOpen}
-                                                        onToggle={() => {
-                                                            setDayOpen((prev) => !prev);
-                                                            setMonthOpen(false);
-                                                        }}
-                                                        onSelect={(next) => {
-                                                            setBirthDay(next);
-                                                            setDayOpen(false);
-                                                        }}
-                                                        containerRef={dayRef}
-                                                    />
+                                            <div className="space-y-4">
+                                                <label className="text-sm text-wuxia-gold/70 font-serif font-bold italic block">Tuổi tác</label>
+                                                <div className="flex items-center gap-4 bg-black/40 border border-wuxia-gold/20 p-2 rounded-lg">
+                                                    <button onClick={() => setCharAge(Math.max(14, charAge - 1))} className="p-1 hover:text-wuxia-gold transition-colors"><Minus className="w-4 h-4" /></button>
+                                                    <span className="flex-1 text-center font-mono text-xl text-wuxia-gold">{charAge}</span>
+                                                    <button onClick={() => setCharAge(Math.min(100, charAge + 1))} className="p-1 hover:text-wuxia-gold transition-colors"><Plus className="w-4 h-4" /></button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4 mt-8">
+                                            <label className="text-sm text-wuxia-gold/70 font-serif font-bold italic block">Ngày sinh</label>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="relative group">
+                                                    <select value={birthMonth} onChange={e => setBirthMonth(Number(e.target.value))} className="w-full bg-black/40 border border-wuxia-gold/20 p-3 text-wuxia-gold rounded-md outline-none focus:border-wuxia-gold appearance-none font-serif">
+                                                        {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1} className="bg-neutral-900">Tháng {i + 1}</option>)}
+                                                    </select>
+                                                </div>
+                                                <div className="relative">
+                                                    <select value={birthDay} onChange={e => setBirthDay(Number(e.target.value))} className="w-full bg-black/40 border border-wuxia-gold/20 p-3 text-wuxia-gold rounded-md outline-none focus:border-wuxia-gold appearance-none font-serif">
+                                                        {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1} className="bg-neutral-900">Ngày {i + 1}</option>)}
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
                                     </OrnateBorder>
+                                </div>
 
-                                    <OrnateBorder className="p-6">
-                                        <div className="space-y-2">
-                                            <label className="text-sm text-wuxia-gold/70 font-serif font-bold italic block">Tuổi</label>
-                                            <input type="number" min={14} max={100} value={charAge} onChange={e => setCharAge(parseInt(e.target.value))} className="w-full bg-transparent border border-wuxia-gold/20 focus:border-wuxia-gold p-3 text-wuxia-gold outline-none rounded-md transition-all font-serif tracking-wider" />
-                                        </div>
-                                    </OrnateBorder>
-
-                                    <OrnateBorder className="p-6">
-                                        <div className="space-y-2">
-                                            <label className="text-sm text-wuxia-gold/70 font-serif font-bold italic block">Ngoại hình</label>
-                                            <div className="relative">
+                                {/* Appearance & Personality */}
+                                <div className="md:col-span-3 flex flex-col">
+                                    <OrnateBorder className="p-8 bg-black/40 backdrop-blur-md h-full">
+                                        <div className="space-y-6">
+                                            <div className="space-y-4 group">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-sm text-wuxia-gold/70 font-serif font-bold italic block">Ngoại hình</label>
+                                                    <button onClick={randomAppearance} className="text-wuxia-gold/50 hover:text-wuxia-gold transition-colors"><Dices className="w-4 h-4" /></button>
+                                                </div>
                                                 <textarea
                                                     value={charAppearance}
                                                     onChange={e => setCharAppearance(e.target.value)}
-                                                    placeholder="Tóc đen và mắt đen, đường nét khuôn mặt rõ ràng, trang phục đơn giản và gọn gàng"
-                                                    className="w-full h-24 bg-transparent border border-wuxia-gold/20 focus:border-wuxia-gold p-3 pr-24 text-wuxia-gold outline-none rounded-md transition-all resize-none font-serif placeholder-wuxia-gold/30"
+                                                    placeholder="Mô tả vẻ ngoài của bạn..."
+                                                    className="w-full h-32 bg-black/20 border border-wuxia-gold/10 focus:border-wuxia-gold/40 p-4 text-wuxia-gold outline-none rounded-xl transition-all resize-none font-serif text-lg leading-relaxed shadow-inner"
                                                 />
-                                                <button
-                                                    onClick={randomAppearance}
-                                                    title="AI ngẫu nhiên ngoại hình"
-                                                    className="absolute right-2 bottom-2 w-8 h-8 flex items-center justify-center rounded-md hover:bg-wuxia-gold/15 text-wuxia-gold transition-all duration-200 text-lg hover:scale-110 active:scale-95"
-                                                >
-                                                    <Dices className="w-4 h-4" />
-                                                </button>
                                             </div>
-                                        </div>
-                                    </OrnateBorder>
-                                    <OrnateBorder className="p-6">
-                                        <div className="space-y-2">
-                                            <label className="text-sm text-wuxia-gold/70 font-serif font-bold italic block">Tính cách</label>
-                                            <div className="relative">
+                                            <div className="space-y-4 group">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-sm text-wuxia-gold/70 font-serif font-bold italic block">Tâm tính</label>
+                                                    <button onClick={randomPersonality} className="text-wuxia-gold/50 hover:text-wuxia-gold transition-colors"><Dices className="w-4 h-4" /></button>
+                                                </div>
                                                 <textarea
                                                     value={charPersonality}
                                                     onChange={e => setCharPersonality(e.target.value)}
-                                                    placeholder="Chí khí cao vời, coi trọng nghĩa khí..."
-                                                    className="w-full h-24 bg-transparent border border-wuxia-gold/20 focus:border-wuxia-gold p-3 pr-24 text-wuxia-gold outline-none rounded-md transition-all resize-none font-serif placeholder-wuxia-gold/30"
+                                                    placeholder="Bản tính thực sự ẩn sau lớp vỏ bọc..."
+                                                    className="w-full h-32 bg-black/20 border border-wuxia-gold/10 focus:border-wuxia-gold/40 p-4 text-wuxia-gold outline-none rounded-xl transition-all resize-none font-serif text-lg leading-relaxed shadow-inner"
                                                 />
-                                                <button
-                                                    onClick={randomPersonality}
-                                                    title="AI ngẫu nhiên tính cách"
-                                                    className="absolute right-2 bottom-2 w-8 h-8 flex items-center justify-center rounded-md hover:bg-wuxia-gold/15 text-wuxia-gold transition-all duration-200 text-lg hover:scale-110 active:scale-95"
-                                                >
-                                                    <Dices className="w-4 h-4" />
-                                                </button>
                                             </div>
                                         </div>
                                     </OrnateBorder>
                                 </div>
+                            </div>
+                        </div>
+                    )}
 
-                                {/* Right: Stats */}
-                                <div className="md:col-span-3">
-                                    <OrnateBorder className="h-full">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <span className="text-wuxia-gold font-bold text-lg">Thiên bẩm cốt cách</span>
-                                            <span className={`text-sm font-mono transition-colors ${remainingPoints > 0 ? 'text-green-400' : 'text-wuxia-gold/40'}`}>Điểm còn lại: {remainingPoints}</span>
+                    {/* STEP 3: ATTRIBUTES (Thuộc tính) */}
+                    {step === 2 && (
+                        <div className="animate-slide-in relative z-10 w-full max-w-5xl mx-auto">
+                            <h3 className="text-xl font-serif font-bold text-wuxia-gold border-b border-wuxia-gold/30 pb-3 mb-6 flex items-center justify-between px-2">
+                                <div className="flex items-center gap-3">
+                                    <span className="bg-wuxia-gold/20 p-1.5 rounded-full"><Swords className="w-4 h-4" /></span>
+                                    Thuộc tính hiệp khách
+                                </div>
+                                <div className="text-xs font-mono flex items-center gap-4">
+                                    <span className="text-gray-400">Điểm dư:</span>
+                                    <span className={`text-xl font-bold ${remainingPoints > 0 ? 'text-green-400 animate-pulse' : 'text-red-400'}`}>
+                                        {remainingPoints}
+                                    </span>
+                                </div>
+                            </h3>
+
+                            <OrnateBorder className="p-4 bg-black/40 backdrop-blur-md overflow-hidden">
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch min-h-[440px]">
+                                    {/* Left: Radar Chart (5 columns) */}
+                                    <div className="lg:col-span-5 flex items-center justify-center bg-black/20 rounded-2xl border border-wuxia-gold/10 p-6 shadow-inner relative overflow-hidden h-full">
+                                        <div className="w-full aspect-square max-w-[340px] flex items-center justify-center">
+                                            <RadarChart
+                                                data={radarData}
+                                                size={300}
+                                                maxValue={20}
+                                            />
                                         </div>
-                                        <div className="space-y-4 pt-4 border-t border-wuxia-gold/20">
-                                            {Object.entries(stats).map(([key, val]) => (
-                                                <div key={key} className="flex items-center justify-between">
-                                                    <span className="text-wuxia-gold/70 text-base font-serif w-20">{STAT_LABELS[key] ?? key}</span>
-                                                    <div className="flex items-center gap-3">
-                                                        <button onClick={() => handleStatChange(key as any, -1)} className="w-8 h-8 bg-black/60 border border-wuxia-gold/20 text-wuxia-gold/50 hover:text-wuxia-gold hover:border-wuxia-gold rounded-md disabled:opacity-30 transition-all" disabled={(val as number) <= 1}>-</button>
-                                                        <span className="w-8 text-center text-wuxia-gold font-serif font-black text-xl shadow-glow-sm">{val}</span>
-                                                        <button onClick={() => handleStatChange(key as any, 1)} className="w-8 h-8 bg-black/60 border border-wuxia-gold/20 text-wuxia-gold/50 hover:text-wuxia-gold hover:border-wuxia-gold rounded-md disabled:opacity-30 transition-all" disabled={remainingPoints <= 0}>+</button>
-                                                    </div>
+                                    </div>
+
+                                    {/* Right: Stat Bars (7 columns) */}
+                                    <div className="lg:col-span-7 flex flex-col h-full">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                                            {(Object.keys(stats) as Array<keyof typeof stats & string>).map((key) => (
+                                                <div key={key} className="bg-black/30 border border-wuxia-gold/10 p-3 rounded-lg hover:border-wuxia-gold/30 transition-all">
+                                                    <StatBar
+                                                        label={STAT_LABELS[key]}
+                                                        value={stats[key]}
+                                                        max={20}
+                                                        showControls={true}
+                                                        onIncrease={() => handleStatChange(key, 1)}
+                                                        onDecrease={() => handleStatChange(key, -1)}
+                                                        disabledIncrease={remainingPoints <= 0 || stats[key] >= 20}
+                                                        disabledDecrease={stats[key] <= 1}
+                                                        color={STAT_COLORS[key]}
+                                                        icon={STAT_ICONS[key]}
+                                                    />
                                                 </div>
                                             ))}
                                         </div>
-                                    </OrnateBorder>
+                                        <div className="mt-4 p-3 bg-wuxia-gold/5 rounded-lg border border-wuxia-gold/10 text-[10px] text-wuxia-gold/50 italic text-center">
+                                            Phân bổ điểm thuộc tính khôn ngoan sẽ quyết định vận mệnh của bạn trong giang hồ.
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            </OrnateBorder>
                         </div>
                     )}
 
-                    {/* STEP 3: BACKGROUNDS */}
-                    {step === 2 && (
-                        <div className="space-y-8 animate-slide-in max-w-5xl mx-auto">
-                            <OrnateBorder className="p-6">
-                                <div className="flex justify-between items-center border-b border-wuxia-gold/30 pb-3 mb-4">
-                                    <h3 className="text-xl font-serif font-bold text-wuxia-gold">Thân thế xuất thân (Chọn một)</h3>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => triggerGacha('bg', gachaBackground)}
-                                            title="Gacha ngẫu nhiên thân thế"
-                                            className={`flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full border transition-all duration-200 active:scale-90 hover:scale-105 ${gachaFlash === 'bg' ? 'border-wuxia-gold bg-wuxia-gold/20 text-wuxia-gold animate-gacha-spin' : 'border-wuxia-gold/30 hover:border-wuxia-gold/70 bg-wuxia-gold/5 hover:bg-wuxia-gold/15 text-wuxia-gold/70 hover:text-wuxia-gold'}`}
-                                        >
-                                            <span><Dices className="w-3.5 h-3.5" /></span><span>Gacha</span>
-                                        </button>
-                                        <button onClick={() => setShowCustomBackground(!showCustomBackground)} className="text-xs text-wuxia-gold hover:underline font-medium">+ Thân thế tùy chỉnh</button>
+                    {/* STEP 4: BACKGROUNDS (shifted to step 3) */}
+                    {step === 3 && (
+                        <div className="animate-slide-in w-full">
+                            <div className="flex justify-between items-center border-b border-wuxia-gold/30 pb-3 mb-8">
+                                <h3 className="text-2xl font-serif font-bold text-wuxia-gold">Thân thế xuất thân</h3>
+                                <button 
+                                    onClick={() => triggerGacha('bg', gachaBackground)} 
+                                    className={`flex items-center gap-2 px-4 py-1.5 bg-wuxia-gold/10 hover:bg-wuxia-gold/20 text-wuxia-gold rounded-lg border border-wuxia-gold/30 transition-all font-serif text-sm group ${gachaFlash === 'bg' ? 'ring-2 ring-wuxia-gold bg-wuxia-gold/30' : ''}`}
+                                    title="Gacha xuất thân (+ May mắn)"
+                                >
+                                    <Dices className={`w-4 h-4 transition-transform duration-500 ${gachaFlash === 'bg' ? 'rotate-180 scale-125' : 'group-hover:rotate-12'}`} />
+                                    <span>Gacha Thân thế</span>
+                                </button>
+                            </div>
+                            
+                            {showCustomBackground && (
+                                <div className="bg-black/40 border border-wuxia-gold/30 p-8 mb-8 rounded-xl space-y-6 shadow-glow-sm relative animate-in fade-in slide-in-from-top-4 duration-500">
+                                    <button onClick={() => setShowCustomBackground(false)} className="absolute top-4 right-4 text-wuxia-gold/50 hover:text-red-400 transition-colors">
+                                        <X className="w-6 h-6" />
+                                    </button>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] text-wuxia-gold/50 uppercase tracking-widest ml-1">Tên thân thế</label>
+                                            <input
+                                                placeholder="VD: Thái tử phủ Giang Nam"
+                                                value={customBackground.name}
+                                                onChange={e => setCustomBackground({ ...customBackground, name: e.target.value })}
+                                                className="w-full bg-black/60 border border-wuxia-gold/30 focus:border-wuxia-gold p-3 text-sm text-wuxia-gold outline-none rounded-lg transition-all font-serif"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] text-wuxia-gold/50 uppercase tracking-widest ml-1">Hiệu ứng cơ bản</label>
+                                            <input
+                                                placeholder="VD: Mảnh sắt vụn +100, Danh vọng +50"
+                                                value={customBackground.effect}
+                                                onChange={e => setCustomBackground({ ...customBackground, effect: e.target.value })}
+                                                className="w-full bg-black/60 border border-wuxia-gold/30 focus:border-wuxia-gold p-3 text-sm text-wuxia-gold outline-none rounded-lg transition-all font-serif italic"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                {showCustomBackground && (
-                                    <div className="bg-black/40 border border-wuxia-gold/30 p-4 mb-4 rounded-lg space-y-3 shadow-inner shadow-black/40">
-                                        <input
-                                            placeholder="Tên thân thế (VD: Thái tử phủ Giang Nam)"
-                                            value={customBackground.name}
-                                            onChange={e => setCustomBackground({ ...customBackground, name: e.target.value })}
-                                            className="w-full bg-transparent border border-wuxia-gold/20 focus:border-wuxia-gold p-2 text-xs text-wuxia-gold outline-none rounded-md transition-all font-serif"
-                                        />
-                                        <input
-                                            placeholder="Mô tả thân thế"
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-wuxia-gold/50 uppercase tracking-widest ml-1">Mô tả bối cảnh</label>
+                                        <textarea
+                                            placeholder="Nhập mô tả sâu sắc về thân thế này..."
                                             value={customBackground.description}
                                             onChange={e => setCustomBackground({ ...customBackground, description: e.target.value })}
-                                            className="w-full bg-transparent border border-wuxia-gold/20 focus:border-wuxia-gold p-2 text-xs text-wuxia-gold/80 outline-none rounded-md transition-all font-serif"
+                                            className="w-full h-24 bg-black/60 border border-wuxia-gold/30 focus:border-wuxia-gold p-3 text-sm text-wuxia-gold outline-none rounded-lg transition-all resize-none font-serif leading-relaxed"
                                         />
-                                        <input
-                                            placeholder="Hiệu ứng thân thế"
-                                            value={customBackground.effect}
-                                            onChange={e => setCustomBackground({ ...customBackground, effect: e.target.value })}
-                                            className="w-full bg-transparent border border-wuxia-gold/20 focus:border-wuxia-gold p-2 text-xs text-wuxia-gold outline-none rounded-md transition-all font-serif italic"
-                                        />
-                                        <GameButton onClick={addCustomBackground} variant="secondary" className="w-full py-1 text-xs">Lưu và dùng thân thế tùy chỉnh</GameButton>
                                     </div>
-                                )}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {allBackgroundOptions.map((bg, idx) => (
-                                        <div
-                                            key={idx}
-                                            onClick={() => setSelectedBackground(bg)}
-                                            className={`p-4 border rounded-lg cursor-pointer transition-all duration-300 transform hover:-translate-y-1 ${selectedBackground.name === bg.name
-                                                ? 'border-wuxia-gold bg-wuxia-gold/10 shadow-lg shadow-wuxia-gold/10'
-                                                : 'border-wuxia-gold/10 bg-transparent hover:border-wuxia-gold/30'
-                                                }`}
-                                        >
-                                            <div className={`font-bold text-sm font-serif ${selectedBackground.name === bg.name ? 'text-wuxia-gold' : 'text-wuxia-gold/50'}`}>
-                                                {bg.name}
-                                                {!PresetBackground.some(p => p.name === bg.name) ? ' (Tùy chỉnh)' : ''}
-                                            </div>
-                                            <div className="text-xs text-wuxia-gold/40 mt-1 line-clamp-2 italic">{bg.description}</div>
-                                            <div className="text-xs text-wuxia-gold/80 mt-2 pt-2 border-t border-wuxia-gold/10 font-mono">{bg.effect}</div>
-                                        </div>
-                                    ))}
+                                    <div className="flex gap-4">
+                                        <GameButton onClick={() => setShowCustomBackground(false)} variant="secondary" className="flex-1">Hủy</GameButton>
+                                        <GameButton onClick={addCustomBackground} variant="primary" className="flex-[2]">Khai mở kỳ ngộ</GameButton>
+                                    </div>
                                 </div>
-                            </OrnateBorder>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {filteredBackgroundOptions.map((bg, idx) => (
+                                    <div
+                                        key={idx}
+                                        onClick={() => setSelectedBackground(bg)}
+                                        className={`group relative p-6 rounded-xl border transition-all cursor-pointer ${selectedBackground.name === bg.name ? 'bg-wuxia-gold/10 border-wuxia-gold shadow-[0_0_20px_rgba(230,200,110,0.15)]' : 'bg-black/40 border-wuxia-gold/10 hover:border-wuxia-gold/30'}`}
+                                    >
+                                        <div className="flex justify-between items-start mb-4">
+                                            <h4 className="text-lg font-serif font-bold text-wuxia-gold">{bg.name}</h4>
+                                            <span className={`text-[10px] px-2 py-0.5 rounded border ${bg.rank === 'Cực khó' ? 'border-red-500/50 text-red-400 bg-red-400/10' : bg.rank === 'Khó' ? 'border-orange-500/50 text-orange-400 bg-orange-400/10' : 'border-green-500/50 text-green-400 bg-green-400/10'}`}>
+                                                {bg.rank}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-gray-400 mb-4 line-clamp-2 h-8 font-serif italic">"{bg.description}"</p>
+                                        <div className="pt-3 border-t border-wuxia-gold/10">
+                                            <div className="text-[10px] text-wuxia-gold/50 font-bold mb-1 uppercase tracking-widest">Hiệu ứng</div>
+                                            <div className="text-xs text-gray-300 line-clamp-2 min-h-[32px]">{bg.effect}</div>
+                                        </div>
+                                        {selectedBackground.name === bg.name && (
+                                            <div className="absolute -top-2 -right-2 bg-wuxia-gold text-black rounded-full p-1 shadow-lg border border-black animate-scale-in">
+                                                <Check className="w-4 h-4" />
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+
+                                <div
+                                    onClick={() => setShowCustomBackground(true)}
+                                    className="p-6 rounded-xl border border-dashed border-wuxia-gold/20 hover:border-wuxia-gold/50 flex flex-col items-center justify-center gap-3 transition-all cursor-pointer bg-black/20 group hover:bg-wuxia-gold/5"
+                                >
+                                    <div className="w-12 h-12 rounded-full border border-wuxia-gold/20 flex items-center justify-center text-wuxia-gold/40 group-hover:text-wuxia-gold group-hover:border-wuxia-gold transition-all">
+                                        <Plus className="w-6 h-6" />
+                                    </div>
+                                    <span className="text-sm font-serif text-wuxia-gold/40 group-hover:text-wuxia-gold">Thân thế kỳ ngộ</span>
+                                </div>
+                            </div>
                         </div>
                     )}
 
-                    {/* STEP 4: TALENTS (Point-based system) */}
-                    {step === 3 && (() => {
-                        const debuffTalents = allTalentOptions.filter(t => DEBUFF_RANKS.includes(t.rank));
-                        const buffTalents = allTalentOptions.filter(t => BUFF_RANKS.includes(t.rank));
-                        const filteredBuffs = talentFilter === 'all' ? buffTalents : buffTalents.filter(t => t.rank === talentFilter);
+                    {/* STEP 5: BẤT LỢI (Debuffs) */}
+                    {step === 4 && (() => {
+                        const rankPriority: Record<string, number> = { 'Cực Hạn': 0, 'Khắc nghiệt': 1, 'Khó': 2 };
+                        const debuffTalents = allTalentOptions
+                            .filter(t => t.cost < 0)
+                            .sort((a, b) => (rankPriority[a.rank] ?? 99) - (rankPriority[b.rank] ?? 99));
+
                         return (
-                        <div className="space-y-6 animate-slide-in max-w-5xl mx-auto">
-                            {/* Point Counter */}
-                            <div className="flex items-center justify-center gap-6 py-3 px-6 bg-black/60 border border-wuxia-gold/30 rounded-xl">
-                                <div className="text-center">
-                                    <div className="text-[10px] text-wuxia-gold/50 uppercase tracking-widest">Điểm cơ bản</div>
-                                    <div className="text-xl font-bold text-wuxia-gold font-mono">{BASE_TALENT_POINTS}</div>
+                            <div className="space-y-6 animate-slide-in max-w-5xl mx-auto">
+                                {/* Point Counter */}
+                                <div className="flex items-center justify-between py-2 px-8 bg-black/60 border border-wuxia-gold/30 rounded-xl text-center max-w-2xl mx-auto flex-wrap gap-4">
+                                    <div>
+                                        <div className="text-[10px] text-wuxia-gold/50 uppercase tracking-widest">Cơ bản</div>
+                                        <div className="text-xl font-bold text-wuxia-gold font-mono">{BASE_TALENT_POINTS}</div>
+                                    </div>
+                                    <div className="text-wuxia-gold/30 text-lg">+</div>
+                                    <div className="bg-red-400/5 px-4 py-2 rounded-lg border border-red-500/20">
+                                        <div className="text-[10px] text-red-400/70 uppercase tracking-widest">Nghiệp lực</div>
+                                        <div className="text-xl font-bold text-red-400 font-mono">+{debuffPoints}</div>
+                                    </div>
+                                    <div className="text-wuxia-gold/30 text-lg">=</div>
+                                    <div className="bg-emerald-400/5 px-4 py-2 rounded-lg border border-emerald-500/20 shadow-glow-sm">
+                                        <div className="text-[10px] text-emerald-400/70 uppercase tracking-widest">Tổng điểm bẩm sinh</div>
+                                        <div className="text-xl font-bold text-emerald-400 font-mono">{totalTalentPoints}</div>
+                                    </div>
                                 </div>
-                                <div className="text-wuxia-gold/30 text-lg">+</div>
-                                <div className="text-center">
-                                    <div className="text-[10px] text-red-400/70 uppercase tracking-widest">Từ debuff</div>
-                                    <div className="text-xl font-bold text-red-400 font-mono">+{debuffPoints}</div>
-                                </div>
-                                <div className="text-wuxia-gold/30 text-lg">=</div>
-                                <div className="text-center">
-                                    <div className="text-[10px] text-wuxia-gold/50 uppercase tracking-widest">Tổng</div>
-                                    <div className="text-xl font-bold text-wuxia-gold font-mono">{totalTalentPoints}</div>
-                                </div>
-                                <div className="text-wuxia-gold/30 text-lg">−</div>
-                                <div className="text-center">
-                                    <div className="text-[10px] text-blue-400/70 uppercase tracking-widest">Đã dùng</div>
-                                    <div className="text-xl font-bold text-blue-400 font-mono">{spentTalentPoints}</div>
-                                </div>
-                                <div className="text-wuxia-gold/30 text-lg">=</div>
-                                <div className="text-center">
-                                    <div className="text-[10px] text-emerald-400/70 uppercase tracking-widest">Còn lại</div>
-                                    <div className={`text-2xl font-bold font-mono ${remainingTalentPoints > 0 ? 'text-emerald-400' : remainingTalentPoints === 0 ? 'text-wuxia-gold' : 'text-red-500'}`}>{remainingTalentPoints}</div>
-                                </div>
-                            </div>
 
-                            {/* Debuff Section (Mandatory) */}
-                            <OrnateBorder className="p-5">
-                                <div className="flex justify-between items-center border-b border-red-500/30 pb-3 mb-4">
-                                    <h3 className="text-lg font-serif font-bold text-red-400 flex items-center gap-2">
-                                        <span>☠</span> Debuff bắt buộc <span className="text-[10px] font-normal text-red-400/60">(chọn ít nhất 1)</span>
-                                    </h3>
-                                    {!hasDebuff && <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-600/20 border border-red-600/40 text-red-400 animate-pulse">⚠ Chưa chọn debuff</span>}
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {debuffTalents.map((t, idx) => {
-                                        const isSelected = !!selectedTalents.find(x => x.name === t.name);
-                                        const rc = RANK_COLORS[t.rank];
-                                        return (
-                                            <div
-                                                key={`debuff-${idx}`}
-                                                onClick={() => toggleTalent(t)}
-                                                className={`p-3 border rounded-lg cursor-pointer transition-all duration-300 transform hover:-translate-y-0.5 ${isSelected
-                                                    ? `${rc.border} ${rc.bg} shadow-lg ${rc.glow}`
-                                                    : 'border-white/10 bg-transparent hover:border-white/20'
-                                                    }`}
+                                <OrnateBorder className="p-5">
+                                    <div className="flex justify-between items-center border-b border-red-500/30 pb-3 mb-6">
+                                        <h3 className="text-xl font-serif font-bold text-red-400 flex items-center gap-2">
+                                            <span className="text-2xl">☠</span> Bất lợi bẩm sinh <span className="text-xs font-normal text-red-400/60 italic">(Chọn để tăng điểm Thiên phú)</span>
+                                        </h3>
+                                        <div className="flex items-center gap-4">
+                                            {!hasDebuff && <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-600/20 border border-red-600/40 text-red-400 animate-pulse">⚠</span>}
+                                            <button
+                                                onClick={() => {
+                                                    setCustomTalent({ name: '', description: '', effect: '', rank: 'Khó', cost: 3 });
+                                                    setShowCustomDebuff(!showCustomDebuff);
+                                                }}
+                                                className="text-[10px] text-red-400 hover:underline font-bold whitespace-nowrap"
                                             >
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className={`font-bold text-sm font-serif ${isSelected ? rc.text : 'text-gray-400'}`}>{t.name}</span>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono ${rc.badge}`}>{t.rank}</span>
-                                                        <span className="text-[10px] font-mono font-bold text-emerald-400">+{Math.abs(t.cost)}đ</span>
-                                                    </div>
-                                                </div>
-                                                <div className="text-[11px] text-gray-500 mt-1 line-clamp-1 italic">{t.description}</div>
-                                                <div className={`text-[11px] mt-1.5 pt-1.5 border-t border-white/5 font-mono ${isSelected ? rc.text : 'text-gray-500'}`}>{t.effect}</div>
-                                                {isSelected && <div className="text-[9px] text-emerald-400 mt-1 font-mono">✓ Đã chọn</div>}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </OrnateBorder>
-
-                            {/* Buff Talents Section */}
-                            <OrnateBorder className="p-5">
-                                <div className="flex justify-between items-center border-b border-wuxia-gold/30 pb-3 mb-4">
-                                    <h3 className="text-lg font-serif font-bold text-wuxia-gold flex items-center gap-2">
-                                        <span>✦</span> Thiên bẩm
-                                    </h3>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => triggerGacha('talent', gachaTalent)}
-                                            disabled={remainingTalentPoints <= 0}
-                                            title={remainingTalentPoints <= 0 ? 'Hết điểm' : 'Gacha ngẫu nhiên thiên bẩm'}
-                                            className={`flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full border transition-all duration-200 active:scale-90 ${remainingTalentPoints <= 0 ? 'border-gray-600 text-gray-600 cursor-not-allowed opacity-50' : gachaFlash === 'talent' ? 'border-wuxia-gold bg-wuxia-gold/20 text-wuxia-gold animate-gacha-spin' : 'hover:scale-105 border-wuxia-gold/30 hover:border-wuxia-gold/70 bg-wuxia-gold/5 hover:bg-wuxia-gold/15 text-wuxia-gold/70 hover:text-wuxia-gold'}`}
-                                        >
-                                            <span><Dices className="w-3.5 h-3.5" /></span><span>Gacha</span>
-                                        </button>
-                                        <button onClick={() => setShowCustomTalent(!showCustomTalent)} className="text-xs text-wuxia-gold hover:underline font-medium">+ Tùy chỉnh</button>
-                                    </div>
-                                </div>
-
-                                {showCustomTalent && (
-                                    <div className="bg-black/40 border border-wuxia-gold/30 p-4 mb-4 rounded-lg space-y-3 shadow-inner shadow-black/40">
-                                        <div className="flex gap-2">
-                                            <input placeholder="Tên thiên bẩm" value={customTalent.name} onChange={e => setCustomTalent({ ...customTalent, name: e.target.value })} className="w-full bg-transparent border border-wuxia-gold/20 focus:border-wuxia-gold p-2 text-xs text-wuxia-gold outline-none rounded-md transition-all flex-1 font-serif" />
-                                            <input placeholder="Hiệu ứng" value={customTalent.effect} onChange={e => setCustomTalent({ ...customTalent, effect: e.target.value })} className="w-full bg-transparent border border-wuxia-gold/20 focus:border-wuxia-gold p-2 text-xs text-wuxia-gold outline-none rounded-md transition-all flex-1 font-serif italic" />
-                                        </div>
-                                        <input placeholder="Mô tả" value={customTalent.description} onChange={e => setCustomTalent({ ...customTalent, description: e.target.value })} className="w-full bg-transparent border border-wuxia-gold/20 focus:border-wuxia-gold p-2 text-xs text-wuxia-gold/80 outline-none rounded-md transition-all font-serif" />
-                                        <div className="flex gap-2 items-center">
-                                            <select value={customTalent.rank} onChange={e => { const r = e.target.value as TalentRank; setCustomTalent({ ...customTalent, rank: r, cost: r === 'Huyền thoại' ? 5 : r === 'Sử Thi' ? 4 : r === 'Hiếm' ? 3 : 2 }); }} className="bg-black border border-wuxia-gold/20 text-wuxia-gold text-xs p-2 rounded-md outline-none">
-                                                <option value="Huyền thoại">Huyền thoại (5đ)</option>
-                                                <option value="Sử Thi">Sử Thi (4đ)</option>
-                                                <option value="Hiếm">Hiếm (3đ)</option>
-                                                <option value="Thường">Thường (2đ)</option>
-                                            </select>
-                                            <GameButton onClick={addCustomTalent} variant="secondary" className="flex-1 py-1 text-xs">Thêm</GameButton>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Filter tabs */}
-                                <div className="flex gap-1.5 mb-4 flex-wrap">
-                                    <button onClick={() => setTalentFilter('all')} className={`text-[11px] px-3 py-1 rounded-full border transition-all ${talentFilter === 'all' ? 'border-wuxia-gold bg-wuxia-gold/15 text-wuxia-gold' : 'border-white/10 text-gray-500 hover:text-gray-300'}`}>Tất cả</button>
-                                    {BUFF_RANKS.map(rank => {
-                                        const rc = RANK_COLORS[rank];
-                                        const count = buffTalents.filter(t => t.rank === rank).length;
-                                        return (
-                                            <button key={rank} onClick={() => setTalentFilter(rank)} className={`text-[11px] px-3 py-1 rounded-full border transition-all ${talentFilter === rank ? `${rc.border} ${rc.bg} ${rc.text}` : 'border-white/10 text-gray-500 hover:text-gray-300'}`}>
-                                                {rank} ({count})
+                                                + Tạo Bất lợi
                                             </button>
-                                        );
-                                    })}
-                                </div>
+                                        </div>
+                                    </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    {filteredBuffs.map((t, idx) => {
-                                        const isSelected = !!selectedTalents.find(x => x.name === t.name);
-                                        const canAfford = t.cost <= remainingTalentPoints;
-                                        const rc = RANK_COLORS[t.rank];
-                                        return (
-                                            <div
-                                                key={`buff-${idx}`}
-                                                onClick={() => toggleTalent(t)}
-                                                className={`p-3 border rounded-lg cursor-pointer transition-all duration-300 transform hover:-translate-y-0.5 ${isSelected
-                                                    ? `${rc.border} ${rc.bg} shadow-lg ${rc.glow}`
-                                                    : canAfford
-                                                        ? 'border-white/10 bg-transparent hover:border-white/20'
-                                                        : 'border-white/5 bg-transparent opacity-40 cursor-not-allowed'
-                                                    }`}
+                                    {showCustomDebuff && (
+                                        <div className="relative bg-black/40 border border-red-900/40 p-5 mb-8 rounded-xl grid grid-cols-1 md:grid-cols-2 gap-4 shadow-inner shadow-black/60 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <button
+                                                onClick={() => setShowCustomDebuff(false)}
+                                                className="absolute top-3 right-3 p-1 text-red-500/40 hover:text-red-500 transition-colors"
+                                                title="Đóng"
                                             >
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className={`font-bold text-sm font-serif truncate ${isSelected ? rc.text : 'text-gray-300'}`}>
-                                                        {t.name}
-                                                        {!PresetTalent.some(p => p.name === t.name) ? ' ✎' : ''}
-                                                    </span>
-                                                    <div className="flex items-center gap-1.5 shrink-0">
-                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono ${rc.badge}`}>{t.rank}</span>
-                                                        <span className={`text-[10px] font-mono font-bold ${isSelected ? 'text-wuxia-gold' : 'text-gray-500'}`}>{t.cost}đ</span>
-                                                    </div>
-                                                </div>
-                                                <div className="text-[11px] text-gray-500 mt-1 line-clamp-1 italic">{t.description}</div>
-                                                <div className={`text-[11px] mt-1.5 pt-1.5 border-t border-white/5 font-mono ${isSelected ? rc.text : 'text-gray-500'}`}>{t.effect}</div>
-                                                {isSelected && <div className="text-[9px] text-emerald-400 mt-1 font-mono">✓ Đã chọn (−{t.cost}đ)</div>}
+                                                <X className="w-4 h-4" />
+                                            </button>
+
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] text-red-400/50 uppercase ml-1">Tên bất lợi</label>
+                                                <input
+                                                    placeholder="VD: Tuyệt mệnh chi thể"
+                                                    value={customTalent.name}
+                                                    onChange={e => setCustomTalent({ ...customTalent, name: e.target.value })}
+                                                    className="w-full bg-black/60 border border-red-900/30 focus:border-red-500 p-2.5 text-xs text-red-400 outline-none rounded-lg font-serif transition-colors"
+                                                />
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            </OrnateBorder>
-                        </div>
+                                            <div className="flex gap-3">
+                                                <div className="flex-1 space-y-1">
+                                                    <label className="text-[10px] text-red-400/50 uppercase ml-1">Cấp bậc</label>
+                                                    <InlineSelect
+                                                        value={customTalent.rank}
+                                                        options={DEBUFF_RANKS as any}
+                                                        onChange={(val) => setCustomTalent({ ...customTalent, rank: val as any })}
+                                                        className="w-full"
+                                                    />
+                                                </div>
+                                                <div className="w-20 space-y-1">
+                                                    <label className="text-[10px] text-red-400/50 uppercase ml-1">Điểm cộng</label>
+                                                    <input
+                                                        type="number"
+                                                        value={customTalent.cost}
+                                                        onChange={e => setCustomTalent({ ...customTalent, cost: parseInt(e.target.value) })}
+                                                        className="w-full bg-black/60 border border-red-900/30 p-2 text-xs text-red-400 outline-none rounded-lg text-center"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="md:col-span-2 space-y-1">
+                                                <label className="text-[10px] text-red-400/50 uppercase ml-1">Hiệu ứng cơ bản</label>
+                                                <input
+                                                    placeholder="VD: Tuổi thọ tối đa = 25, Thể chất -15"
+                                                    value={customTalent.effect}
+                                                    onChange={e => setCustomTalent({ ...customTalent, effect: e.target.value })}
+                                                    className="w-full bg-black/60 border border-red-900/30 focus:border-red-500 p-2.5 text-xs text-red-400 outline-none rounded-lg font-serif italic transition-colors"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2 space-y-1">
+                                                <label className="text-[10px] text-red-400/50 uppercase ml-1">Mô tả bối cảnh</label>
+                                                <textarea
+                                                    placeholder="Nhập mô tả sâu sắc hơn về bất lợi này..."
+                                                    value={customTalent.description}
+                                                    onChange={e => setCustomTalent({ ...customTalent, description: e.target.value })}
+                                                    className="w-full h-20 bg-black/60 border border-red-900/30 focus:border-red-500 p-2.5 text-xs text-red-400 outline-none rounded-lg transition-all resize-none font-serif leading-relaxed"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2 flex gap-3 mt-2">
+                                                <button
+                                                    onClick={() => setShowCustomDebuff(false)}
+                                                    className="flex-1 py-1.5 rounded-lg border border-white/10 hover:border-white/30 text-gray-500 hover:text-gray-300 text-[10px] font-bold transition-all uppercase tracking-widest"
+                                                >
+                                                    Hủy
+                                                </button>
+                                                <button
+                                                    onClick={() => addCustomDebuff()}
+                                                    className="flex-[2] py-2 bg-red-900/20 hover:bg-red-900/40 border border-red-500/30 hover:border-red-500 text-red-400 text-xs font-bold rounded-lg shadow-glow-sm transition-all"
+                                                >
+                                                    Phát kiến Nghiệp lực
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {debuffTalents.map((t, idx) => {
+                                            const isSelected = !!selectedTalents.find(x => x.name === t.name);
+                                            const rc = RANK_COLORS[t.rank] || RANK_COLORS['Thường'];
+
+                                            // Check if this debuff is excluded by current background
+                                            const isExcluded = t.excludedBackgrounds?.includes(selectedBackground.name);
+
+                                            return (
+                                                <div
+                                                    key={`debuff-${idx}`}
+                                                    onClick={() => !isExcluded && toggleTalent(t)}
+                                                    className={`group relative p-4 border rounded-xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1 ${isSelected
+                                                        ? `${rc.border} ${rc.bg} shadow-xl ${rc.glow}`
+                                                        : isExcluded
+                                                            ? 'border-red-900/30 bg-red-950/10 grayscale opacity-40 cursor-not-allowed'
+                                                            : 'border-white/10 bg-black/20 hover:border-white/20'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <span className={`font-bold text-sm font-serif ${isSelected ? rc.text : isExcluded ? 'text-red-800' : 'text-gray-400 group-hover:text-gray-200'}`}>{t.name}</span>
+                                                        <div className="flex items-center gap-1.5 min-w-max">
+                                                            <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono uppercase tracking-tighter ${rc.badge}`}>{t.rank}</span>
+                                                            <span className="text-[11px] font-bold text-red-400 font-mono">+{Math.abs(t.cost)}đ</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-[10px] text-gray-500 mt-1.5 italic line-clamp-1 group-hover:text-gray-400">{t.description}</div>
+                                                    <div className="text-[11px] text-gray-300 mt-3 font-mono leading-relaxed line-clamp-2 border-t border-white/5 pt-2">{t.effect}</div>
+
+                                                    {isExcluded && (
+                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/80 transition-opacity rounded-xl p-4">
+                                                            <span className="text-[10px] text-red-500 font-bold text-center leading-tight">Xuất thân "{selectedBackground.name}"<br />không thể có bất lợi này</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </OrnateBorder>
+                            </div>
                         );
                     })()}
 
-                    {/* STEP 5: CONFIRMATION */}
-                    {step === 4 && (
+                    {/* STEP 6: THIÊN PHÚ (Buffs) */}
+                    {step === 5 && (() => {
+                        const rankPriority: Record<string, number> = { 'Huyền thoại': 0, 'Sử Thi': 1, 'Hiếm': 2, 'Thường': 3 };
+                        const buffTalents = allTalentOptions
+                            .filter(t => t.cost > 0)
+                            .sort((a, b) => (rankPriority[a.rank] ?? 99) - (rankPriority[b.rank] ?? 99));
+
+                        const filteredBuffs = talentFilter === 'all' ? buffTalents : buffTalents.filter(t => t.rank === talentFilter);
+                        return (
+                            <div className="space-y-6 animate-slide-in max-w-5xl mx-auto">
+                                <div className="flex items-center justify-between py-3 px-8 bg-black/60 border border-wuxia-gold/30 rounded-2xl text-center max-w-2xl mx-auto shadow-2xl flex-wrap gap-4">
+                                    <div>
+                                        <div className="text-[10px] text-wuxia-gold/50 uppercase tracking-widest">Tổng điểm</div>
+                                        <div className="text-xl font-bold text-wuxia-gold font-mono">{totalTalentPoints}</div>
+                                    </div>
+                                    <div className="text-wuxia-gold/30 text-lg">-</div>
+                                    <div className="bg-blue-400/5 px-4 py-2 rounded-lg border border-blue-500/20">
+                                        <div className="text-[10px] text-blue-400/70 uppercase tracking-widest">Đã dùng</div>
+                                        <div className="text-xl font-bold text-blue-400 font-mono">{spentTalentPoints}</div>
+                                    </div>
+                                    <div className="text-wuxia-gold/30 text-lg">=</div>
+                                    <div className="bg-emerald-400/5 px-4 py-2 rounded-lg border border-emerald-500/20 shadow-glow-sm">
+                                        <div className="text-[10px] text-emerald-400/70 uppercase tracking-widest">Điểm còn lại</div>
+                                        <div className={`text-2xl font-bold font-mono transition-colors ${remainingTalentPoints > 0 ? 'text-emerald-400' : remainingTalentPoints === 0 ? 'text-wuxia-gold' : 'text-red-500'}`}>{remainingTalentPoints}</div>
+                                    </div>
+                                </div>
+
+                                <OrnateBorder className="p-6">
+                                    <div className="flex flex-col md:flex-row justify-between items-center border-b border-wuxia-gold/30 pb-4 mb-6 gap-4">
+                                        <h3 className="text-xl font-serif font-bold text-wuxia-gold flex items-center gap-3">
+                                            <span className="text-2xl">✨</span> Thiên phú linh khiếu
+                                        </h3>
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex gap-1.5 flex-wrap justify-center">
+                                                {['all', ...BUFF_RANKS].map(r => (
+                                                    <button
+                                                        key={r}
+                                                        onClick={() => setTalentFilter(r as any)}
+                                                        className={`text-[10px] px-3 py-1 rounded border transition-all ${talentFilter === r ? 'border-wuxia-gold bg-wuxia-gold/20 text-wuxia-gold shadow-glow-sm' : 'border-white/10 text-gray-500 hover:border-white/30 hover:text-gray-300'}`}
+                                                    >
+                                                        {r === 'all' ? 'Tất cả' : r}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <button onClick={() => setShowCustomTalent(!showCustomTalent)} className="text-[10px] text-wuxia-gold hover:underline font-bold whitespace-nowrap">+ Tạo Thiên Phú</button>
+                                        </div>
+                                    </div>
+
+                                    {showCustomTalent && (
+                                        <div className="relative bg-black/40 border border-wuxia-gold/30 p-5 mb-8 rounded-xl grid grid-cols-1 md:grid-cols-2 gap-4 shadow-inner shadow-black/60 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            {/* Close Button Top Right */}
+                                            <button
+                                                onClick={() => setShowCustomTalent(false)}
+                                                className="absolute top-3 right-3 p-1 text-wuxia-gold/40 hover:text-red-500 transition-colors"
+                                                title="Đóng"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] text-wuxia-gold/50 uppercase ml-1">Tên thiên phú</label>
+                                                <input
+                                                    placeholder="VD: Cốt cách kinh nhân"
+                                                    value={customTalent.name}
+                                                    onChange={e => setCustomTalent({ ...customTalent, name: e.target.value })}
+                                                    className="w-full bg-black/60 border border-wuxia-gold/20 focus:border-wuxia-gold p-2.5 text-xs text-wuxia-gold outline-none rounded-lg font-serif transition-colors"
+                                                />
+                                            </div>
+                                            <div className="flex gap-3">
+                                                <div className="flex-1 space-y-1">
+                                                    <label className="text-[10px] text-wuxia-gold/50 uppercase ml-1">Cấp bậc</label>
+                                                    <InlineSelect
+                                                        value={customTalent.rank}
+                                                        options={BUFF_RANKS as any}
+                                                        onChange={(val) => setCustomTalent({ ...customTalent, rank: val as any })}
+                                                        className="w-full"
+                                                    />
+                                                </div>
+                                                <div className="w-20 space-y-1">
+                                                    <label className="text-[10px] text-wuxia-gold/50 uppercase ml-1">Điểm</label>
+                                                    <input
+                                                        type="number"
+                                                        value={customTalent.cost}
+                                                        onChange={e => setCustomTalent({ ...customTalent, cost: parseInt(e.target.value) })}
+                                                        className="w-full bg-black/60 border border-wuxia-gold/20 p-2 text-xs text-wuxia-gold outline-none rounded-lg text-center"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="md:col-span-2 space-y-1">
+                                                <label className="text-[10px] text-wuxia-gold/50 uppercase ml-1">Hiệu ứng cơ bản (Logically relevant)</label>
+                                                <input
+                                                    placeholder="VD: Tu luyện tốc độ tăng 50%"
+                                                    value={customTalent.effect}
+                                                    onChange={e => setCustomTalent({ ...customTalent, effect: e.target.value })}
+                                                    className="w-full bg-black/60 border border-wuxia-gold/20 focus:border-wuxia-gold p-2.5 text-xs text-wuxia-gold outline-none rounded-lg font-serif italic transition-colors"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2 space-y-1">
+                                                <label className="text-[10px] text-wuxia-gold/50 uppercase ml-1">Mô tả bối cảnh</label>
+                                                <textarea
+                                                    placeholder="Nhập mô tả sâu sắc hơn về thiên phú này..."
+                                                    value={customTalent.description}
+                                                    onChange={e => setCustomTalent({ ...customTalent, description: e.target.value })}
+                                                    className="w-full h-20 bg-black/60 border border-wuxia-gold/20 focus:border-wuxia-gold p-2.5 text-xs text-wuxia-gold outline-none rounded-lg transition-all resize-none font-serif leading-relaxed"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2 flex gap-3 mt-2">
+                                                <button
+                                                    onClick={() => setShowCustomTalent(false)}
+                                                    className="flex-1 py-1.5 rounded-lg border border-white/10 hover:border-white/30 text-gray-500 hover:text-gray-300 text-[10px] font-bold transition-all uppercase tracking-widest"
+                                                >
+                                                    Hủy
+                                                </button>
+                                                <GameButton
+                                                    onClick={addCustomTalent}
+                                                    variant="secondary"
+                                                    className="flex-[2] py-2 text-xs font-bold shadow-glow-sm"
+                                                >
+                                                    Phát hiện Thiên phú linh tú
+                                                </GameButton>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {filteredBuffs.map((t, idx) => {
+                                            const isSelected = !!selectedTalents.find(x => x.name === t.name);
+                                            const rc = RANK_COLORS[t.rank] || RANK_COLORS['Thường'];
+                                            const isExcluded = t.excludedBackgrounds?.includes(selectedBackground.name);
+                                            const canAfford = t.cost <= remainingTalentPoints;
+
+                                            return (
+                                                <div
+                                                    key={`buff-${idx}`}
+                                                    onClick={() => !isExcluded && toggleTalent(t)}
+                                                    className={`group relative p-4 border rounded-xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1 ${isSelected
+                                                        ? `${rc.border} ${rc.bg} shadow-xl ${rc.glow}`
+                                                        : isExcluded
+                                                            ? 'border-red-900/30 bg-red-950/10 grayscale opacity-40 cursor-not-allowed'
+                                                            : canAfford
+                                                                ? 'border-white/10 bg-black/20 hover:border-white/20'
+                                                                : 'border-white/5 bg-black/10 opacity-60'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <span className={`font-bold text-sm font-serif truncate ${isSelected ? rc.text : isExcluded ? 'text-red-800' : 'text-gray-300 group-hover:text-white'}`}>{t.name}</span>
+                                                        <div className="flex items-center gap-1.5 min-w-max">
+                                                            <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono uppercase tracking-tighter ${rc.badge}`}>{t.rank}</span>
+                                                            <span className={`text-[11px] font-bold font-mono ${isSelected ? 'text-white' : 'text-blue-400'}`}>-{t.cost}đ</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-[10px] text-gray-500 mt-1.5 italic line-clamp-1 group-hover:text-gray-400">{t.description}</div>
+                                                    <div className="text-[11px] text-gray-300 mt-3 font-mono leading-relaxed line-clamp-2 border-t border-white/5 pt-2">{t.effect}</div>
+
+                                                    {isExcluded && (
+                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/80 transition-opacity rounded-xl p-4">
+                                                            <span className="text-[10px] text-red-500 font-bold text-center leading-tight">Xuất thân "{selectedBackground.name}"<br />không thể chọn {t.name}</span>
+                                                        </div>
+                                                    )}
+                                                    {!isSelected && !isExcluded && !canAfford && (
+                                                        <div className="absolute top-0 right-0 -mt-1 -mr-1 px-1.5 py-0.5 bg-red-500/80 text-[8px] text-white rounded font-bold">Hết điểm</div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </OrnateBorder>
+                            </div>
+                        );
+                    })()}
+
+                    {/* STEP 7: CONFIRMATION */}
+                    {step === 6 && (
                         <div className="flex flex-col items-center justify-center space-y-8 animate-slide-in h-full">
                             <h3 className="text-2xl font-serif font-bold text-wuxia-gold tracking-widest text-center">Xác nhận phong vân chi lộ</h3>
 
@@ -1076,9 +1396,37 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
                                     <p>Nhân vật chính: <span className="text-wuxia-gold">{charName.trim() || 'Chưa điền tên'}</span> <span className='text-wuxia-gold/40'>({GENDER_LABELS[charGender] ?? charGender}, {charAge} tuổi)</span></p>
                                     <p>Ngoại hình: <span className="text-wuxia-gold">{charAppearance.trim() || 'Chưa điền'}</span></p>
                                     <p>Tính cách: <span className="text-wuxia-gold">{charPersonality.trim() || 'Chưa điền'}</span></p>
-                                    <p>Thân thế: <span className="text-wuxia-gold">{selectedBackground.name}</span></p>
-                                    <p>Thiên bẩm: <span className="text-wuxia-gold">{selectedTalents.map(t => t.name).join(', ') || 'Không có'}</span></p>
+                                    <p>Thân thế: <span className="text-wuxia-gold">{selectedBackground.name}</span> <span className="text-[10px] text-wuxia-gold/40">({selectedBackground.rank})</span></p>
+                                    <div className="pt-2 border-t border-wuxia-gold/10 space-y-2">
+                                        <p className="text-emerald-400/80">Thiên phú/Linh kiếu:</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {selectedBuffs.length > 0 ? selectedBuffs.map(t => (
+                                                <span key={t.name} className="px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px]">{t.name}</span>
+                                            )) : <span className="text-gray-600 italic text-[10px]">Chưa chọn</span>}
+                                        </div>
+                                    </div>
+                                    <div className="pt-2 border-t border-wuxia-gold/10 space-y-2">
+                                        <p className="text-red-400/80">Bất lợi/Nghiệp lực:</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {selectedDebuffs.length > 0 ? selectedDebuffs.map(t => (
+                                                <span key={t.name} className="px-1.5 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-[10px]">{t.name}</span>
+                                            )) : <span className="text-gray-600 italic text-[10px]">Chưa chọn Bất lợi (Gợi ý: chọn để có thêm điểm Thiên phú)</span>}
+                                        </div>
+                                    </div>
 
+                                    {(remainingTalentPoints >= 2 || selectedDebuffs.length === 0) && (
+                                        <div className="mt-4 p-3 bg-red-950/20 border border-red-500/30 rounded-lg space-y-2">
+                                            <p className="text-xs text-red-400 font-bold flex items-center gap-2">
+                                                <span>⚠️</span> Cảnh báo tu luyện:
+                                            </p>
+                                            {selectedDebuffs.length === 0 && (
+                                                <p className="text-[10px] text-red-400/80 italic">• Bạn chưa chọn Bất lợi nào. Đây là cơ hội để nhận thêm điểm Thiên phú cực hiếm.</p>
+                                            )}
+                                            {remainingTalentPoints >= 2 && (
+                                                <p className="text-[10px] text-red-400/80 italic">• Bạn còn dư {remainingTalentPoints} điểm Thiên phú. Đừng lãng phí linh khí trời ban!</p>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </OrnateBorder>
 

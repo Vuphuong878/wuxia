@@ -821,6 +821,7 @@ const App: React.FC = () => {
                             <MobileCharacter
                                 character={state.character}
                                 onClose={() => setShowCharacter(false)}
+                                allAvatars={allAvatars}
                             />
                         </>
                     )}

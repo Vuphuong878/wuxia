@@ -62,12 +62,15 @@ export interface Talent {
     effect: string; // Tác động cụ thể hoặc mô tả logic
     rank: TalentRank;
     cost: number; // 5, 4, 3, 2 for buffs; -3, -2, -1 for debuffs
+    conflictsWith?: string[]; // Names of other talents that cannot be selected together
+    excludedBackgrounds?: string[]; // Names of backgrounds that cannot select this talent
 }
 
 export interface Background {
     name: string;
     description: string;
     effect: string;
+    rank: 'Dễ' | 'Bình thường' | 'Khó' | 'Cực khó';
 }
 
 // GameDifficulty settings
