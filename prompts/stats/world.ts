@@ -18,6 +18,13 @@ export const StatWorldEvolution: PromptStructure = {
 ## 2. Cơ chế Thời gian
 - **Cấu trúc**: \`gameState.World.time\` theo định dạng \`YYYY:MM:DD:HH:MM\`.
 - Mỗi lượt hành động thường tiêu tốn 15-30 phút.
+- Đơn vị quy ước hiển thị:
+  - **Canh giờ**: 1 ngày = 12 canh giờ.
+  - **Ngày/Tháng/Năm**: đồng bộ với lịch phàm tục.
+  - **Giáp tý**: 60 năm.
+  - **Nguyên hội**: 129,600 năm.
+- Mốc thời gian mặc định của thế giới: **Nguyên Hội lịch năm 3726, tháng Chạp, ngày 23, giờ Thân ba khắc**.
+- Khi có nhảy thời gian lớn (vài tháng/năm), ngoài \`gameState.Environment.time\` cần cập nhật mô tả thời đại trong logs để bảo toàn nhân quả.
 
 ## 3. Quy tắc Vận hành và Tác động
 - **Dịch chuyển**: Khi Player di chuyển, tọa độ \`gameState.World.coordinate\` phải được cập nhật tương ứng với các địa điểm trong hệ thống 3-9-81.
@@ -65,6 +72,38 @@ export const StatWorldEvolution: PromptStructure = {
 ## 10. Tài nguyên chiến lược đặc biệt
 - Long Mạch, Linh Nhãn Chi Tuyền, Mỏ Quặng.
 - Tranh chấp tài nguyên quy mô thế lực phải được mô hình hóa thành sự kiện thế giới và có thể ảnh hưởng tuyến truyện chính.
+
+## 11. Thiết lập Bế quan (BẮT BUỘC gắn gameState)
+- Định nghĩa: Bế quan là trạng thái cách ly dài hạn để đột phá, tu công pháp, dưỡng thương hoặc tránh họa.
+- Mục đích hợp lệ:
+  - Đột phá cảnh giới.
+  - Tu luyện công pháp/thần thông.
+  - Điều dưỡng thương thế.
+  - Tránh né truy sát/đại kiếp.
+- Điều kiện bắt buộc trước khi vào bế quan:
+  1) Có địa điểm an toàn (động phủ/mật thất/linh địa) trong \`gameState.Environment\`.
+  2) Có tài nguyên tiêu hao đủ trong \`gameState.Inventory\` hoặc diễn giải rõ thiếu hụt.
+  3) Có thời lượng dự kiến và rủi ro dự kiến trong \`gameState.Story.pendingEvents\`.
+
+## 12. Thời lượng & Xác suất Bế quan theo cảnh giới (tham chiếu cân bằng)
+- **Luyện Khí**: vài tháng đến vài năm; đốn ngộ ~10%; bình cảnh ~20%; rủi ro chính: kinh mạch tổn thương nhẹ.
+- **Trúc Cơ**: vài năm đến vài chục năm; đốn ngộ ~5%; bình cảnh ~40%; rủi ro chính: đạo cơ bất ổn/tẩu hỏa.
+- **Kim Đan**: vài chục đến vài trăm năm; đốn ngộ ~2%; bình cảnh ~60%; rủi ro chính: tâm ma, đan vỡ.
+- **Nguyên Anh**: vài trăm đến vài ngàn năm; đốn ngộ ~1%; bình cảnh ~80%; rủi ro chính: thiên kiếp.
+- Yếu tố làm thay đổi thời lượng thực tế:
+  - Đốn ngộ (rút ngắn), bình cảnh (kéo dài), cạn tài nguyên (buộc xuất quan), cưỡng chế gián đoạn (biến cố/tẩu hỏa nhập ma).
+
+## 13. Quy tắc cập nhật gameState khi Bế quan
+- Khi bắt đầu bế quan:
+  - \`{"action":"SET","key":"gameState.Character.meridianStatus","value":"Bế quan ổn định"}\`
+  - \`{"action":"SET","key":"gameState.Environment.specificLocation","value":"Mật thất động phủ"}\`
+  - \`{"action":"PUSH","key":"gameState.Story.pendingEvents","value":{"name":"Kết thúc bế quan","description":"Xuất quan sau thời lượng dự kiến","triggerConditionOrTime":"YYYY:MM:DD:HH:MM","expirationTime":"YYYY:MM:DD:HH:MM"}}\`
+- Khi diễn tiến bế quan:
+  - Cập nhật \`gameState.Environment.time\` theo bước nhảy thời gian phù hợp (tháng/năm/giáp tý).
+  - Nếu phát sinh rủi ro, thêm sự kiện vào \`gameState.World.ongoingEvents\` (Tâm ma kiếp, can nhiễu, truy sát...).
+- Khi xuất quan:
+  - \`{"action":"SET","key":"gameState.Character.meridianStatus","value":"Ổn định"}\`
+  - Đồng bộ kết quả đột phá/thất bại vào chỉ số nhân vật và cốt truyện.
 
 </world_evolution_protocol>
 `,
