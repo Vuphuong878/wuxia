@@ -7,72 +7,80 @@ export const festivalList: FestivalStructure[] = [
         name: 'Tết Nguyên Đán',
         month: 1,
         day: 1,
-        description: 'Năm cũ qua đi trong tiếng pháo, gió xuân đưa hơi ấm về khắp nơi. Muôn vật đổi mới, khắp nơi rộn ràng chúc mừng năm mới.',
-        effect: 'Không khí lễ hội bao trùm, tất cả NPC tâm trạng vui vẻ tăng cao. Hàng quán đồng loạt giảm giá đón Tết.'
+        description: 'Năm mới bắt đầu, vạn vật đổi mới. Khắp nơi treo đèn kết hoa, tiếng pháo nổ vang trời xua đuổi tà ma.',
+        effect: 'Không khí lễ hội bao trùm, tất cả NPC tâm trạng vui vẻ tăng cao. Linh khí thiên địa dồi dào hơn.'
     },
     {
         id: 'tet_nguyen_tieu',
         name: 'Tết Nguyên Tiêu',
         month: 1,
         day: 15,
-        description: 'Rằm tháng Giêng, đèn lồng sáng rực khắp phố phường. Người người cầu an, thắp hương tưởng nhớ tổ tiên, trẻ em nô đùa dưới ánh trăng tròn.',
-        effect: 'Đêm sáng rực đèn lồng, tăng khả năng gặp nhân vật đặc biệt và kiếm thêm manh mối khi dạo phố.'
+        description: 'Rằm tháng Giêng, trăng sáng vằng vặc. Phố phường rực rỡ ánh đèn lồng, nam thanh nữ tú dạo bước ngắm trăng, giải câu đố.',
+        effect: 'Đêm sáng rực đèn lồng, tăng khả năng gặp gỡ kỳ ngộ và kết giao nhân mạch.'
     },
     {
-        id: 'gio_to_hung_vuong',
-        name: 'Giỗ Tổ Hùng Vương',
+        id: 'tet_thanh_minh',
+        name: 'Tết Thanh Minh',
         month: 3,
-        day: 10,
-        description: 'Dù ai đi ngược về xuôi, nhớ ngày Giỗ Tổ mùng mười tháng ba. Con cháu tứ phương tụ về, tưởng nhớ công lao dựng nước của các Vua Hùng.',
-        effect: 'Tăng lòng trung thành và ý chí chiến đấu. Các NPC có gốc gác anh hùng sẽ sẵn sàng giúp đỡ hơn.'
+        day: 5,
+        description: 'Tiết trời trong sáng, cỏ cây tươi tốt. Người người đi tảo mộ, tưởng nhớ tổ tiên và những bậc tiền bối đã khuất.',
+        effect: 'Âm dương giao hòa, dễ dàng cảm ngộ công pháp hệ mộc và âm hồn. Tỉ lệ nhặt được di vật tiền bối tăng.'
     },
     {
         id: 'tet_doan_ngo',
         name: 'Tết Đoan Ngọ',
         month: 5,
         day: 5,
-        description: 'Tết diệt sâu bọ, người người uống rượu nếp, ăn bánh ú, vải thiều chín đỏ. Buổi trưa nắng cao trời đất giao hòa, là lúc dương khí cực thịnh.',
-        effect: 'Giảm hiệu ứng độc và trạng thái tiêu cực liên quan đến côn trùng và miasma. Dương khí tăng, ám khí suy giảm.'
+        description: 'Mùng năm tháng năm, dương khí thịnh nhất trong năm. Khắp nơi đua thuyền rồng, uống hùng hoàng tửu xua đuổi độc trùng.',
+        effect: 'Dương khí cực thịnh, áp chế tà ma ngoại đạo. Kháng độc tăng mạnh, dễ luyện chế dương đan.'
     },
     {
-        id: 'le_vu_lan',
-        name: 'Lễ Vu Lan',
+        id: 'that_tich',
+        name: 'Thất Tịch',
+        month: 7,
+        day: 7,
+        description: 'Mùng bảy tháng bảy, Ngưu Lang Chức Nữ hội ngộ trên cầu Ô Thước. Đêm của tình nhân, nữ tử cầu khéo léo.',
+        effect: 'Vận đào hoa tăng vọt, dễ dàng gia tăng hảo cảm với người khác giới. Song tu hiệu quả tăng cường.'
+    },
+    {
+        id: 'tet_trung_nguyen',
+        name: 'Tết Trung Nguyên',
         month: 7,
         day: 15,
-        description: 'Rằm tháng Bảy, ngày xá tội vong nhân. Đèn hoa đăng thả trôi trên sông, tiếng kinh cầu vang vọng khắp chùa chiền, người người tưởng nhớ cha mẹ tổ tiên.',
-        effect: 'Âm khí tăng cao trong đêm, xác suất gặp vong hồn và sự kiện siêu nhiên tăng đáng kể.'
+        description: 'Rằm tháng Bảy, quỷ môn quan mở rộng. Âm khí tràn ngập thế gian, người sống đốt vàng mã, thả hoa đăng siêu độ vong hồn.',
+        effect: 'Âm khí bạo tăng, ma tu và quỷ tu thực lực tăng vọt. Cực kỳ nguy hiểm khi ra ngoài vào ban đêm.'
     },
     {
         id: 'tet_trung_thu',
         name: 'Tết Trung Thu',
         month: 8,
         day: 15,
-        description: 'Trăng rằm tháng Tám sáng vằng vặc, trẻ em rước đèn lồng, người lớn thưởng nguyệt ăn bánh. Mùa thu thanh mát, gia đình sum họp dưới ánh trăng tròn.',
-        effect: 'Ánh trăng sáng rực, tăng khả năng lĩnh ngộ võ học và tu luyện. Tăng cảm giác giao tiếp thân thiết với NPC.'
+        description: 'Trăng rằm tháng Tám tròn vạnh, sáng trong như ngọc. Gia đình sum vầy thưởng nguyệt, ăn bánh nướng bánh dẻo.',
+        effect: 'Nguyệt hoa rọi chiếu, tu luyện công pháp hệ thủy và thái âm đạt hiệu quả gấp bội. Tâm ma được xoa dịu.'
     },
     {
         id: 'tet_trung_cuu',
         name: 'Tết Trùng Cửu',
         month: 9,
         day: 9,
-        description: 'Tiết thu mát mẻ, người giang hồ rủ nhau leo núi ngắm cảnh, uống rượu cúc vàng. Khắp nơi tao nhân mặc khách tụ tập ngâm thơ, vịnh cảnh trời thu.',
-        effect: 'Giảm tiêu hao thể lực khi di chuyển đường dài và leo núi. Tăng xác suất gặp cao thủ ẩn cư trên núi cao.'
+        description: 'Mùng chín tháng chín, dương số cực đại. Người người leo núi cao, cài nhánh thù du, uống rượu cúc hoa để trường thọ.',
+        effect: 'Đăng cao vọng viễn, ngộ tính tăng mạnh. Đột phá cảnh giới trên đỉnh núi có tỉ lệ thành công cao hơn.'
     },
     {
-        id: 'tet_tao_quan',
-        name: 'Tết Táo Quân',
-        month: 12,
-        day: 23,
-        description: 'Ngày tiễn ông Táo về trời, mỗi nhà dọn dẹp sạch sẽ, sắm sửa cúng lễ. Bếp lửa hồng, khói hương nghi ngút, không khí chuẩn bị đón Tết tràn ngập khắp nơi.',
-        effect: 'Cửa hàng bổ sung hàng nhanh hơn, số lựa chọn giao dịch tăng lên. Không khí lễ hội bắt đầu lan tỏa.'
+        id: 'tiet_dong_chi',
+        name: 'Tiết Đông Chí',
+        month: 11,
+        day: 15,
+        description: 'Đêm dài nhất trong năm, âm cực dương sinh. Khí lạnh thấu xương nhưng ẩn chứa sinh cơ bừng nở.',
+        effect: 'Băng linh khí nồng đậm, thích hợp bế quan tu luyện. Hỏa hệ công pháp bị áp chế nhẹ.'
     },
     {
-        id: 'tat_nien',
-        name: 'Tất Niên',
+        id: 'lap_bat',
+        name: 'Lễ Lạp Bát',
         month: 12,
-        day: 30,
-        description: 'Đêm giao thừa, pháo hoa rực rỡ trên bầu trời, cả nhà quây quần bên mâm cơm sum họp. Năm cũ kết thúc, năm mới bắt đầu, giang hồ cũng hiếm khi dừng kiếm.',
-        effect: 'Hầu hết các thế lực thù địch giảm hoạt động. Các sự kiện xung đột trong thành thị giảm đáng kể.'
+        day: 8,
+        description: 'Mùng tám tháng chạp, nấu cháo Lạp Bát dâng Phật và tổ tiên. Báo hiệu một năm sắp qua, chuẩn bị đón xuân mới.',
+        effect: 'Ăn cháo Lạp Bát giúp khôi phục toàn bộ thể lực và thương thế, xua tan hàn khí trong cơ thể.'
     }
 ];
 

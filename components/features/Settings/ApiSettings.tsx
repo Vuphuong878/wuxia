@@ -307,40 +307,63 @@ const ApiSettings: React.FC<Props> = ({ settings, onSave }) => {
             </div>
 
             <div className="rounded-md border border-wuxia-gold/20 bg-ink-black/40 p-4 space-y-4">
-                <div className="text-xs text-paper-white/40">Hỗ trợ hiện tại: Gemini / Claude / OpenAI / DeepSeek / API Tương thích OpenAI</div>
-                <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-                    <div className="space-y-2">
-                        <label className="text-sm text-wuxia-gold font-bold">Thêm cấu hình mới - Nhà cung cấp</label>
-                        <InlineSelect
-                            value={newProvider}
-                            options={providerOptions.map((provider) => ({
-                                value: provider,
-                                label: PROVIDER_LABELS[provider]
-                            }))}
-                            onChange={(provider) => setNewProvider(provider)}
-                            buttonClassName="bg-ink-black/20 border-wuxia-gold/20 hover:border-wuxia-gold/50 py-2.5"
-                        />
+                <div className="flex items-center justify-between">
+                    <div>
+                        <div className="text-sm text-wuxia-gold font-bold">Sử dụng Hệ thống Gemini 3 Flash mặc định</div>
+                        <div className="text-xs text-paper-white/40 mt-1">Bật để sử dụng mô hình Gemini 3 Flash được cấu hình sẵn của hệ thống thay vì API key của bạn.</div>
                     </div>
-
-                    {newProvider === 'openai_compatible' && (
-                        <div className="space-y-2">
-                            <label className="text-sm text-wuxia-gold font-bold">Giải pháp tương thích OpenAI</label>
-                            <InlineSelect
-                                value={newCompatiblePreset}
-                                options={compatibilitySolutionOptions}
-                                onChange={(preset) => setNewCompatiblePreset(preset)}
-                                buttonClassName="bg-ink-black/20 border-wuxia-gold/20 hover:border-wuxia-gold/50 py-2.5"
-                            />
-                        </div>
-                    )}
-
-                    <div className="md:self-end">
-                        <GameButton onClick={handleCreateConfig} variant="secondary" className="w-full md:w-auto">Thêm cấu hình mới</GameButton>
-                    </div>
+                    <ToggleSwitch
+                        checked={form.useSystemGemini !== false}
+                        onChange={(checked) => setForm(prev => ({ ...prev, useSystemGemini: checked }))}
+                    />
                 </div>
             </div>
 
-            {form.configs.length === 0 ? (
+            {form.useSystemGemini !== false ? (
+                <div className="rounded-md border border-wuxia-gold/20 bg-ink-black/40 p-6 text-center">
+                    <div className="text-wuxia-gold font-bold text-lg mb-2">Hệ thống đang sử dụng Gemini 3 Flash</div>
+                    <div className="text-sm text-paper-white/60">
+                        Bạn đang sử dụng mô hình Gemini 3 Flash mặc định của hệ thống. 
+                        Tắt tùy chọn trên để cấu hình API key của riêng bạn.
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <div className="rounded-md border border-wuxia-gold/20 bg-ink-black/40 p-4 space-y-4">
+                        <div className="text-xs text-paper-white/40">Hỗ trợ hiện tại: Gemini / Claude / OpenAI / DeepSeek / API Tương thích OpenAI</div>
+                        <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+                            <div className="space-y-2">
+                                <label className="text-sm text-wuxia-gold font-bold">Thêm cấu hình mới - Nhà cung cấp</label>
+                                <InlineSelect
+                                    value={newProvider}
+                                    options={providerOptions.map((provider) => ({
+                                        value: provider,
+                                        label: PROVIDER_LABELS[provider]
+                                    }))}
+                                    onChange={(provider) => setNewProvider(provider)}
+                                    buttonClassName="bg-ink-black/20 border-wuxia-gold/20 hover:border-wuxia-gold/50 py-2.5"
+                                />
+                            </div>
+
+                            {newProvider === 'openai_compatible' && (
+                                <div className="space-y-2">
+                                    <label className="text-sm text-wuxia-gold font-bold">Giải pháp tương thích OpenAI</label>
+                                    <InlineSelect
+                                        value={newCompatiblePreset}
+                                        options={compatibilitySolutionOptions}
+                                        onChange={(preset) => setNewCompatiblePreset(preset)}
+                                        buttonClassName="bg-ink-black/20 border-wuxia-gold/20 hover:border-wuxia-gold/50 py-2.5"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="md:self-end">
+                                <GameButton onClick={handleCreateConfig} variant="secondary" className="w-full md:w-auto">Thêm cấu hình mới</GameButton>
+                            </div>
+                        </div>
+                    </div>
+
+                    {form.configs.length === 0 ? (
                 <div className="rounded-md border border-dashed border-wuxia-gold/20 bg-ink-black/20 p-6 space-y-4">
                     <div className="text-center text-paper-white/40">
                         Chưa có cấu hình API nào. Chọn mẫu nhanh bên dưới hoặc nhấp "Thêm cấu hình mới" ở trên.
@@ -725,8 +748,10 @@ const ApiSettings: React.FC<Props> = ({ settings, onSave }) => {
                     )}
                 </div>
             )}
+        </>
+    )}
 
-            {message && <p className="text-sm text-wuxia-red font-bold animate-pulse mt-4 text-center">{message}</p>}
+    {message && <p className="text-sm text-wuxia-red font-bold animate-pulse mt-4 text-center">{message}</p>}
 
             <div className="pt-4 sticky bottom-0 bg-ink-black/80 backdrop-blur-md pb-4 z-20">
                 <ParallelogramSaveButton

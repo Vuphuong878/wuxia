@@ -41,12 +41,12 @@ export interface ApiConfig {
     updatedAt: number;
 }
 
-export type ApiProviderType = 
-    | 'gemini' | 'claude' | 'openai' | 'deepseek' 
-    | 'mistral' | 'groq' | 'xai' | 'perplexity' 
-    | 'cohere' | 'moonshot' | 'openrouter' | 'huggingface' | 'cloudflare' 
-    | 'together' | 'fireworks' | 'cerebras' | 'sambanova' 
-    | 'openai_compatible' | 'worker';
+export type ApiProviderType =
+    | 'gemini' | 'claude' | 'openai' | 'deepseek'
+    | 'mistral' | 'groq' | 'xai' | 'perplexity'
+    | 'cohere' | 'moonshot' | 'openrouter' | 'huggingface' | 'cloudflare'
+    | 'together' | 'fireworks' | 'cerebras' | 'sambanova'
+    | 'openai_compatible' | 'worker' | 'system_gemini';
 
 export type OpenAICompatibilitySolution = 'custom' | 'openrouter' | 'siliconflow' | 'together' | 'groq';
 
@@ -86,6 +86,7 @@ export interface FeatureModelPlaceholderConfig {
 }
 
 export interface ApiSettings {
+    useSystemGemini?: boolean;
     activeConfigId: string | null;
     configs: ApiConfig[];
     featureModelPlaceholder: FeatureModelPlaceholderConfig;
@@ -130,7 +131,7 @@ export interface VisualSettings {
     textGenWorkerUrl?: string;
 }
 
-export type StoryStyleType = 'Tu luyện' | 'Thông thường' | 'Tu la tràng' | 'Thuần ái';
+export type StoryStyleType = 'Tu luyện' | 'Thông thường' | 'Tu la tràng' | 'Tu Tiên Ưu Ám';
 
 export interface GameSettings {
     bodyLengthRequirement: number; // Độ dài tối thiểu của thân bài logs

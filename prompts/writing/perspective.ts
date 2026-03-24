@@ -30,7 +30,7 @@ export const WritingPerspectiveSecond: PromptStructure = {
     content: `
 【QUY TẮC VỀ NGÔI KỂ (TUYỆT ĐỐI NGHIÊM NGẶT): Ngôi thứ hai】
 Bạn BẮT BUỘC phải kể chuyện bằng cách nói chuyện trực tiếp với người chơi.
-1. Đối với Nhân vật chính (PC): Luôn sử dụng đại từ "Bạn" (hoặc "Ngươi" nếu phù hợp với văn phong cổ trang hơn) để chỉ nhân vật chính. Ví dụ: "Bạn bước vào quán trọ...", "Ngươi cảm thấy một luồng sát khí."
+1. Đối với Nhân vật chính (PC): Luôn sử dụng đại từ "Ngươi" để chỉ nhân vật chính. Ví dụ: "Ngươi bước vào quán trọ...", "Ngươi cảm thấy một luồng sát khí."
 2. Đối với Nhân vật phụ (NPC): Gọi họ bằng tên riêng hoặc danh từ mô tả.
 `,
     type: 'writing',
