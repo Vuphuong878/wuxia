@@ -79,7 +79,7 @@ export class TransformationService {
                 { role: 'user', content: `Transform these items (Dữ liệu nhập):\n${processedInput}` }
             ],
             max_tokens: 131000,
-            temperature: 0.3
+            temperature: 1.0
         });
     }
 }

@@ -842,19 +842,24 @@ const normalizeSingleMap = (raw: any): any => {
     const rawCities = Array.isArray(m.cities) ? m.cities : (Array.isArray(m['Thành thị']) ? m['Thành thị'] : []);
     const cities = rawCities.map((c: any) => {
         const cityName = getFirstNonEmptyText(c.name, c.Name, c['Tên'], c['Thành thị']) || 'Unnamed City';
+        const description = getFirstNonEmptyText(c.description, c.Description, c['Mô tả']) || '';
+        const leader = c.leader || null;
         const cityBuildings = Array.isArray(c.buildings) ? c.buildings : [];
-        return { name: cityName, buildings: cityBuildings };
+        return { name: cityName, description, leader, buildings: cityBuildings };
     });
 
     // If we have cities, we can also synthesize internalBuildings if it is empty
     if (internalBuildings.length === 0 && cities.length > 0) {
         cities.forEach(city => {
-            city.buildings.forEach((bName: any) => {
-                const name = typeof bName === 'string' ? bName : (bName?.name || 'Unnamed');
+            city.buildings.forEach((b: any) => {
+                const name = typeof b === 'string' ? b : (b?.name || 'Unnamed');
+                const buildingType = typeof b === 'object' ? b.type : undefined;
+                const buildingDesc = typeof b === 'object' ? b.description : '';
                 internalBuildings.push({
-                    name: `${city.name}: ${name}`,
-                    description: '',
-                    affiliation: { ...normalizeLocationAffiliation(m.affiliation), minorLocation: city.name }
+                    name,
+                    type: buildingType,
+                    description: buildingDesc,
+                    affiliation: { ...normalizeLocationAffiliation(m.affiliation), mediumLocation: city.name, minorLocation: name }
                 });
             });
         });
@@ -876,6 +881,7 @@ const normalizeSingleBuilding = (raw: any): any => {
     return {
         name: getFirstNonEmptyText(b.name, b.Name, b['Tên'], b['Tên kiến trúc']) || 'Unnamed Building',
         description: getFirstNonEmptyText(b.description, b.Description, b['Mô tả'], b['Chi tiết kiến trúc']) || '',
+        type: b.type || b['Công năng'],
         affiliation: normalizeLocationAffiliation(b.affiliation || b.ownership || b['Sở hữu'] || b['Quy thuộc'] || b['Thuộc về'] || b['Nằm trong'])
     };
 };
@@ -903,10 +909,27 @@ const normalizeWorldStatus = (raw?: any): any => {
     const rawSettled = Array.isArray(world.settledEvents) ? world.settledEvents
         : (Array.isArray(world['Sự kiện đã kết thúc']) ? world['Sự kiện đã kết thúc'] : []);
 
+    const maps = rawMaps.map((m: any) => normalizeSingleMap(m));
+    
+    // Add city leaders to activeNpcList
+    const cityLeaders: any[] = [];
+    maps.forEach((m: any) => {
+        if (Array.isArray(m.cities)) {
+            m.cities.forEach((c: any) => {
+                if (c.leader) {
+                    cityLeaders.push({
+                        ...c.leader,
+                        id: c.leader.id || `leader_${c.name.toLowerCase().replace(/\s+/g, '_')}`,
+                    });
+                }
+            });
+        }
+    });
+
     return {
         ...world,
-        activeNpcList: Array.isArray(world.activeNpcList) ? world.activeNpcList : [],
-        maps: rawMaps.map((m: any) => normalizeSingleMap(m)),
+        activeNpcList: standardizeSocialList([...(world.activeNpcList || []), ...cityLeaders], { mergeSameNames: true }),
+        maps,
         buildings: rawBuildings.map((b: any) => normalizeSingleBuilding(b)),
         ongoingEvents: rawOngoing,
         settledEvents: rawSettled,

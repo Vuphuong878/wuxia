@@ -1542,12 +1542,15 @@ export const useGame = () => {
 
                             // Flatten buildings
                             if (Array.isArray(city.buildings)) {
-                                city.buildings.forEach((bName: any) => {
-                                    const bRealName = typeof bName === 'string' ? bName : (bName?.name || '');
+                                city.buildings.forEach((b: any) => {
+                                    const bRealName = typeof b === 'string' ? b : (b?.name || '');
+                                    const bType = typeof b === 'object' ? b.type : undefined;
+                                    const bDesc = typeof b === 'object' ? b.description : '';
                                     if (bRealName && !skeletonBuildings.some((sb: any) => (sb.name || sb) === bRealName)) {
                                         extraBuildings.push({
                                             name: bRealName,
-                                            description: `Kiến trúc tại ${city.name}, ${map.name}`,
+                                            type: bType,
+                                            description: bDesc || `Kiến trúc tại ${city.name}, ${map.name}`,
                                             affiliation: {
                                                 majorLocation: map.name,
                                                 mediumLocation: city.name,

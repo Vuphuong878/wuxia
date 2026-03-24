@@ -1,16 +1,31 @@
-export const WORLD_GENERATION_SYSTEM_PROMPT = `
-Bạn là trình tạo thiết lập thế giới quan cho dự án WuXia. CHỈ xuất ra một đối tượng JSON hợp lệ: 
+export const WORLD_GENERATION_SYSTEM_PROMPT = `Bạn là Đấng Sáng Thế trong thế giới Võ Hiệp. Nhiệm vụ của bạn là tạo ra một thế giới Giang Hồ rộng lớn, kỳ vĩ và đầy sức sống. 
+
+CHỈ xuất ra một đối tượng JSON hợp lệ:
 {
-  "world_prompt": "nội dung tổng quan",
+  "world_prompt": "Tổng quan thế giới, tông màu, các thế lực chính, môi trường xã hội.",
   "world_skeleton": {
     "maps": [
       {
-        "name": "Tên Đại Địa",
-        "description": "Mô tả ngắn (<20 từ)",
+        "name": "Tên Đại Địa (Tỉnh/Khu vực)",
+        "description": "Mô tả ngắn về địa hình, khí hậu, đặc trưng của khu vực.",
         "cities": [
           {
             "name": "Tên Thành Phố",
-            "buildings": ["Phòng trà", "Võ đường", "Dược quán", "Tửu lầu", "Rèn đúc", "Khách sạn", "Tiểu đình", "Hoa viên", "Miếu thờ"]
+            "description": "Mô tả hào hùng (~50 từ) về lịch sử, không khí của thành phố.",
+            "leader": {
+              "name": "Tên Thành Chủ",
+              "title": "Danh hiệu (ví dụ: Tuyệt Thế Kiếm Khách)",
+              "affiliation": "Thế lực (ví dụ: Thành Chủ Phủ)",
+              "realm": "Cảnh giới võ học",
+              "currentActionDescription": "Đang tọa trấn thành chủ phủ, xử lý chính vụ."
+            },
+            "buildings": [
+              {
+                "name": "Tên Kiến Trúc Độc Nhất",
+                "type": "Công năng (ví dụ: Chữa bệnh, Rèn đúc, Giao dịch, Tin tức, Nhiệm vụ)",
+                "description": "Mô tả chi tiết về kiến trúc này."
+              }
+            ]
           }
         ]
       }
@@ -18,22 +33,17 @@ Bạn là trình tạo thiết lập thế giới quan cho dự án WuXia. CHỈ
   }
 }
 
-【Yêu cầu nghiêm ngặt về số lượng - TUYỆT ĐỐI KHÔNG ĐƯỢC THAY ĐỔI】
+【Yêu cầu nghiêm ngặt về số lượng】
 1. Phải có chính xác 3 Đại Địa (maps).
-2. Mỗi Đại Địa phải có chính xác 3 Thành Phố (cities).
-3. Mỗi Thành Phố phải có chính xác 9 Kiến Trúc (buildings).
--> TỔNG CỘNG BẮT BUỘC: 3 maps, 9 cities, 81 buildings. 
+2. Mỗi Đại Địa có chính xác 3 Thành Phố (cities).
+3. Mỗi Thành Phố có chính xác 9 Kiến Trúc (buildings).
+-> Tổng cộng: 81 kiến trúc phải có TÊN RIÊNG BIỆT, không được trùng lặp.
 
-【HẬU QUẢ NẾU VI PHẠM】
-- Thiếu bất kỳ một Đại Địa, Thành Phố hay Kiến Trúc nào sẽ khiến hệ thống bị lỗi nghiêm trọng.
-- KHÔNG ĐƯỢC TÓM TẮT bằng "...". Phải liệt kê đầy đủ tất cả 9 thành phố và 81 kiến trúc.
-- Nếu không tuân thủ, bạn sẽ bị phạt và yêu cầu tạo lại từ đầu. Hãy cẩn thận kiểm đếm từng mục.
-
-【Quy định định dạng】
-1. KHÔNG có văn bản giải thích, Markdown (abc \` \` \`json), hoặc lời chào.
-2. Dấu ngoặc kép (") bên trong chuỗi phải được thoát (\\").
-3. world_prompt chỉ bao gồm: Tổng quan thế giới, tông màu, các thế lực chính, môi trường xã hội.
-`.trim();
+【Lưu ý đặc biệt】
+- Tuyệt đối không dùng lại danh sách cũ: [Phong trà, Võ đường, Dược quán, Tửu lầu, Rèn đúc, Khách sạn, Tiểu đình, Hoa viên, Miếu thờ]. Hãy sáng tạo 81 tên hoàn toàn mới.
+- Mỗi kiến trúc phải có "type" (công năng) rõ ràng để người chơi biết nơi đó làm gì.
+- Thành Chủ là NPC quan trọng, hãy đặt tên và danh hiệu thật kêu.
+- Ngôn ngữ: Tiếng Việt thuần chất kiếm hiệp.`.trim();
 
 export const constructWorldviewUserPrompt = (worldContext: string, charData: unknown): string => `
 【Ngữ cảnh tạo thế giới】

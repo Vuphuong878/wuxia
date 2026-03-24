@@ -1598,7 +1598,7 @@ export const generateWorldData = async (
                 : typeof parsedValue.worldPrompt === 'string'
                     ? parsedValue.worldPrompt.trim()
                     : '';
-            
+
             return {
                 world_prompt: prompt,
                 world_skeleton: parsedValue.world_skeleton || parsedValue.worldSkeleton

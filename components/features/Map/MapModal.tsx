@@ -182,9 +182,16 @@ export const MapModal: React.FC<MapModalProps> = ({ world, env, settings, apiCon
                                         )}
                                         
                                         <div className="relative z-10 h-full p-4 flex flex-col justify-center">
-                                            <span className={`text-base font-serif font-bold ${idx === selectedCityIndex ? 'text-wuxia-gold' : 'text-gray-300'}`}>
-                                                {city.name}
-                                            </span>
+                                            <div className="flex items-center justify-between">
+                                                <span className={`text-base font-serif font-bold ${idx === selectedCityIndex ? 'text-wuxia-gold' : 'text-gray-300'}`}>
+                                                    {city.name}
+                                                </span>
+                                                {city.leader && (
+                                                    <span className="text-[9px] text-wuxia-gold/60 border border-wuxia-gold/20 px-1 bg-black/40">
+                                                        {city.leader.name}
+                                                    </span>
+                                                )}
+                                            </div>
                                             {idx === selectedCityIndex && (
                                                 <p className="text-[10px] text-gray-400 line-clamp-2 mt-2 italic leading-relaxed">
                                                     {city.description}
@@ -216,15 +223,15 @@ export const MapModal: React.FC<MapModalProps> = ({ world, env, settings, apiCon
                                             
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="bg-white/[0.03] border border-white/5 p-4">
-                                                    <span className="block text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Cảnh Sắc</span>
-                                                    <p className="text-xs text-gray-300">
-                                                        {(() => {
-                                                            const desc = currentCity.description || "Tươi đẹp";
-                                                            const text = Array.isArray(desc) ? desc[0] : desc;
-                                                            if (!text) return "Chưa có mô tả chi tiết cho khu vực này.";
-                                                            return typeof text === 'string' ? text.split(/[,\r\n;]+/)[0] : String(text);
-                                                        })()}
+                                                    <span className="block text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Thành Chủ</span>
+                                                    <p className="text-xs text-wuxia-gold font-serif">
+                                                        {currentCity.leader?.name || "Ẩn danh"}
                                                     </p>
+                                                    {currentCity.leader?.description && (
+                                                        <p className="text-[9px] text-gray-500 mt-1 line-clamp-1 italic">
+                                                            {currentCity.leader.description}
+                                                        </p>
+                                                    )}
                                                 </div>
                                                 <div className="bg-white/[0.03] border border-white/5 p-4">
                                                     <span className="block text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Tọa Độ</span>
@@ -255,7 +262,14 @@ export const MapModal: React.FC<MapModalProps> = ({ world, env, settings, apiCon
                                             {cityBuildings.map((b: any, idx: number) => (
                                                 <div key={idx} className="bg-white/[0.02] border border-white/5 p-5 hover:bg-white/[0.05] hover:border-wuxia-gold/20 transition-all group">
                                                     <div className="flex items-center justify-between mb-3">
-                                                        <span className="text-[10px] font-serif text-wuxia-gold/40 italic">#0{idx + 1}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-serif text-wuxia-gold/40 italic">#0{idx + 1}</span>
+                                                            {b.type && (
+                                                                <span className="text-[9px] bg-wuxia-gold/10 text-wuxia-gold/70 px-1.5 py-0.5 border border-wuxia-gold/10 uppercase tracking-tighter font-bold">
+                                                                    {b.type}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         <div className="w-4 h-4 rounded-full border border-wuxia-gold/20 flex items-center justify-center">
                                                             <div className="w-1 h-1 bg-wuxia-gold group-hover:scale-150 transition-transform"></div>
                                                         </div>

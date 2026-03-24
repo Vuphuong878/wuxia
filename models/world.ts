@@ -76,6 +76,7 @@ export interface MapStructure {
 export interface BuildingStructure {
     name: string;
     description: string;
+    type?: string; 
     affiliation: LocationAffiliation;
 }
 

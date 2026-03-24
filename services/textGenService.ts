@@ -75,7 +75,7 @@ export class TextGenService {
           body: JSON.stringify({
             messages: options.messages,
             max_tokens: options.max_tokens || 131000,
-            temperature: options.temperature || 0.8,
+            temperature: options.temperature || 0.7,
             stream: true, // Enabled streaming
           }),
         });
@@ -126,7 +126,7 @@ export class TextGenService {
             const { value, done: doneReading } = await reader.read();
             done = doneReading;
             const chunk = decoder.decode(value, { stream: !done });
-            
+
             const lines = chunk.split('\n');
             for (const line of lines) {
               if (line.startsWith('data: ')) {
