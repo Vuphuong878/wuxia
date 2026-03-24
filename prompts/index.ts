@@ -5,9 +5,9 @@ import { PromptStructure } from '../types';
 import { Core_OutputFormat } from './core/format';
 import { CoreRules } from './core/rules';
 import { coreDataFormat } from './core/data';
-import { coreMemoryLaws } from './core/memory'; 
-import { coreWorldview } from './core/world'; 
-import { CoreChainOfThought } from './core/cot';   
+import { coreMemoryLaws } from './core/memory';
+import { coreWorldview } from './core/world';
+import { CoreChainOfThought } from './core/cot';
 import { CoreChainOfThoughtMulti } from './core/cotMulti';
 import { CoreAncientRealism } from './core/ancientRealism';
 import { coreStoryProgression } from './core/story';
@@ -17,12 +17,11 @@ import { Core_OutputFormat_MultiThought } from './core/formatMulti';
 import { coreNpcFate } from './core/npc_fate';
 import { coreUserFate } from './core/user_fate';
 import { coreWorldMechanics } from './core/world_mechanics';
-
 // Stats
 import { StatCharacter } from './stats/character';
 import { StatItem } from './stats/items';
 import { StatKungfu } from './stats/kungfu';
-import { StatWorldEvolution } from './stats/world'; 
+import { StatWorldEvolution } from './stats/world';
 import { StatOtherSettings } from './stats/others';
 import { StatCombat } from './stats/combat';
 import { StatBodyHealth } from './stats/body';
@@ -42,6 +41,7 @@ import { WritingPerspectiveFirst, WritingPerspectiveSecond, WritingPerspectiveTh
 import { WritingRequirements } from './writing/requirements';
 import { WritingNoControl } from './writing/noControl';
 import { WritingStyle } from './writing/style';
+import { WritingNsfw } from './writing/nsfw';
 
 import { WritingEmotionGuard } from './writing/emotionGuard';
 
@@ -62,7 +62,6 @@ export const DefaultPrompts: PromptStructure[] = [
     coreNpcFate,
     coreUserFate,
     coreWorldMechanics,
-
     // Stats
     StatCharacter,
     StatItem,
@@ -89,6 +88,8 @@ export const DefaultPrompts: PromptStructure[] = [
     WritingRequirements,
     WritingNoControl,
     WritingStyle,
+    WritingNsfw,
 
     WritingEmotionGuard
+
 ].map(p => ({ ...p, isSystem: true }));
