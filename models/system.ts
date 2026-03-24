@@ -251,6 +251,7 @@ export interface PromptStructure {
     type: PromptCategory;
     role?: string;
     enabled: boolean;
+    isSystem?: boolean;
 }
 
 export interface FestivalStructure {

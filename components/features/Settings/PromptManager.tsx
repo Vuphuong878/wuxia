@@ -218,8 +218,13 @@ const PromptManager: React.FC<Props> = ({ prompts, onUpdate, requestConfirm, api
                                 ariaLabel={`${p.enabled ? 'Disable' : 'Enable'} Prompt ${p.title}`}
                             />
                             <div>
-                                <div className={`font-bold font-serif text-sm transition-colors ${p.enabled ? 'text-wuxia-gold group-hover:text-paper-white' : 'text-paper-white/50'}`}>
+                                <div className={`font-bold font-serif text-sm transition-colors flex items-center gap-2 ${p.enabled ? 'text-wuxia-gold group-hover:text-paper-white' : 'text-paper-white/50'}`}>
                                     {p.title}
+                                    {p.isSystem && (
+                                        <span className="text-[8px] px-1 py-0.5 border border-wuxia-gold/30 bg-wuxia-gold/10 text-wuxia-gold/80 rounded-sm uppercase tracking-tighter">
+                                            Hệ thống
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="text-[9px] leading-none text-paper-white/30 mt-0.5">{p.type} | Chars: {(p.content || '').length}</div>
                             </div>

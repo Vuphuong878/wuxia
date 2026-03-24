@@ -91,4 +91,4 @@ export const DefaultPrompts: PromptStructure[] = [
     WritingStyle,
 
     WritingEmotionGuard
-];
+].map(p => ({ ...p, isSystem: true }));

@@ -10,32 +10,40 @@ export class PromptSyncService {
      * Returns the updated prompts array.
      */
     static async syncPrompts(currentPrompts: PromptStructure[]): Promise<PromptStructure[]> {
-        let synced = [...currentPrompts];
-        let hasChanges = false;
+        const defaultPromptMap = new Map(DefaultPrompts.map(p => [p.id, p]));
+        const defaultIds = new Set(defaultPromptMap.keys());
 
-        // Sync with local defaults in the application code
-        for (const defaultPrompt of DefaultPrompts) {
-            const index = synced.findIndex(p => p.id === defaultPrompt.id);
-            if (index === -1) {
-                // New prompt added to the code
-                console.log(`[PromptSyncService] Adding new prompt: ${defaultPrompt.id}`);
-                synced.push({ ...defaultPrompt });
-                hasChanges = true;
-            } else if (synced[index].content !== defaultPrompt.content || synced[index].title !== defaultPrompt.title) {
-                // Existing prompt updated in the code
-                console.log(`[PromptSyncService] Updating prompt content: ${defaultPrompt.id}`);
-                synced[index] = { 
-                    ...synced[index], 
-                    content: defaultPrompt.content, 
-                    title: defaultPrompt.title 
-                };
-                hasChanges = true;
+        // 1. Start with the latest system prompts from code
+        let synced = [...DefaultPrompts];
+        
+        // 2. Add back user-added prompts
+        const userAddedPrompts = currentPrompts.filter(p => {
+            // If it's a current system prompt, ignore it (we already have the latest version in 'synced')
+            if (defaultIds.has(p.id)) return false;
+            
+            // It's not a current system ID. Check if it's user-added or a stale system prompt.
+            // Heuristic for user-added: ID is a numeric timestamp (from Date.now().toString())
+            const isTimestamp = /^\d+$/.test(p.id);
+            const isUserAdded = isTimestamp || !p.isSystem;
+            
+            if (!isUserAdded) {
+                console.log(`[PromptSyncService] Removing stale system prompt: ${p.id} (${p.title})`);
             }
-        }
+            
+            return isUserAdded;
+        });
+
+        synced = [...synced, ...userAddedPrompts];
+
+        // 3. Detect changes to decide whether to save
+        // We simplified the logic: we always rebuild the list.
+        // To be efficient, we check if the result is different from currentPrompts.
+        const hash = (plist: PromptStructure[]) => plist.map(p => `${p.id}-${p.content.length}`).join('|');
+        const hasChanges = hash(synced) !== hash(currentPrompts);
 
         if (hasChanges) {
             await dbService.saveSetting('prompts', synced);
-            console.log('[PromptSyncService] Prompt synchronization complete with changes.');
+            console.log('[PromptSyncService] Prompt synchronization complete. System prompts updated/cleaned, user prompts preserved.');
         }
 
         return synced;
