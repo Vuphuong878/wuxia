@@ -274,6 +274,10 @@ const TopBar: React.FC<Props> = ({ Environment, timeFormat, festivals = [] }) =>
                         />
                         <Divider />
                         <TopItem label="Hành trình" value={`Ngày ${Environment.gameDays || 1}`} />
+                        <Divider />
+                        <TopItem label="Nghiệp" value={Environment.karma || 0} />
+                        <Divider />
+                        <TopItem label="Thế giới" value={Environment.worldTick || 0} />
                     </div>
                 </div>
 

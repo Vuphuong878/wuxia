@@ -14,6 +14,9 @@ import { coreStoryProgression } from './core/story';
 import { CoreActionOptions } from './core/actionOptions';
 import { coreTimeProgression } from './core/timeProgress';
 import { Core_OutputFormat_MultiThought } from './core/formatMulti';
+import { coreNpcFate } from './core/npc_fate';
+import { coreUserFate } from './core/user_fate';
+import { coreWorldMechanics } from './core/world_mechanics';
 
 // Stats
 import { StatCharacter } from './stats/character';
@@ -56,6 +59,9 @@ export const DefaultPrompts: PromptStructure[] = [
     coreMemoryLaws,
     CoreChainOfThought,
     CoreChainOfThoughtMulti,
+    coreNpcFate,
+    coreUserFate,
+    coreWorldMechanics,
 
     // Stats
     StatCharacter,

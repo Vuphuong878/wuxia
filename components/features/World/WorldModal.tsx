@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { WorldDataStructure } from '../../../models/world';
+import { EnvironmentData } from '../../../models/environment';
 
 interface Props {
     world: WorldDataStructure;
+    environment?: EnvironmentData;
     onClose: () => void;
 }
 
@@ -15,7 +17,7 @@ const GlassCard: React.FC<{ children: React.ReactNode; className?: string }> = (
     </div>
 );
 
-const WorldModal: React.FC<Props> = ({ world, onClose }) => {
+const WorldModal: React.FC<Props> = ({ world, environment, onClose }) => {
     const [activeTab, setActiveTab] = useState<TabType>('events');
     const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
 
@@ -67,15 +69,25 @@ const WorldModal: React.FC<Props> = ({ world, onClose }) => {
                         </div>
                     </div>
                     
-                    <button
-                        onClick={onClose}
-                        className="group relative w-10 h-10 flex items-center justify-center rounded-none border border-wuxia-gold/20 bg-black/40 overflow-hidden shadow-lg active:scale-95 transition-transform"
-                    >
-                        <div className="absolute inset-0 bg-wuxia-gold/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-wuxia-gold relative z-10 transition-transform group-hover:rotate-90">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <div className="flex items-center gap-6">
+                        <div className="hidden md:flex flex-col items-end border-r border-wuxia-gold/20 pr-6">
+                            <span className="text-wuxia-gold/60 text-[10px] uppercase tracking-widest font-bold">Thiên Đạo Nghiệp</span>
+                            <span className="text-wuxia-gold text-lg font-serif">{environment?.karma || 0}</span>
+                        </div>
+                        <div className="hidden md:flex flex-col items-end border-r border-wuxia-gold/20 pr-6">
+                            <span className="text-wuxia-gold/60 text-[10px] uppercase tracking-widest font-bold">Thế Giới Tuyến</span>
+                            <span className="text-wuxia-gold text-lg font-serif">{environment?.worldTick || 0}</span>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="group relative w-10 h-10 flex items-center justify-center rounded-none border border-wuxia-gold/20 bg-black/40 overflow-hidden shadow-lg active:scale-95 transition-transform"
+                        >
+                            <div className="absolute inset-0 bg-wuxia-gold/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-wuxia-gold relative z-10 transition-transform group-hover:rotate-90">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Mobile Tab Navigation */}

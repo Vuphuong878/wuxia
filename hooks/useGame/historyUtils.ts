@@ -9,7 +9,7 @@ export const formatHistoryToScript = (historyItems: ChatHistory[]): string => {
         if (h.role === 'assistant' && h.structuredResponse) {
             const logs = Array.isArray(h.structuredResponse.logs) ? h.structuredResponse.logs : [];
             const lines = logs
-                .filter((l) => l.sender !== '【NSFWJudgment】')
+                .filter((l) => l.sender !== '【NSFWJudgment】' && l.sender !== 'Judgment' && l.sender !== '【Judgment】')
                 .map((l) => `${l.sender}：${l.text}`).join('\n');
             if (!lines.trim()) return '';
             return `${timeStr}${lines}`;

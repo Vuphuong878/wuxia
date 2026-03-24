@@ -64,6 +64,7 @@ export const useGameState = () => {
             sectId: 'none',
             sectPosition: 'None',
             sectContribution: 0,
+            karma: 0,
             money: { gold: 0, silver: 0, copper: 0 },
             currentEnergy: 0,
             maxEnergy: 0,
@@ -111,7 +112,9 @@ export const useGameState = () => {
         currentAreaId: '',
         envVariables: null,
         time: 'Sáng',
-        season: 'Xuân'
+        season: 'Xuân',
+        karma: 0,
+        worldTick: 0
     });
 
     const createEmptyWorld = (): WorldData => ({

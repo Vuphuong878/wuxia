@@ -56,9 +56,13 @@ export const StatWorldEvolution: PromptStructure = {
 - Với Cơ Duyên Trọng Đại trở lên, bắt buộc tạo hệ quả xã hội trong \`gameState.World.ongoingEvents\` hoặc \`gameState.Story.pendingEvents\`.
 
 ## 7. Các Thế lực và Tổ chức chính (Lore chuẩn thế giới)
-- Thiên Cơ Các, Quảng Hàn Cung, Thái Dương Thần Cung, Thục Sơn Kiếm Môn, Côn Luân Đạo Môn, Đại Lôi Âm Tự.
-- Tam Thanh Đạo Tông (Thái Thanh Tông, Ngọc Hư Tông, Thông Thiên Tông), Vạn Pháp Tông.
-- Huyết Thần Cung, Vạn Hồn Điện, Hợp Hoan Tông, Thi Ma Tông.
+- **Thiên Cơ Các**: Tổ chức trung lập bí ẩn nhất, có khả năng suy diễn thiên cơ, nắm giữ bí mật quá khứ và tương lai.
+- **Quảng Hàn Cung**: Thánh địa nữ tu đỉnh cấp, chỉ nhận đệ tử nữ, công pháp thanh lãnh thoát tục.
+- **Thái Dương Thần Cung**: Chí tôn Thể tu, sùng bái nhục thân thành thánh, hành sự bá đạo, nhục thân cường hoành vô song.
+- **Thục Sơn Kiếm Môn**: Thánh địa kiếm tu, lấy trảm yêu trừ ma làm nhiệm vụ, đứng đầu chính đạo thiên hạ.
+- **Côn Luân Đạo Môn**: Đạo môn chính tông lịch sử lâu đời, am hiểu trận pháp và thuật suy diễn, chú trọng thanh tịnh vô vi.
+- **Đại Lôi Âm Tự**: Thánh địa tối cao Phật môn tại Tây Mạc, phổ độ chúng sinh và trấn áp ma vực.
+- Tam Thanh Đạo Tông (Thái Thanh, Ngọc Hư, Thông Thiên), Vạn Pháp Tông, Huyết Thần Cung, Vạn Hồn Điện, Hợp Hoan Tông, Thi Ma Tông.
 - Khi phát sinh sự kiện liên quan thế lực, ưu tiên liên kết bằng \`relatedAffiliations\` trong \`gameState.World.ongoingEvents\`.
 
 ## 8. Hệ thống cấp độ Linh dược

@@ -23,8 +23,37 @@ interface Props {
 
 const TurnItem: React.FC<Props> = ({ response, turnNumber, isLatest = false, rawJson, onSaveEdit, onRetry, onReroll, allAvatars, isPlayerGenerating, generatingNames, npcs, playerName, playerId }) => {
     const formatRawJson = (raw?: string) => {
-
         if (!raw) return '（Văn bản gốc của vòng này chưa được lưu.）';
+        
+        try {
+            // Find JSON part if wrapped in tags (like <thinking>)
+            const jsonMatch = raw.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) return raw;
+
+            const originalJsonString = jsonMatch[0];
+            const parsed = JSON.parse(originalJsonString);
+
+            if (parsed.logs && Array.isArray(parsed.logs)) {
+                parsed.logs = parsed.logs.filter((log: any) => {
+                    const sender = (log.sender || '').trim();
+                    const text = (log.text || '').trim();
+                    const isJudgment = (
+                        sender === 'Judgment' || 
+                        sender === '【Judgment】' || 
+                        sender.includes('Judgment') ||
+                        text.startsWith('【Judgment】') || 
+                        text.startsWith('【Phán đoán】')
+                    );
+                    return !isJudgment;
+                });
+                
+                const filteredJsonString = JSON.stringify(parsed, null, 2);
+                return raw.replace(originalJsonString, filteredJsonString);
+            }
+        } catch (e) {
+            // If parsing fails, just return original string as a safe fallback
+            return raw;
+        }
         return raw;
     };
 
@@ -109,13 +138,21 @@ const TurnItem: React.FC<Props> = ({ response, turnNumber, isLatest = false, raw
     ] as Array<{ key: string; label: string; value: string; phase: ThinkingStage }>;
     const preThinkingBlocks = thinkingBlocks.filter(item => item.phase === 'pre');
     const postThinkingBlocks = thinkingBlocks.filter(item => item.phase === 'post');
-    const isDisclaimerLog = (log: { sender?: string; text?: string }) => {
+    const isHiddenLog = (log: { sender?: string; text?: string }) => {
         const sender = (log?.sender || '').trim();
         const text = (log?.text || '').trim();
+        
+        // Hide standard disclaimer
         if (sender === 'disclaimer' || sender === 'Disclaimer' || sender === '【Disclaimer】') return true;
-        return /^【\s*Disclaimer\s*】/.test(text);
+        if (/^【\s*Disclaimer\s*】/.test(text)) return true;
+
+        // Hide Judgment system messages
+        if (sender === 'Judgment' || sender === '【Judgment】' || sender.includes('Judgment')) return true;
+        if (text.startsWith('【Judgment】') || text.startsWith('【Phán đoán】')) return true;
+
+        return false;
     };
-    const displayLogs = response.logs.filter(log => !isDisclaimerLog(log));
+    const displayLogs = response.logs.filter(log => !isHiddenLog(log));
     const bodyText = displayLogs.map(log => log.text || '').join('\n');
     const charCount = bodyText.length;
     const commands = Array.isArray(response.tavern_commands) ? response.tavern_commands : [];

@@ -484,7 +484,9 @@ export const useGame = () => {
         currentAreaId: '',
         season: 'Xuân',
         envVariables: null,
-        time: 'Sáng'
+        time: 'Sáng',
+        karma: 0,
+        worldTick: 0
     });
 
     const createOpeningBlankWorld = (): WorldDataStructure => ({
@@ -770,7 +772,9 @@ export const useGame = () => {
                 festival: env.festival,
                 weather: env.weather,
                 environmentalVariables: env.envVariables,
-                gameDays: env.gameDays || 1
+                gameDays: env.gameDays || 1,
+                karma: env.karma || 0,
+                worldTick: env.worldTick || 0
             };
             return `【Thông tin môi trường hiện tại】\n${JSON.stringify(orderedEnv, null, 2)} `;
         };

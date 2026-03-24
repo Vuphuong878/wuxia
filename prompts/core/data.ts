@@ -11,7 +11,7 @@ export const coreDataFormat: PromptStructure = {
 > Principle: Check path first, then match fields, finally check type and constraints.
 
 ## 0. Platinum Path Rules (CRITICAL)
-- \`gameState.Character\` (Main profile, attributes, survival)
+- \`gameState.Character\`: { \`id\`, \`name\`, \`gender\`, \`age\`, \`realm\`, \`karma\` }
 - \`gameState.Inventory\` (All baggage, items, equipment in bag)
 - \`gameState.Kungfu\` (All manuals, moves, internal kungfu)
 - \`gameState.Equipment\` (Currently equipped slots)
@@ -41,6 +41,8 @@ export const coreDataFormat: PromptStructure = {
 - \`gameDays\`: Number (Total days passed)
 - \`majorLocation\`, \`mediumLocation\`, \`minorLocation\`, \`specificLocation\`
 - \`weather\`: { \`type\`, \`description\`, \`endDate\` }
+- \`karma\`: Number (World karma value)
+- \`worldTick\`: Number (Global world progression tick)
 
 ## 3. Combat Structure
 - \`isInBattle\`: Boolean

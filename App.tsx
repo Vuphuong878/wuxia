@@ -834,6 +834,7 @@ const App: React.FC = () => {
                     {state.showWorld && (
                         <WorldModal
                             world={state.world}
+                            environment={state.environment}
                             onClose={() => setters.setShowWorld(false)}
                         />
                     )}

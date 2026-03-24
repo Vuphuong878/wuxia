@@ -148,6 +148,7 @@ const MobileCharacter: React.FC<Props> = ({ character, onClose, allAvatars }) =>
                                     <span className="px-1.5 py-0.5 bg-ink-gray/40 border border-ink-gray rounded text-gray-300">Giới tính {character.gender}</span>
                                     <span className="px-1.5 py-0.5 bg-ink-gray/40 border border-ink-gray rounded text-gray-300">Tuổi {character.age}</span>
                                     <span className="px-1.5 py-0.5 bg-ink-gray/40 border border-ink-gray rounded text-gray-300 font-mono">Nặng {character.currentWeight}/{character.maxWeight}kg</span>
+                                    <span className={`px-1.5 py-0.5 bg-ink-gray/40 border border-ink-gray rounded font-bold ${character.karma >= 0 ? 'text-wuxia-gold' : 'text-wuxia-red'}`}>Nghiệp {character.karma || 0}</span>
                                 </div>
                             </div>
                         </div>

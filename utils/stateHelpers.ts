@@ -279,6 +279,9 @@ export const VIETNAMESE_SUBKEY_MAP: Record<string, string> = {
     "Ngày chơi": "gameDays",
     "Màu sắc": "color",
     "Vùng": "region",
+    "Nghiệp": "karma",
+    "Nghiệp lực": "karma",
+    "Pháp tắc": "worldTick",
     
     // Additional Story Variations
     "currentchapter": "currentChapter",

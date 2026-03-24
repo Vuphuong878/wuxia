@@ -530,18 +530,30 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
 
 
 
-                        {/* ── Quick Stats Grid (Phụ trọng) ── */}
-                        <div className="">
+                        {/* ── Quick Stats Grid (Phụ trọng & Nghiệp lực) ── */}
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col p-4 bg-transparent border border-white/[0.05] rounded-xl group hover:border-wuxia-gold/20 transition-all shadow-none">
                                 <span className="text-[8px] text-paper-white/40 uppercase tracking-[0.3em] font-black mb-2">Phụ Trọng</span>
                                 <div className="flex items-end justify-between">
                                     <span className="text-xl font-mono text-wuxia-gold font-black tracking-tighter leading-none">
                                         {Role.currentWeight?.toFixed(1) || 0}
                                     </span>
-                                    <span className="text-[8px] text-paper-white/30 font-black mb-0.5">/ {Role.maxWeight || 0} Cân</span>
+                                    <span className="text-[8px] text-paper-white/30 font-black mb-0.5">/ {Role.maxWeight || 0}</span>
                                 </div>
                                 <div className="mt-3 h-[2px] w-full bg-black/80 rounded-full overflow-hidden">
                                     <div className="h-full bg-wuxia-gold/40 rounded-full" style={{ width: `${Math.min(((Role.currentWeight || 0)/(Role.maxWeight || 1))*100, 100)}%` }}></div>
+                                </div>
+                            </div>
+                            <div className="flex flex-col p-4 bg-transparent border border-white/[0.05] rounded-xl group hover:border-wuxia-gold/20 transition-all shadow-none">
+                                <span className="text-[8px] text-paper-white/40 uppercase tracking-[0.3em] font-black mb-2">Nghiệp Lực</span>
+                                <div className="flex items-end justify-between">
+                                    <span className={`text-xl font-mono ${Role.karma >= 0 ? 'text-wuxia-gold' : 'text-wuxia-red'} font-black tracking-tighter leading-none`}>
+                                        {Role.karma || 0}
+                                    </span>
+                                    <span className="text-[8px] text-paper-white/30 font-black mb-0.5">Tiền Định</span>
+                                </div>
+                                <div className="mt-3 h-[2px] w-full bg-black/80 rounded-full overflow-hidden">
+                                    <div className={`h-full ${Role.karma >= 0 ? 'bg-wuxia-gold/20' : 'bg-wuxia-red/20'} rounded-full`} style={{ width: '100%' }}></div>
                                 </div>
                             </div>
                         </div>

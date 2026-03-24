@@ -121,7 +121,9 @@ const normalizeEnvironment = (rawEnv?: any): EnvironmentData => {
         Minute: parsedTime.Minute ?? (typeof source?.Minute === 'number' && Number.isFinite(source.Minute) ? source.Minute : (typeof source?.minute === 'number' ? source.minute : 15)),
         time: rawTime || (typeof source?.time === 'string' ? source.time : 'Sáng'),
         season: typeof source?.season === 'string' ? source.season : 'Xuân',
-        timeProgressEnabled: source?.timeProgressEnabled ?? true
+        timeProgressEnabled: source?.timeProgressEnabled ?? true,
+        karma: typeof source?.karma === 'number' && Number.isFinite(source.karma) ? source.karma : (typeof source?.['Nghiệp Lực'] === 'number' ? source?.['Nghiệp Lực'] : 0),
+        worldTick: typeof source?.worldTick === 'number' && Number.isFinite(source.worldTick) ? source.worldTick : (typeof source?.['Pháp Tắc'] === 'number' ? source?.['Pháp Tắc'] : 0)
     } as any;
 };
 const buildFullLocation = (env: any): string => {

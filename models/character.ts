@@ -59,6 +59,7 @@ export interface CharacterData extends CoreStats {
     sectId: string;
     sectPosition: string;
     sectContribution: number;
+    karma: number; // Mới: Nghiệp lực
     money: CharacterMoney;
 
     currentEnergy: number;

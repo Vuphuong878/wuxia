@@ -39,4 +39,6 @@ export interface EnvironmentData {
         effect: string;
     } | null;
     time: string;
+    karma: number;
+    worldTick: number;
 }

@@ -131,6 +131,12 @@
         "photo4k": "Họa ảnh 4K"
       },
       "labels": {
+        "identity": "Thân Phận",
+        "realm": "Cảnh Giới",
+        "relationStatus": "Tình Trạng",
+        "favorability": "Thiện Cảm",
+        "trackedStatus": "Theo Dõi Đặc Biệt",
+        "unknown": "Chưa rõ",
         "target": "Mối liên kết",
         "relation": "Quan hệ",
         "stature": "Vóc dáng",
