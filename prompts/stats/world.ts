@@ -31,6 +31,41 @@ export const StatWorldEvolution: PromptStructure = {
 - \`{"action": "SET", "key": "gameState.World.coordinate", "value": "-1000,-1000"}\`
 - \`{"action": "SET", "key": "gameState.Environment.time", "value": "2026:03:24:08:30"}\`
 
+## 6. Quy tắc cốt lõi: Hệ thống Cơ Duyên Động cho NPC (BẮT BUỘC gắn gameState)
+- Điều kiện kích hoạt đồng thời:
+  1) Có khoảng nghỉ tự sự (nhảy thời gian, bế quan, di chuyển đường dài).
+  2) NPC đang ở khu vực rủi ro (hoang dã, bí cảnh, phế tích, dãy núi yêu thú...).
+  3) NPC thuộc nhóm tán tu/đệ tử cấp thấp/mạo hiểm giả, không phải nhân vật cốt lõi.
+- Kiểm định ngẫu nhiên d100:
+  - 01-40: Cơ Duyên Vi Mạt.
+  - 41-75: Cơ Duyên Phổ Thông.
+  - 76-95: Cơ Duyên Trọng Đại.
+  - 96-100: Nghịch Thiên Cải Mệnh.
+- Ghi nhận kết quả bằng lệnh hợp lệ:
+  - Gắn nhãn: \`{"action":"PUSH","key":"gameState.World.activeNpcList[i].tags","value":"Thân Mang Dị Bảo"}\`
+  - Cập nhật hành vi: \`{"action":"SET","key":"gameState.World.activeNpcList[i].currentActionDescription","value":"Ẩn nấp tu luyện để tránh truy sát"}\`
+  - Lan truyền tin đồn/sự kiện: \`{"action":"PUSH","key":"gameState.World.ongoingEvents","value":{"id":"EVT_x","type":"Tin đồn","title":"Tin đồn cơ duyên trọng đại","content":"...","location":"...","startTime":"YYYY:MM:DD:HH:MM","estimatedEndTime":"YYYY:MM:DD:HH:MM","currentStatus":"Đang diễn ra","isMajorEvent":true,"relatedAffiliations":[],"relatedCharacters":[]}}\`
+  - Móc câu cốt truyện: \`{"action":"PUSH","key":"gameState.Story.pendingEvents","value":{"name":"Truy tìm dị bảo","description":"Tin đồn về NPC đắc bảo","triggerConditionOrTime":"Khi tới phường thị liên quan","expirationTime":"YYYY:MM:DD:HH:MM"}}\`
+- Với Cơ Duyên Trọng Đại trở lên, bắt buộc tạo hệ quả xã hội trong \`gameState.World.ongoingEvents\` hoặc \`gameState.Story.pendingEvents\`.
+
+## 7. Các Thế lực và Tổ chức chính (Lore chuẩn thế giới)
+- Thiên Cơ Các, Quảng Hàn Cung, Thái Dương Thần Cung, Thục Sơn Kiếm Môn, Côn Luân Đạo Môn, Đại Lôi Âm Tự.
+- Tam Thanh Đạo Tông (Thái Thanh Tông, Ngọc Hư Tông, Thông Thiên Tông), Vạn Pháp Tông.
+- Huyết Thần Cung, Vạn Hồn Điện, Hợp Hoan Tông, Thi Ma Tông.
+- Khi phát sinh sự kiện liên quan thế lực, ưu tiên liên kết bằng \`relatedAffiliations\` trong \`gameState.World.ongoingEvents\`.
+
+## 8. Hệ thống cấp độ Linh dược
+- Phàm giai / Huyền giai / Địa giai / Thiên giai.
+- Khi NPC hoặc người chơi thu được linh dược cấp Địa giai trở lên, cần tạo ảnh hưởng hệ quả (tranh đoạt, truy sát, chiêu mộ) vào \`gameState.World.ongoingEvents\`.
+
+## 9. Phân loại vật liệu Luyện khí
+- Ngũ Hành Tinh Kim, Tinh Thần Sa, Hư Không Thạch, Vật liệu Tiên Thiên.
+- Vật liệu cấp cao phải có độ hiếm phù hợp và hệ quả tương ứng với bối cảnh hiện tại.
+
+## 10. Tài nguyên chiến lược đặc biệt
+- Long Mạch, Linh Nhãn Chi Tuyền, Mỏ Quặng.
+- Tranh chấp tài nguyên quy mô thế lực phải được mô hình hóa thành sự kiện thế giới và có thể ảnh hưởng tuyến truyện chính.
+
 </world_evolution_protocol>
 `,
     type: 'num',
