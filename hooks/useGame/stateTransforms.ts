@@ -41,6 +41,17 @@ const coerceToString = (val: unknown): string => {
     }
     return String(val).trim();
 };
+const slugify = (text: string): string => {
+    if (!text) return '';
+    return text
+        .normalize('NFD') // Tách dấu
+        .replace(/[\u0300-\u036f]/g, '') // Xóa dấu
+        .toLowerCase()
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9]+/g, '_') // Thay ký tự đặc biệt bằng _
+        .replace(/^_+|_+$/g, ''); // Trim _
+};
+const generateAnonymousId = () => `npc_${Math.random().toString(36).substring(2, 11)}`;
 const getLocationFragment = (raw: unknown): string => coerceToString(raw);
 const removeSpecificLocationRedundancy = (specificRaw: string, smallRaw: string): string => {
     const specific = getLocationFragment(specificRaw);
@@ -611,15 +622,31 @@ export const standardizeSingleNPC = (rawNpc: any, fallbackIndex: number): any =>
 
     return {
         ...npc,
-        id: getFirstNonEmptyText(npc?.id, npc?.ID, `npc_${fallbackIndex}`) || `npc_${fallbackIndex}`,
+        id: (() => {
+            const rawId = getFirstNonEmptyText(npc?.id, npc?.ID);
+            // If it's a specific personal ID, slugify it
+            if (rawId && !/^(role|npc|char|unknown)_?\d*$/i.test(rawId)) {
+                return slugify(rawId);
+            }
+            // If ID is generic or missing, try to use slugified real name
+            const rawName = getFirstNonEmptyText(npc?.name, npc?.fullName, npc?.['Họ tên']);
+            // Check if name is NOT a title/generic (heuristic: common titles or generic patterns)
+            const isTitle = /^(trưởng|chủ|tiểu|đại|nhị|lính|người|vô danh|kẻ|hắc y|ngụy trang)/i.test(rawName || '');
+            if (rawName && !isTitle && !/^(role|npc|char|unknown)_?\d*$/i.test(rawName)) {
+                return slugify(rawName);
+            }
+            // Otherwise generate a unique anonymous ID for image generation consistency
+            return rawId && /^npc_[a-z0-9]{8,12}$/i.test(rawId) ? rawId : generateAnonymousId();
+        })(),
         name: (() => {
             const rawName = getFirstNonEmptyText(npc?.name, npc?.fullName, npc?.['Họ tên'], npc?.lastName);
-            const isGeneric = !rawName || /^(role|npc|char)_?\d+$/i.test(rawName);
-            if (isGeneric && typeof (npc?.identity || npc?.title || npc?.['Thân phận']) === 'string') {
+            const isGenericName = !rawName || /^(role|npc|char|unknown|vô danh)_?\d*$/i.test(rawName);
+            
+            if (isGenericName && typeof (npc?.identity || npc?.title || npc?.['Thân phận']) === 'string') {
                 const combined = [npc?.identity, npc?.title, npc?.['Thân phận']].filter(Boolean).join(' - ');
                 if (combined) return combined;
             }
-            return rawName || `Vô danh ${fallbackIndex}`;
+            return rawName || 'Vô danh';
         })(),
         gender: typeof npc?.gender === 'string' ? npc.gender : 'Unknown',
         age: Number.isFinite(Number(npc?.age)) ? Number(npc.age) : undefined,

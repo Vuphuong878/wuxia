@@ -26,7 +26,7 @@ export const coreDataFormat: PromptStructure = {
 - \`gameState.AppointmentList\` (Scheduled meetings/promises)
 
 ## 1. NPC Structure (Social/Team)
-- \`id\`, \`name\`, \`gender\`, \`age\`, \`identity\`, \`realm\`
+- \`id\` (BẮT BUỘC: \`snake_case\`, không dấu, permanent), \`name\`, \`gender\`, \`age\`, \`identity\`, \`realm\`
 - \`appearanceDescription\`: Visual description (Mandatory for key NPCs)
 - \`corePersonalityTraits\`: Personality description (Mandatory for accurate roleplay)
 - \`favorability\`: Number (Interpersonal point)

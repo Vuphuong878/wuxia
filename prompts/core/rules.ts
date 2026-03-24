@@ -28,7 +28,12 @@ export const CoreRules: PromptStructure = {
 - \`gameState.AppointmentList\`
 - \`gameState.PlayerSect\`
 
-## 3) Quy tắc NPC
+## 3) Quy tắc NPC (NHẤT QUÁN DANH TÍNH)
+- **Hợp nhất danh tính**: Khi một nhân vật xuất hiện lần đầu với tên riêng (VD: "Lão Lý"), AI phải quét danh sách NPC hiện có để tìm các danh xưng chung chung (VD: 'Trưởng Làng', 'Chị Dâu') phù hợp vai trò. Nếu tìm thấy, BẮT BUỘC gửi lệnh \`UPDATE\` cập nhật \`name\` thành tên riêng đó thay vì tạo NPC mới.
+- **Quy tắc tạo ID (Chỉ khi CREATE)**:
+  1. ID cơ sở = tên riêng \`snake_case\`, không dấu, viết thường (VD: \`lac_than\`).
+  2. Nếu trùng ID, thêm hậu tố số (\`_2\`, \`_3\`,...).
+  3. ID đã tạo là VĨNH VIỄN và KHÔNG ĐƯỢC THAY ĐỔI.
 - Cập nhật NPC xã hội qua \`gameState.Social[i].Field\` (VD: \`favorability\`, \`identity\`, \`memories\`).
 - Nhân vật rời cảnh phải set \`isPresent: false\`.
 - Tương tác xã hội phải ghi vào \`memories\` và cập nhật \`favorability\`.
