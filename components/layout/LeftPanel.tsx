@@ -2,11 +2,13 @@ import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom';
 import { CharacterData, NpcStructure, VisualSettings } from '../../types';
 import IconGlyph from '../ui/Icon/IconGlyph';
+import { useTranslation } from 'react-i18next';
 import { RadarChart, RadarData } from '../shared/RadarChart';
 import { StatBar } from '../shared/StatBar';
 import { ImageService } from '../../services/imageService';
 import { TextGenService } from '../../services/textGenService';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Dices } from 'lucide-react';
+import { OrnateBorder } from '../ui/decorations/OrnateBorder';
 
 interface Props {
     Role: CharacterData;
@@ -19,6 +21,7 @@ interface Props {
     generatingNames?: Set<string>;
     allAvatars?: Record<string, string>;
 }
+
 
 // Utility for specific avatars
 const getDynamicAvatar = (role: CharacterData, allAvatars?: Record<string, string>) => {
@@ -130,16 +133,18 @@ const MiniBodyPart: React.FC<{ name: string; current: number; max: number; statu
 
 
 // NPC Slot Miniature
-const NpcSlot: React.FC<{ npc: NpcStructure; visualConfig: VisualSettings; isGenerating?: boolean; allAvatars?: Record<string, string> }> = ({ npc, visualConfig, isGenerating, allAvatars }) => {
+const NpcSlot: React.FC<{ npc: NpcStructure; visualConfig: VisualSettings; isGenerating?: boolean; allAvatars?: Record<string, string>; onClick: (id: string) => void; isSelected: boolean }> = ({ npc, visualConfig, isGenerating, allAvatars, onClick, isSelected }) => {
+    const { t } = useTranslation();
+    
+    const tValue = (val?: string) => {
+        if (!val) return t('social.labels.unknown');
+        const translated = t(`social.values.${val}`);
+        return translated === `social.values.${val}` ? val : translated;
+    };
     const isNSFW = npc.socialNetworkVariables?.some(v => v.tags?.includes('NSFW')) || false;
     const [showTooltip, setShowTooltip] = useState(false);
     const [coords, setCoords] = useState({ top: 0, left: 0 });
     const slotRef = useRef<HTMLDivElement>(null);
-
-    // Sync when npc.avatar changes externally (e.g. after auto-generation in App.tsx)
-    useEffect(() => {
-        // No-op for now as App.tsx handles global state
-    }, [npc.avatar]);
 
     const handleMouseEnter = () => {
         if (slotRef.current) {
@@ -156,20 +161,20 @@ const NpcSlot: React.FC<{ npc: NpcStructure; visualConfig: VisualSettings; isGen
         setShowTooltip(false);
     };
 
-    // Central Avatar Mapping resolution
     const displayAvatar = (allAvatars && (allAvatars[npc.id] || allAvatars[npc.name])) || npc.avatar;
     const isGeneratingNow = isGenerating;
 
     return (
         <div 
             ref={slotRef}
-            className="relative group cursor-pointer"
+            className="relative group cursor-pointer w-full"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+            onClick={() => onClick(npc.id)}
         >
-            <div className={`w-14 h-14 rounded-2xl border border-white/10 overflow-hidden bg-black/40 backdrop-blur-md transition-all duration-500 group-hover:border-wuxia-gold/60 group-hover:scale-110 shadow-xl relative ${isNSFW ? 'ring-1 ring-wuxia-red/20' : ''}`}>
-                <div className={`h-full w-full flex items-center justify-center bg-gradient-to-br from-white/5 to-black/30 ${isNSFW ? 'blur-[2px] hover:blur-none transition-all duration-700' : ''}`}>
-                    {!displayAvatar && !isGenerating ? (
+            <div className={`w-full aspect-square max-w-[48px] mx-auto rounded-2xl border border-white/10 overflow-hidden bg-black/40 backdrop-blur-md transition-all duration-500 group-hover:border-wuxia-gold/60 group-hover:scale-110 shadow-xl relative ${isNSFW ? 'ring-1 ring-wuxia-red/20' : ''} ${isSelected ? 'border-wuxia-gold ring-2 ring-wuxia-gold/50' : ''}`}>
+                <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-white/5 to-black/30 ${isNSFW ? 'blur-[2px] hover:blur-none transition-all duration-700' : ''}`}>
+                    {!displayAvatar && !isGeneratingNow ? (
                         <div className="flex flex-col items-center justify-center text-wuxia-gold/40">
                             <IconGlyph name="user" className="w-8 h-8 opacity-20" />
                             <span className="text-[10px] font-serif font-black mt-1">
@@ -179,26 +184,34 @@ const NpcSlot: React.FC<{ npc: NpcStructure; visualConfig: VisualSettings; isGen
                     ) : displayAvatar ? (
                         <img src={displayAvatar} className="w-full h-full object-cover" alt={npc.name} />
                     ) : null}
-                    {isGenerating && (
+                    {isGeneratingNow && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                             <div className="w-4 h-4 border border-wuxia-gold/30 border-t-wuxia-gold rounded-full animate-spin"></div>
                         </div>
                     )}
                 </div>
+                
+                {/* NPC Name Tag Overlay */}
+                <div className="absolute inset-x-0 bottom-0 bg-black/80 py-0.5 px-0.5 border-t border-white/5 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <div className="text-[6px] text-paper-white/60 truncate text-center uppercase font-black tracking-tighter">
+                        {npc.name}
+                    </div>
+                </div>
+
                 {/* Status Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none"></div>
                 
                 {/* NSFW warning marker */}
                 {isNSFW && (
-                    <div className="absolute top-1 right-1 bg-wuxia-red/80 px-1 rounded text-[6px] text-white font-black uppercase animate-pulse">
+                    <div className="absolute top-0.5 right-0.5 bg-wuxia-red/80 px-0.5 rounded text-[5px] text-white font-black uppercase animate-pulse">
                         NSFW
                     </div>
                 )}
             </div>
             
-            {/* Presence indicator */}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-ink-black bg-wuxia-gold shadow-[0_0_10px_rgba(230,200,110,0.8)] z-10 flex items-center justify-center">
-                <div className="w-1 h-1 bg-black rounded-full rotate-45"></div>
+            {/* Presence indicator with gold glow */}
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#0a0a0a] bg-wuxia-gold shadow-[0_0_10px_rgba(230,200,110,0.8)] z-10 flex items-center justify-center">
+                <div className="w-1.5 h-1.5 bg-black rounded-full rotate-45"></div>
             </div>
             
             {/* Premium Tooltip - Rendered via Portal for absolute visibility */}
@@ -210,29 +223,56 @@ const NpcSlot: React.FC<{ npc: NpcStructure; visualConfig: VisualSettings; isGen
                         left: `${coords.left}px`,
                     }}
                 >
-                    <div className="bg-ink-black/95 border border-wuxia-gold/30 p-4 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] min-w-[200px] glass-panel backdrop-blur-xl animate-in fade-in zoom-in duration-200">
-                        <div className="text-wuxia-gold font-serif font-black text-xs border-b border-wuxia-gold/20 pb-2 mb-3 tracking-widest uppercase text-center truncate">{npc.name}</div>
-                        <div className="space-y-1.5">
-                            <div className="flex justify-between text-[8px]">
-                                <span className="text-paper-white/40 uppercase font-black">Thân phận</span>
-                                <span className="text-paper-white/80 italic">{npc.identity}</span>
+                    <div className="bg-[#0a0a0a]/95 border border-wuxia-gold/20 p-5 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] min-w-[240px] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200 ring-1 ring-white/5">
+                        {/* Shimmer line */}
+                        <div className="absolute top-0 left-5 right-5 h-px bg-gradient-to-r from-transparent via-wuxia-gold/30 to-transparent" />
+                        
+                        <div className="text-wuxia-gold font-serif font-black text-sm border-b border-wuxia-gold/10 pb-3 mb-4 tracking-[0.2em] uppercase text-center drop-shadow-sm">
+                            {npc.name}
+                        </div>
+                        
+                        <div className="space-y-4">
+                            {/* Identity and Realm */}
+                            <div className="flex flex-col gap-2">
+                                <div className="flex justify-between items-center text-[10px]">
+                                    <span className="text-paper-white/40 uppercase tracking-widest">{t('social.labels.identity')}</span>
+                                    <span className="text-paper-white font-serif italic text-right">{tValue(npc.identity)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[10px]">
+                                    <span className="text-paper-white/40 uppercase tracking-widest">{t('social.labels.realm')}</span>
+                                    <span className="text-wuxia-red font-black tracking-widest uppercase text-right">{tValue(npc.realm)}</span>
+                                </div>
                             </div>
-                            <div className="flex justify-between text-[8px]">
-                                <span className="text-paper-white/40 uppercase font-black">Cảnh giới</span>
-                                <span className="text-wuxia-cyan font-black">{npc.realm}</span>
-                            </div>
-                            {npc.favorability !== undefined && (
-                                <div className="pt-2 border-t border-white/5">
-                                    <div className="flex justify-between text-[8px] mb-1">
-                                        <span className="text-paper-white/40 uppercase font-black">Hảo cảm</span>
-                                        <span className="text-pink-400 font-black">{npc.favorability}%</span>
+
+                            {/* Relationship and Favorability */}
+                            <div className="border-t border-white/5 pt-3">
+                                <div className="flex justify-between items-end mb-2">
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] text-paper-white/30 uppercase font-black tracking-widest mb-1">{t('social.labels.relationStatus')}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-wuxia-gold animate-pulse"></div>
+                                            <span className="text-[10px] font-serif font-black text-wuxia-gold tracking-[0.15em] uppercase">{tValue(npc.relationStatus)}</span>
+                                        </div>
                                     </div>
-                                    <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden">
-                                         <div className="h-full bg-pink-500 shadow-[0_0_5px_rgba(236,72,153,0.5)] rounded-full" style={{ width: `${npc.favorability}%` }}></div>
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-[8px] text-paper-white/30 uppercase font-black tracking-widest mb-1">{t('social.labels.favorability')}</span>
+                                        <span className="text-xl font-black text-wuxia-red font-mono leading-none">{npc.favorability}</span>
                                     </div>
                                 </div>
-                            )}
+                                <div className="h-[3px] w-full bg-white/5 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-wuxia-red/80 shadow-[0_0_8px_rgba(180,50,50,0.4)] transition-all duration-1000" 
+                                        style={{ width: `${Math.min(npc.favorability || 0, 100)}%` }}
+                                    ></div>
+                                </div>
+                            </div>
                         </div>
+                        
+                        {/* Decorative corners */}
+                        <div className="absolute top-2 left-2 w-1 h-1 border-t border-l border-wuxia-gold/20" />
+                        <div className="absolute top-2 right-2 w-1 h-1 border-t border-r border-wuxia-gold/20" />
+                        <div className="absolute bottom-2 left-2 w-1 h-1 border-b border-l border-wuxia-gold/20" />
+                        <div className="absolute bottom-2 right-2 w-1 h-1 border-b border-r border-wuxia-gold/20" />
                     </div>
                 </div>,
                 document.body
@@ -242,6 +282,8 @@ const NpcSlot: React.FC<{ npc: NpcStructure; visualConfig: VisualSettings; isGen
 };
 
 const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visualConfig, onUpdateCharacter, isProfile = false, isGenerating = false, generatingNames, allAvatars }) => {
+
+
     const radarData = useMemo(() => {
         const stats = {
             strength: Role.strength,
@@ -322,8 +364,8 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
     };
 
 
-    return (
-        <div className="h-full flex flex-col p-6 relative bg-transparent glass-panel">
+    const innerContent = (
+        <>
             {/* Background Texture Overlay */}
             <div className="absolute inset-0 bg-ink-wash opacity-10 pointer-events-none mix-blend-overlay"></div>
             
@@ -360,7 +402,7 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
                             {avatarUrl ? (
                                 <img 
                                     src={avatarUrl} 
-                                    className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms] ease-out ${isGenerating ? 'opacity-40 blur-sm' : 'opacity-80'}`} 
+                                    className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2000ms] ease-out`} 
                                     alt={Role.name} 
                                 />
                             ) : (
@@ -533,6 +575,38 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
                 )}
                 
 
+
+                {/* ── Nội viện (Tòng hành) ── */}
+                {!isProfile && (
+                    <div className="mt-6 border-t border-white/5 pt-4">
+                        <div className="flex items-center justify-between mb-3 px-1">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black text-wuxia-gold/40 uppercase tracking-[0.2em]">Nội viện tòng hành</span>
+                                <span className="text-[10px] text-white/20 font-bold">[{presentNpcs.length}]</span>
+                            </div>
+                            
+                        </div>
+                        
+                        <div className="grid grid-cols-4 gap-2 px-1">
+                            {presentNpcs.slice(0, 4).map((npc) => (
+                                <NpcSlot 
+                                    key={npc.id} 
+                                    npc={npc} 
+                                    visualConfig={visualConfig} 
+                                    isGenerating={generatingNames?.has(npc.name)}
+                                    allAvatars={allAvatars} 
+                                />
+                            ))}
+                            {/* Fill remaining slots if < 4 */}
+                            {Array.from({ length: Math.max(0, 4 - presentNpcs.length) }).map((_, idx) => (
+                                <div key={`empty-${idx}`} className="aspect-square bg-black/40 border border-white/5 relative flex items-center justify-center opacity-30">
+                                    <div className="w-full h-full flex items-center justify-center text-white/10 uppercase font-black text-[8px]">Trống</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Wealth Redesign */}
                 <div className="px-5 py-4 bg-transparent border border-wuxia-gold/20 rounded-xl relative group/wealth">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-wuxia-gold/5 blur-3xl rounded-full -mr-12 -mt-12 group-hover:bg-wuxia-gold/10 transition-all duration-1000"></div>
@@ -590,7 +664,23 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
             
             {/* Ink Wash Vignette Ornament */}
             <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-ink-wash opacity-20 blur-3xl pointer-events-none rounded-full select-none"></div>
-        </div>
+        </>
+    );
+
+    if (isProfile) {
+        return (
+            <div className="h-full flex flex-col p-6 relative bg-transparent glass-panel">
+                {innerContent}
+            </div>
+        );
+    }
+
+    return (
+        <OrnateBorder className="h-full bg-ink-black/95 !rounded-none !p-0">
+            <div className="h-full flex flex-col p-6 relative bg-transparent">
+                {innerContent}
+            </div>
+        </OrnateBorder>
     );
 };
 

@@ -639,7 +639,6 @@ const extractFirstTagContent = (
 const standardizedLogSender = (senderRaw: string): string => {
     const sender = (senderRaw || '').trim();
     if (!sender) return 'Narrator';
-    if (sender === 'Judgment' || sender === '【Judgment】') return '【Judgment】';
     return sender;
 };
 

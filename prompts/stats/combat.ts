@@ -21,15 +21,11 @@ export const StatCombat: PromptStructure = {
 - Hình phạt: Giảm \`agility\`, \`strength\` hoặc khả năng thi triển võ công tùy thuộc vào bộ phận bị thương.
 - Xuất huyết (\`bleeding\`): Trừ HP mỗi lượt cho đến khi được cầm máu.
 
-## 4. Định dạng Log Phán định (Judgment Log)
-- Mỗi đòn đánh phải có dòng \`【Phán định】\` mô tả kết quả kỹ thuật:
-- Ví dụ: \`【Phán định】 Bạn tung ra một chiêu "Hắc Hổ Đào Tâm", đối thủ né tránh không kịp, trúng đòn vào ngực. Sát thương: 45. Trạng thái: Nội thương nhẹ.\`
-
-## 5. Quy trình Chiến đấu
+## 4. Quy trình Chiến đấu
 - Xác định thứ tự ra đòn (Initiative) dựa trên \`agility\`.
 - Lựa chọn chiêu thức -> Phán định trúng/trượt -> Tính toán sát thương -> Cập nhật trạng thái cơ thể.
 
-## 6. Ví dụ Lệnh (Hợp lệ)
+## 5. Ví dụ Lệnh (Hợp lệ)
 - \`{"action": "ADD", "key": "gameState.Character.chest.currentHp", "value": -45}\`
 - \`{"action": "SET", "key": "gameState.Character.chest.status", "value": "Nội thương nhẹ"}\`
 - \`{"action": "SET", "key": "gameState.Battle.isCombatActive", "value": true}\`

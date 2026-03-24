@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { GameResponse } from '../../../types';
-import { NarratorRenderer, CharacterRenderer, JudgmentRenderer, InnerThoughtRenderer, FlashbackRenderer, SystemRenderer, SceneryRenderer } from './MessageRenderers';
+import { NarratorRenderer, CharacterRenderer, InnerThoughtRenderer, FlashbackRenderer, SystemRenderer, SceneryRenderer } from './MessageRenderers';
 import GameButton from '../../ui/GameButton';
 import { parseStoryRawText } from '../../../services/aiService';
 
@@ -312,10 +312,6 @@ const TurnItem: React.FC<Props> = ({ response, turnNumber, isLatest = false, raw
                 {displayLogs.map((log, idx) => {
                     if (log.sender === 'Narrator' || log.sender === 'Background' || log.sender === 'Bối cảnh') {
                         return <NarratorRenderer key={idx} text={log.text} />;
-                    } else if (log.sender === '【Judgment】' || log.sender === 'Judgment' || log.sender === 'Phán định') {
-                        return <JudgmentRenderer key={idx} text={log.text} />;
-                    } else if (log.sender === '【NSFWJudgment】') {
-                        return <JudgmentRenderer key={idx} text={log.text} isNsfw={true} />;
                     } else if (log.sender === 'InnerThought' || log.sender === 'Nội tâm') {
                         // Find the nearest previous character speaker for context
                         const prevSpeaker = idx > 0

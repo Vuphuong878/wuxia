@@ -692,14 +692,18 @@ export const applyStateCommand = (
     const parts = path.split('.').filter(p => p !== "").map(p => {
         let partName = p;
         let index: number | undefined = undefined;
+        
+        // Handle parts like "TaskList[0]" or standalone "[0]"
         if (p.includes('[') && p.includes(']')) {
-            partName = p.split('[')[0];
-            index = parseInt(p.split('[')[1].replace(']', ''));
+            const bracketStart = p.indexOf('[');
+            const bracketEnd = p.indexOf(']');
+            partName = p.substring(0, bracketStart);
+            index = parseInt(p.substring(bracketStart + 1, bracketEnd));
         }
         
         // Translate Vietnamese key if mapped
         const pLower = partName.toLowerCase();
-        if (VIETNAMESE_SUBKEY_MAP[partName] !== undefined || NORMALIZED_SUBKEY_MAP[pLower] !== undefined) {
+        if (partName !== "" && (VIETNAMESE_SUBKEY_MAP[partName] !== undefined || NORMALIZED_SUBKEY_MAP[pLower] !== undefined)) {
             // Context-aware mapping for "Bản đồ"
             if (pLower === "bản đồ" && key.toLowerCase().startsWith("gamestate.world")) {
                 partName = "maps";
@@ -709,7 +713,7 @@ export const applyStateCommand = (
         }
         
         return { name: partName, index };
-    }).filter(p => p.name !== ""); // Skip collapsed category segments
+    }).filter(p => p.name !== "" || p.index !== undefined); // Keep segments that have either a name or an index
     
     // Body part flattening: combine head + CurrentHp -> headCurrentHp
     const BODY_PARTS = ['head', 'chest', 'abdomen', 'leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
@@ -746,8 +750,6 @@ export const applyStateCommand = (
         }
     }
 
-    if (parts.length === 0) return { char: newChar, env: newEnv, social: newSocial, world: newWorld, battle: newBattle, story: newStory, taskList: newTaskList, appointmentList: newAppointmentList, playerSect: newPlayerSect };
-
     let current = targetObj;
     
     // Iterate to find the parent of the target property
@@ -779,10 +781,26 @@ export const applyStateCommand = (
 
     const effectiveKey = (finalObj === newChar && finalKey === 'weight') ? 'currentWeight' : finalKey;
 
+    // Status mapping logic
+    const isStatusUpdate = lastPart.name.toLowerCase().includes('status') || 
+                          lastPart.name.toLowerCase().includes('trạng thái');
+    
+    let processedValue = translateObjectKeys(value);
+    
+    if (isStatusUpdate && typeof value === 'string') {
+        const s = value.trim();
+        if (s === "Đã nhận" || s === "Đang nhận" || s === "Đang thực hiện") processedValue = "Đang thực hiện";
+        else if (s === "Hoàn thành") {
+            // Tasks use "Đã hoàn thành", appointments might use "Đã thực hiện"
+            processedValue = key.toLowerCase().includes('task') ? "Đã hoàn thành" : "Đã thực hiện";
+        }
+        else if (s === "Thất bại") processedValue = "Thất bại";
+        else if (s === "Có thể nộp") processedValue = "Có thể nộp";
+    }
+
     if (normalizedAction === 'set') {
-        const translatedValue = translateObjectKeys(value);
-        if (lastPart.index !== undefined) finalObj[lastPart.index] = translatedValue;
-        else finalObj[effectiveKey] = translatedValue;
+        if (lastPart.index !== undefined) finalObj[lastPart.index] = processedValue;
+        else finalObj[effectiveKey] = processedValue;
     } else if (normalizedAction === 'add') {
         if (lastPart.index !== undefined) finalObj[lastPart.index] = (finalObj[lastPart.index] || 0) + Number(value);
         else finalObj[effectiveKey] = (finalObj[effectiveKey] || 0) + Number(value);
@@ -797,12 +815,11 @@ export const applyStateCommand = (
             else finalObj[effectiveKey] = arrayToPush;
         }
         
-        const translatedValue = translateObjectKeys(value);
-        if ((key.endsWith('.memories') || finalKey === 'memories') && typeof translatedValue === 'object' && !translatedValue.time) {
-             translatedValue.time = newEnv.time || `${newEnv.Year || ''}:${String(newEnv.Month || 0).padStart(2,'0')}:${String(newEnv.Day || 0).padStart(2,'0')}:${String(newEnv.Hour || 0).padStart(2,'0')}:00`; 
+        if ((key.endsWith('.memories') || finalKey === 'memories') && typeof processedValue === 'object' && !processedValue.time) {
+             processedValue.time = newEnv.time || `${newEnv.Year || ''}:${String(newEnv.Month || 0).padStart(2,'0')}:${String(newEnv.Day || 0).padStart(2,'0')}:${String(newEnv.Hour || 0).padStart(2,'0')}:00`; 
         }
         
-        arrayToPush.push(translatedValue);
+        arrayToPush.push(processedValue);
     } else if (normalizedAction === 'delete') {
         if (lastPart.index !== undefined) {
             if (Array.isArray(finalObj) && lastPart.index >= 0 && lastPart.index < finalObj.length) {

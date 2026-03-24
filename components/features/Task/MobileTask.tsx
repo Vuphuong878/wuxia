@@ -5,6 +5,7 @@ import IconGlyph from '../../ui/Icon/IconGlyph';
 interface Props {
     tasks: QuestStructure[];
     onClose: () => void;
+    onDeleteTask?: (task: any) => void;
 }
 
 // Helper to read task fields with fallback names
@@ -15,7 +16,7 @@ const getField = (task: any, ...keys: string[]) => {
     return '';
 };
 
-const MobileTask: React.FC<Props> = ({ tasks, onClose }) => {
+const MobileTask: React.FC<Props> = ({ tasks, onClose, onDeleteTask }) => {
     const [filter, setFilter] = useState<QuestType | 'Tất cả'>('Tất cả');
     const [selectedIdx, setSelectedIdx] = useState<number>(0);
 
@@ -98,8 +99,16 @@ const MobileTask: React.FC<Props> = ({ tasks, onClose }) => {
                                 Cảnh giới: <span className="text-wuxia-cyan">{getField(currentTask, 'recommendedRealm', 'Recommended realm')}</span>
                             </div>
                             <p className="text-sm text-gray-300 font-serif leading-relaxed">"{getField(currentTask, 'description', 'Description')}"</p>
-                            <div className="flex gap-2 flex-wrap">
+                            <div className="flex gap-2 flex-wrap items-center justify-between">
                                 <span className={`text-[9px] px-2 py-0.5 rounded border ${getTypeLabelColor(getField(currentTask, 'type', 'Type'))}`}>{getField(currentTask, 'type', 'Type')}</span>
+                                {onDeleteTask && (
+                                    <button
+                                        onClick={() => onDeleteTask(currentTask)}
+                                        className="px-3 py-1 bg-wuxia-red/10 border border-wuxia-red/30 text-wuxia-red text-[10px] font-bold rounded-none"
+                                    >
+                                        XÓA NHIỆM VỤ
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ) : (

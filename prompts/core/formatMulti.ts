@@ -39,8 +39,7 @@ export const Core_OutputFormat_MultiThought: PromptStructure = {
     {"sender": "Character Name", "text": "Lời thoại... (Vietnamese)"},
     {"sender": "InnerThought", "text": "Suy nghĩ nội tâm... (Vietnamese)"},
     {"sender": "Flashback", "text": "Hồi ức... (Vietnamese)"},
-    {"sender": "System", "text": "Thông báo... (Vietnamese)"},
-    {"sender": "Judgment", "text": "【Judgment】 Hành động｜Kết quả｜..."}
+    {"sender": "System", "text": "Thông báo... (Vietnamese)"}
   ],
   "shortTerm": "Tóm tắt ngắn (Vietnamese)",
   "t_logcheck": "Kiểm tra nhất quán... (Vietnamese)",
@@ -61,7 +60,7 @@ export const Core_OutputFormat_MultiThought: PromptStructure = {
 \`\`\`
 
 ## 1) Logs Rules
-- Senders: Background, Judgment, InnerThought, Flashback, System, Scenery.
+- Senders: Background, InnerThought, Flashback, System, Scenery.
 - Use "Background" for narration, "Character Name" for dialogue.
 - Use asterisks \`*\` to wrap proper nouns.
 - Content must be entirely in VIETNAMESE.

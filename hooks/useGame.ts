@@ -25,7 +25,7 @@ import * as aiService from '../services/aiService';
 import { applyStateCommand } from '../utils/stateHelpers';
 import { estimateTextTokens } from '../utils/tokenEstimate';
 import { useGameState } from './useGameState';
-import { normalizeApiSettings, getMainStoryApiConfig, getRecallApiConfig, isApiConfigUsable, hasAnyAiBackend } from '../utils/apiConfig';
+import { normalizeApiSettings, getMainStoryApiConfig, getRecallApiConfig, isApiConfigUsable, hasAnyAiBackend, getCurrentApiConfig } from '../utils/apiConfig';
 import type { ApiConfig } from '../types';
 import {
     standardizeMemorySystem,
@@ -51,6 +51,7 @@ import {
     defaultExtraSystemPrompt
 } from '../prompts/runtime/defaults';
 import { buildAICharacterDeclarationPrompt } from '../prompts/runtime/roleIdentity';
+import { standardizeSingleNPC } from './useGame/stateTransforms';
 import {
     constructWordCountRequirementPrompt,
     constructDisclaimerOutputPrompt as constructDisclaimerOutputRequirementsPrompt,
@@ -198,6 +199,7 @@ export const useGame = () => {
         activeTab, setActiveTab,
 
         isGenerating, setIsGenerating,
+        isNpcGachaLoading, setIsNpcGachaLoading,
         generationStartTime, setGenerationStartTime,
         generationMetadata, setGenerationMetadata,
 
@@ -2719,6 +2721,77 @@ YÊU CẦU ĐỊNH DẠNG JSON (BẮT BUỘC):
         setShowSaveLoad({ show: false, mode: 'load' });
     };
 
+    const handleGachaNpc = async () => {
+        const currentApi = getCurrentApiConfig(apiConfig);
+        if (!hasAnyAiBackend(currentApi, visualConfig.textGenWorkerUrl)) {
+            alert("Vui lòng cấu hình API trong phần Cài đặt hoặc đảm bảo hệ thống có kết nối mạng.");
+            return;
+        }
+
+        setIsNpcGachaLoading(true);
+        try {
+            const protagonistName = character.name || "Nhân vật chính";
+            
+            const prompt = `
+Hãy tạo một NPC (Nhân vật phụ) mới ngẫu nhiên cho thế giới kiếm hiệp/tiên hiệp hiện tại. 
+Nhân vật này sẽ là một "Tòng hành" (người đồng hành/thuộc hạ) có thể xuất hiện trong Nội viện của ${protagonistName}.
+
+Yêu cầu định dạng JSON cực kỳ nghiêm ngặt:
+{
+  "npc": {
+    "id": "NPC_" + chuỗi ngẫu nhiên,
+    "name": "Tên nhân vật",
+    "gender": "Nam/Nữ",
+    "age": số tuổi,
+    "identity": "Thân phận/Nghề nghiệp",
+    "realm": "Cảnh giới (ví dụ: Luyện Khí tầng 1, Phàm nhân...)",
+    "personality": "Tính cách chính",
+    "favorability": 50,
+    "relationStatus": "Tòng hành",
+    "isPresent": true,
+    "currentLocation": "${environment.currentAreaId || environment.currentRegionId || 'unknown'}",
+    "status": "Bình thường",
+    "combatPower": số sức mạnh ngẫu nhiên phù hợp cảnh giới
+  }
+}
+
+Chỉ trả về JSON, không giải thích gì thêm.
+`;
+
+            const aiResult = await aiService.generateStoryResponse(
+                "Bạn là một người dẫn truyện kiếm hiệp. Hãy tạo NPC theo yêu cầu JSON.",
+                `Nhân vật chính: ${protagonistName}. Cảnh giới: ${character.realm || 'Phàm nhân'}.`,
+                prompt,
+                currentApi,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                visualConfig.textGenWorkerUrl
+            );
+
+            const rawText = aiResult.rawText || "";
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                const parsed = JSON.parse(jsonMatch[0]);
+                if (parsed.npc) {
+                    const newNpc = standardizeSingleNPC(parsed.npc, social.length);
+                    setSocial(prev => {
+                        const newList = [...(Array.isArray(prev) ? prev : []), newNpc];
+                        return standardizeSocialList(newList, { mergeSameNames: true });
+                    });
+                }
+            } else {
+                throw new Error("Không thể phân giải dữ liệu NPC từ AI.");
+            }
+        } catch (error) {
+            console.error("Gacha NPC failed:", error);
+            alert("Không thể chiêu mộ tòng hành lúc này. Vui lòng thử lại sau.");
+        } finally {
+            setIsNpcGachaLoading(false);
+        }
+    };
+
     const updateNpcMajorRole = (npcId: string, isMajor: boolean) => {
         if (!npcId) return;
         setSocial((prev) => {
@@ -2746,7 +2819,7 @@ YÊU CẦU ĐỊNH DẠNG JSON (BẮT BUỘC):
             setShowSettings, setShowInventory, setShowEquipment, setShowSocial, setShowTeam, setShowKungfu, setShowWorld, setShowMap, setShowSect, setShowTask, setShowAgreement, setShowStory, setShowMemory, setShowSaveLoad,
             setActiveTab, setCurrentTheme,
             setApiConfig, setVisualConfig, setPrompts,
-            setBattle
+            setBattle, setCharacter, setSocial, setWorld, setPlayerSect, setTaskList, setAppointmentList, setStory, setHistory, setEnvironment
         },
         actions: {
             handleSend,
@@ -2762,6 +2835,7 @@ YÊU CẦU ĐỊNH DẠNG JSON (BẮT BUỘC):
             handleReturnToHome,
             handleQuickRestart,
             updateNpcMajorRole,
+            handleGachaNpc,
             handleSummarizeChapter,
             getContextSnapshot: buildContextSnapshot
         }

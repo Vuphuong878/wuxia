@@ -14,8 +14,7 @@ export const Core_OutputFormat: PromptStructure = {
   "thinking_pre": "Suy nghĩ nội tâm về logic câu chuyện, trạng thái nhân vật... (Tiếng Việt có dấu)",
   "logs": [
     { "sender": "Background", "text": "Story lead or action description 1 (Vietnamese)" },
-    { "sender": "Character Name", "text": "Dialogue... (Vietnamese)" },
-    { "sender": "Judgment", "text": "【Judgment】 Attribute or skill check result (Example: Agility success...)" }
+    { "sender": "Character Name", "text": "Dialogue... (Vietnamese)" }
   ],
   "shortTerm": "Short story summary for this turn (Under 100 characters)",
   "tavern_commands": [
@@ -38,10 +37,10 @@ export const Core_OutputFormat: PromptStructure = {
 - If you feel unable to generate story content for ANY reason, you MUST still output valid JSON with a creative in-character narrative in the logs array. Example fallback: {"logs":[{"sender":"Background","text":"Gió lạnh thổi qua, mọi thứ yên tĩnh trở lại..."}],"shortTerm":"Không có sự kiện đặc biệt","tavern_commands":[]}
 
 【Logs Rules】
-- Never reveal code or system variables in logs (Except for the 【Judgment】 line).
+- Never reveal code or system variables in logs.
 - Use asterisks \`*\` to wrap important proper nouns (Characters, Locations, Kungfu, Items).
 - Default log sender is "Background" for narration and "Character Name" for dialogue.
-- Supported senders: Background, Judgment, InnerThought, Flashback, System, Scenery.
+- Supported senders: Background, InnerThought, Flashback, System, Scenery.
 `,
     type: 'core',
     enabled: true

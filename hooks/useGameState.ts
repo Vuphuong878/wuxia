@@ -60,7 +60,7 @@ export const useGameState = () => {
             title: '',
             realm: '',
             talentList: [],
-            background: { name: '', description: '', effect: '' },
+            background: { name: '', description: '', effect: '', rank: 'Bình thường' },
             sectId: 'none',
             sectPosition: 'None',
             sectContribution: 0,
@@ -245,6 +245,7 @@ export const useGameState = () => {
     const [showMemory, setShowMemory] = useState(false);
     const [showSaveLoad, setShowSaveLoad] = useState<{ show: boolean, mode: 'save' | 'load' }>({ show: false, mode: 'save' });
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isNpcGachaLoading, setIsNpcGachaLoading] = useState(false);
     const [generationStartTime, setGenerationStartTime] = useState<number | undefined>(undefined);
     const [generationMetadata, setGenerationMetadata] = useState<{ input: number, output: number } | undefined>(undefined);
 
@@ -525,6 +526,7 @@ export const useGameState = () => {
         storyId, setStoryId,
         activeTab, setActiveTab,
         isGenerating, setIsGenerating,
+        isNpcGachaLoading, setIsNpcGachaLoading,
         generationStartTime, setGenerationStartTime,
         generationMetadata, setGenerationMetadata,
 

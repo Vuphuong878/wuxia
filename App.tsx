@@ -110,6 +110,22 @@ const App: React.FC = () => {
         return '';
     };
 
+    const handleDeleteItem = React.useCallback((itemId: string) => {
+        setters.setCharacter(prev => {
+            const itemToDelete = prev.itemList.find(i => i.id === itemId);
+            const itemWeight = Number(itemToDelete?.weight || (itemToDelete as any)?.Weight || 0);
+            return {
+                ...prev,
+                itemList: prev.itemList.filter(i => i.id !== itemId),
+                currentWeight: Math.max(0, Number((prev.currentWeight || 0).toFixed(2)) - itemWeight)
+            };
+        });
+    }, [setters]);
+
+    const handleDeleteTask = React.useCallback((task: any) => {
+        setters.setTaskList(prev => prev.filter(t => t !== task));
+    }, [setters]);
+
     const parseGameTimestampToNumber = (timeInput?: any): number => {
         if (!timeInput) return 0;
         
@@ -467,6 +483,8 @@ const App: React.FC = () => {
                                 isGenerating={isGeneratingProtagonist}
                                 generatingNames={generatingNpcs}
                                 allAvatars={allAvatars}
+                                isGachaLoading={state.isNpcGachaLoading}
+                                onGachaNpcs={actions.handleGachaNpc}
                             />
                         </div>
 
@@ -747,6 +765,7 @@ const App: React.FC = () => {
                         <InventoryModal
                             character={state.character}
                             onClose={() => setters.setShowInventory(false)}
+                            onDeleteItem={handleDeleteItem}
                         />
                     )}
 
@@ -852,11 +871,13 @@ const App: React.FC = () => {
                             <TaskModal
                                 tasks={state.taskList}
                                 onClose={() => setters.setShowTask(false)}
+                                onDeleteTask={handleDeleteTask}
                             />
                             {isMobile && (
                                 <MobileTask
                                     tasks={state.taskList}
                                     onClose={() => setters.setShowTask(false)}
+                                    onDeleteTask={handleDeleteTask}
                                 />
                             )}
                         </>

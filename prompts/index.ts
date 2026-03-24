@@ -32,7 +32,6 @@ import { StatItemWeight } from './stats/itemWeight';
 
 // Difficulty
 import { Difficulty_Game } from './difficulty/game';
-import { Difficulty_Judgment } from './difficulty/check';
 import { Difficulty_Physiology } from './difficulty/physiology';
 
 // Writing
@@ -75,7 +74,6 @@ export const DefaultPrompts: PromptStructure[] = [
 
     // Difficulty (Arrays)
     ...Difficulty_Game,
-    ...Difficulty_Judgment,
     ...Difficulty_Physiology,
 
     // Writing

@@ -6,6 +6,7 @@ import IconGlyph from '../../ui/Icon/IconGlyph';
 interface Props {
     tasks: QuestStructure[];
     onClose: () => void;
+    onDeleteTask?: (task: QuestStructure) => void;
 }
 
 // Helper to read task fields with fallback names
@@ -16,7 +17,7 @@ const getField = (task: any, ...keys: string[]) => {
     return '';
 };
 
-const TaskModal: React.FC<Props> = ({ tasks, onClose }) => {
+const TaskModal: React.FC<Props> = ({ tasks, onClose, onDeleteTask }) => {
     const [filter, setFilter] = useState<QuestType | 'Tất cả'>('Tất cả');
     const [selectedIdx, setSelectedIdx] = useState<number>(0);
 
@@ -115,9 +116,25 @@ const TaskModal: React.FC<Props> = ({ tasks, onClose }) => {
                                             <span className={`font-bold font-serif ${isSelected ? 'text-wuxia-gold' : 'text-gray-300'}`}>
                                                 {getField(task, 'title', 'Title')}
                                             </span>
-                                            <span className={`text-[10px] ${getStatusColor(getField(task, 'currentStatus', 'status', 'Current status', 'Status'))}`}>
-                                                {getField(task, 'currentStatus', 'status', 'Current status', 'Status')}
-                                            </span>
+                                            <div className="flex items-center gap-1">
+                                                <span className={`text-[10px] ${getStatusColor(getField(task, 'currentStatus', 'status', 'Current status', 'Status'))}`}>
+                                                    {getField(task, 'currentStatus', 'status', 'Current status', 'Status')}
+                                                </span>
+                                                {onDeleteTask && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onDeleteTask(task);
+                                                        }}
+                                                        className="p-1 hover:text-wuxia-red opacity-0 group-hover:opacity-100 transition-all"
+                                                        title="Xóa nhiệm vụ"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <span className={`text-[9px] px-1.5 rounded-none border ${getTypeLabelColor(getField(task, 'type', 'Type'))}`}>
@@ -144,8 +161,7 @@ const TaskModal: React.FC<Props> = ({ tasks, onClose }) => {
                                 <div className="absolute inset-0 opacity-5 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/paper.png')]"></div>
 
                                 {/* Header */}
-                                <div className="border-b border-gray-800 pb-4 mb-4 relative z-10">
-                                    <div className="flex justify-between items-start">
+                                                         <div className="flex justify-between items-start">
                                         <div>
                                             <h2 className="text-3xl font-black font-serif text-wuxia-gold mb-2">{getField(currentTask, 'title', 'Title')}</h2>
                                             <div className="flex gap-4 text-xs text-gray-400">
@@ -154,11 +170,25 @@ const TaskModal: React.FC<Props> = ({ tasks, onClose }) => {
                                                 <span>Cảnh giới: <span className="text-wuxia-cyan">{getField(currentTask, 'recommendedRealm', 'Recommended realm', 'realm')}</span></span>
                                             </div>
                                         </div>
-                                        <div className={`text-4xl font-serif font-bold opacity-20 rotate-12 select-none ${getStatusColor(getField(currentTask, 'currentStatus', 'Current status'))}`}>
-                                            {getField(currentTask, 'currentStatus', 'Current status')}
+                                        <div className="flex flex-col items-end gap-2">
+                                            <div className={`text-4xl font-serif font-bold opacity-20 rotate-12 select-none ${getStatusColor(getField(currentTask, 'currentStatus', 'Current status'))}`}>
+                                                {getField(currentTask, 'currentStatus', 'Current status')}
+                                            </div>
+                                            {onDeleteTask && (
+                                                <button
+                                                    onClick={() => onDeleteTask(currentTask)}
+                                                    className="px-4 py-2 border border-wuxia-red/30 text-wuxia-red bg-wuxia-red/5 hover:bg-wuxia-red/10 flex items-center gap-2 text-xs transition-all tracking-widest font-bold"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                    </svg>
+                                                    XÓA NHIỆM VỤ
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
-                                </div>
+
+
 
                                 {/* Description */}
                                 <div className="bg-ink-black/20 p-6 rounded-none border border-gray-800 relative z-10">

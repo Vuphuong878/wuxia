@@ -126,7 +126,9 @@
         "appearanceData": "Dữ Liệu Ngoại Hình",
         "sacredUnion": "Dấu Ấn Đầu Tiên",
         "sharedPath": "Ký ỨC TRƯỜNG HÀ",
-        "bodyDevelopment": "Cơ Thể Phát Triển Tiến Độ"
+        "bodyDevelopment": "Cơ Thể Phát Triển Tiến Độ",
+        "inkHaze": "Mặc hý truyền kỳ",
+        "photo4k": "Họa ảnh 4K"
       },
       "labels": {
         "target": "Mối liên kết",
@@ -154,8 +156,13 @@
         "noBiography": "Lai lịch bất định, hành tung bí hiểm.",
         "noAppearance": "Dung mạo chưa rõ, khí chất phi phàm.",
         "noLustRecords": "Dục tính chưa bộc lộ.",
-        "sacredUnionTitle": "ĐẤO ẤN NGUYÊN THỦY",
-        "hero": "Thiếu hiệp"
+        "sacredUnionTitle": "DẤO ẤN NGUYÊN THỦY",
+        "sacredUnionSubtitle": "Lược Sử Riêng Tư • Chỉ dành cho chủ nhân",
+        "hero": "Thiếu hiệp",
+        "viewer": "Người xem",
+        "almanac": "LÂM SÀNG BẢNG",
+        "totalArousal": "Tổng huyệt phát",
+        "memoryRiver": "Ký ỨC TRƯỜNG HÀ"
       },
       "values": {
         "Male": "Nam",

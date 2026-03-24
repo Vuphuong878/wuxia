@@ -21,9 +21,10 @@ import { GameItem } from '../../../models/item';
 interface Props {
     character: CharacterData;
     onClose: () => void;
+    onDeleteItem?: (itemId: string) => void;
 }
 
-const InventoryModal: React.FC<Props> = ({ character, onClose }) => {
+const InventoryModal: React.FC<Props> = ({ character, onClose, onDeleteItem }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
     const [showMobileSidebar, setShowMobileSidebar] = useState(false);
@@ -336,11 +337,11 @@ const InventoryModal: React.FC<Props> = ({ character, onClose }) => {
 
                                             {/* Action Hover Overlay - Desktop Onlyish */}
                                             <div className={`absolute inset-0 bg-black/90 flex flex-col items-center justify-center gap-3 transition-opacity duration-300 opacity-0 group-hover:opacity-100 border border-wuxia-gold/40`}>
-                                                <button className="w-32 bg-wuxia-gold text-black py-2 text-[10px] font-black uppercase tracking-widest transition-transform hover:scale-105 active:scale-95">
-                                                    Sử dụng
-                                                </button>
-                                                <button className="w-32 bg-white/5 border border-white/10 text-white/60 py-2 text-[10px] font-black uppercase tracking-widest transition-transform hover:bg-white/10 hover:text-white">
-                                                    Chi tiết
+                                                <button 
+                                                    onClick={() => onDeleteItem?.(item.id)}
+                                                    className="w-32 bg-red-600/80 hover:bg-red-700 text-white py-2 text-[10px] font-black uppercase tracking-widest transition-transform hover:scale-105 active:scale-95"
+                                                >
+                                                    Xóa
                                                 </button>
                                             </div>
                                         </div>

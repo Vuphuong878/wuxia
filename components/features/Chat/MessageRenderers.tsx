@@ -1,129 +1,7 @@
-
 import React from 'react';
 import IconGlyph from '../../ui/Icon/IconGlyph';
+import { useTranslation } from 'react-i18next';
 
-type JudgmentModifier = {
-    key: string;
-    label: string;
-    value: number | null;
-    reason?: string;
-    raw: string;
-};
-
-type ParsedJudgment = {
-    eventName: string;
-    result: string;
-    target: string;
-    score: number;
-    difficulty: number;
-    modifiers: JudgmentModifier[];
-};
-
-const createEmptyJudgment = (): ParsedJudgment => ({
-    eventName: 'Sự kiện kiểm tra',
-    result: 'Không xác định',
-    target: 'Bản thân',
-    score: 0,
-    difficulty: 0,
-    modifiers: []
-});
-
-const MODIFIER_LABELS: Record<string, string> = {
-    Basic: 'Cơ bản',
-    Environment: 'Môi trường',
-    Status: 'Trạng thái',
-    Luck: 'May mắn',
-    Equipment: 'Trang bị'
-};
-
-const parseModifier = (part: string): JudgmentModifier | null => {
-    // English: Basic, Environment, Status, Luck, Equipment
-    // Vietnamese: Cơ bản, Môi trường, Trạng thái, May mắn, Trang bị
-    const modifierMatch = part.match(/^(Basic|Environment|Status|Luck|Equipment|Cơ bản|Môi trường|Trạng thái|May mắn|Trang bị)\s*([+\-]?\d+(?:\.\d+)?|B|E|S|L|Q)?(?:\s*\((.+)\))?$/i);
-    if (!modifierMatch) return null;
-
-    const [, key, valueRaw, reason] = modifierMatch;
-    // Map Vietnamese keys back to English if possible, or use as is
-    const keyMap: Record<string, string> = {
-        'Cơ bản': 'Basic',
-        'Môi trường': 'Environment',
-        'Trạng thái': 'Status',
-        'May mắn': 'Luck',
-        'Trang bị': 'Equipment'
-    };
-    const mappedKey = keyMap[key] || key;
-    
-    // Check if valueRaw is numeric
-    const numericValue = valueRaw && !isNaN(Number(valueRaw)) ? Number(valueRaw) : null;
-
-    return {
-        key: mappedKey,
-        label: MODIFIER_LABELS[mappedKey] || key,
-        value: numericValue,
-        reason: reason?.trim(),
-        raw: part
-    };
-};
-
-const parseJudgmentText = (text: string): ParsedJudgment => {
-    const parts = text.split('｜').map(s => s.trim()).filter(Boolean);
-    if (parts.length === 0) return createEmptyJudgment();
-
-    const parsed: ParsedJudgment = {
-        ...createEmptyJudgment(),
-        modifiers: [],
-        eventName: parts[0] || 'Sự kiện kiểm tra'
-    };
-
-    const isResultToken = (token: string) => 
-        /(Success|Failure|Critical Success|Critical Failure|Ultimate Success|Ultimate Failure|Thành công|Thất bại|Đại thành công|Đại thất bại|Cực thành công|Cực thất bại)/i.test(token);
-
-    if (parts[1] && isResultToken(parts[1])) {
-        parsed.result = parts[1];
-    }
-
-    for (let i = 1; i < parts.length; i++) {
-        const part = parts[i];
-
-        if (isResultToken(part)) {
-            parsed.result = part;
-            continue;
-        }
-
-        // Support both "Trigger object Player" and "Người chơi: Lý Vân"
-        const targetMatch = part.match(/^(Trigger object|Đối tượng kích hoạt|Người chơi|NPC)\s*[:\s]*(.+)$/i);
-        if (targetMatch) {
-            parsed.target = targetMatch[2].trim() || parsed.target;
-            continue;
-        }
-
-        // Support both "Check value X / Difficulty Y" and "Giá trị phán đoán X/Độ khó Y"
-        const scoreDiffMatch = part.match(/^(Check value|Giá trị phán đoán|Phán đoán|Kiểm tra)\s*([+\-]?\d+(?:\.\d+)?)\s*\/\s*(Difficulty|Độ khó)\s*([+\-]?\d+(?:\.\d+)?)$/i);
-        if (scoreDiffMatch) {
-            parsed.score = Number(scoreDiffMatch[2]);
-            parsed.difficulty = Number(scoreDiffMatch[4]);
-            continue;
-        }
-
-        const modifier = parseModifier(part);
-        if (modifier) {
-            parsed.modifiers.push(modifier);
-            continue;
-        }
-    }
-
-    return parsed;
-};
-
-const RESULT_LABELS: Record<string, string> = {
-    'Success': 'Thành công',
-    'Failure': 'Thất bại',
-    'Critical Success': 'Đại thành công',
-    'Critical Failure': 'Đại thất bại',
-    'Ultimate Success': 'Cực thành công',
-    'Ultimate Failure': 'Cực thất bại',
-};
-const translateResult = (result: string): string => RESULT_LABELS[result] || result;
 
 // --- Highlighting Utility ---
 const highlightText = (text: string) => {
@@ -269,6 +147,13 @@ export const CharacterRenderer: React.FC<{
     favorability?: number;
 }> = ({ sender, text, providedAvatar, isUser, isGenerating, identity, personality, relationStatus, favorability }) => {
     let avatarUrl = providedAvatar;
+    const { t } = useTranslation();
+    
+    const tValue = (val?: string) => {
+        if (!val) return t('social.labels.unknown');
+        const translated = t(`social.values.${val}`);
+        return translated === `social.values.${val}` ? val : translated;
+    };
     
     return (
         <div className={`flex w-full my-7 items-start group pl-0 sm:pl-2 animate-fade-in relative ${isUser ? 'flex-col sm:flex-row-reverse pr-0 sm:pr-2' : 'flex-col sm:flex-row'}`}>
@@ -294,8 +179,9 @@ export const CharacterRenderer: React.FC<{
                                 alt={sender} 
                                 className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
                                 onError={(e) => {
-                                    const parent = (e.target as HTMLImageElement).parentElement;
-                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    const img = e.target as HTMLImageElement;
+                                    img.style.display = 'none';
+                                    const parent = img.parentElement;
                                     if (parent) {
                                         parent.classList.add('flex', 'items-center', 'justify-center', 'bg-ink-wash/20');
                                         const span = document.createElement('span');
@@ -336,11 +222,11 @@ export const CharacterRenderer: React.FC<{
             {/* Speech bubble */}
             <div className={`w-full sm:flex-1 relative ${isUser ? 'text-right' : ''}`}>
                 {/* Meta info (Identity/Personality) */}
-                {!isUser && (identity || personality) && (
-                    <div className="flex items-center gap-2 mb-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                {!isUser && (identity || personality || relationStatus) && (
+                    <div className="flex items-center gap-2 mb-2 flex-wrap opacity-70 group-hover:opacity-100 transition-opacity duration-300">
                         {identity && (
-                            <span className="text-[9px] font-mono text-wuxia-gold/80 bg-wuxia-gold/5 px-1.5 py-0.5 rounded border border-wuxia-gold/15 uppercase tracking-tighter">
-                                {identity}
+                            <span className="text-[9px] font-mono text-wuxia-gold/80 bg-wuxia-gold/5 px-1.5 py-0.5 rounded border border-wuxia-gold/15 uppercase tracking-tighter shadow-sm">
+                                {tValue(identity)}
                             </span>
                         )}
                         {personality && (
@@ -349,9 +235,10 @@ export const CharacterRenderer: React.FC<{
                             </span>
                         )}
                         {relationStatus && (
-                            <span className="text-[9px] font-mono font-bold text-wuxia-cyan/70 bg-wuxia-cyan/5 px-1.5 py-0.5 rounded border border-wuxia-cyan/20">
-                                {relationStatus} {favorability !== undefined ? `(${favorability})` : ''}
-                            </span>
+                            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-cyan-900/30 bg-cyan-950/20 text-cyan-400 font-mono text-[10px] shadow-sm backdrop-blur-sm">
+                                <span className="uppercase tracking-tighter opacity-80">{tValue(relationStatus)}</span>
+                                <span className="opacity-50">({favorability})</span>
+                            </div>
                         )}
                     </div>
                 )}
@@ -374,168 +261,6 @@ export const CharacterRenderer: React.FC<{
                     {/* Bottom glow */}
                     <div className="absolute bottom-0 left-10 right-10 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity" style={{background:'linear-gradient(to right, transparent, rgba(230,200,110,0.15), transparent)'}} />
                 </div>
-            </div>
-        </div>
-    );
-};
-
-// --- 3. Judgment Renderer ---
-export const JudgmentRenderer: React.FC<{ text: string; isNsfw?: boolean }> = ({ text, isNsfw }) => {
-    const parsed = parseJudgmentText(text);
-    const scoreValue = parsed.score;
-    const difficultyValue = parsed.difficulty;
-    const result = parsed.result;
-
-    const isSuccess = /(Success|Critical Success|Ultimate Success)/.test(result);
-    // Specifically check for failure tokens to ensure we don't misidentify Success-only checks as failure
-    const isFailure = /(Failure|Critical Failure|Ultimate Failure)/.test(result);
-    const isUndetermined = result === 'Không xác định' || (!isSuccess && !isFailure);
-    const isCrit = /(Critical|Ultimate)/.test(result);
-
-    // Color config
-    const accentColor = isNsfw
-        ? { rgb: '236,72,153', hex: '#ec4899', cls: 'text-pink-400', bgCls: 'bg-pink-500', borderCls: 'border-pink-500/40' }
-        : isUndetermined
-            ? { rgb: '68,170,170', hex: '#44aaaa', cls: 'text-wuxia-cyan', bgCls: 'bg-wuxia-cyan', borderCls: 'border-wuxia-cyan/30' }
-            : isSuccess
-                ? { rgb: '230,200,110', hex: '#e6c86e', cls: 'text-wuxia-gold', bgCls: 'bg-wuxia-gold', borderCls: 'border-wuxia-gold/40' }
-                : { rgb: '180,50,50', hex: '#b43232', cls: 'text-wuxia-red', bgCls: 'bg-wuxia-red', borderCls: 'border-wuxia-red/40' };
-
-    const statusLabel = translateResult(result);
-    const scoreBarPct = difficultyValue > 0 ? Math.min((scoreValue / difficultyValue) * 100, 150) : 100;
-    const normalizedBarPct = Math.min(scoreBarPct, 100);
-
-    return (
-        <div className="w-full my-5 max-w-lg mx-auto px-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div
-                className={`relative overflow-hidden border ${accentColor.borderCls}`}
-                style={{
-                    background: 'rgba(5,5,8,0.85)',
-                    backdropFilter: 'blur(16px)',
-                    borderRadius: '4px',
-                    boxShadow: `0 0 20px rgba(${accentColor.rgb},0.08), inset 0 1px 0 rgba(255,255,255,0.03)`,
-                }}
-            >
-                {/* Scanline overlay */}
-                <div
-                    className="absolute inset-0 pointer-events-none z-30 opacity-[0.04]"
-                    style={{
-                        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px)',
-                    }}
-                />
-
-                {/* Left accent bar */}
-                <div
-                    className="absolute left-0 top-0 bottom-0 w-[3px] z-20"
-                    style={{ background: `linear-gradient(to bottom, rgba(${accentColor.rgb},0.6), rgba(${accentColor.rgb},0.1))` }}
-                />
-
-                {/* ─── Row 1: Header ─── */}
-                <div className="relative z-10 flex items-center justify-between px-4 py-2 border-b border-white/[0.04]">
-                    <div className="flex items-center gap-2 min-w-0">
-                        <IconGlyph name={isNsfw ? 'heart' : 'dice'} className={`w-3 h-3 ${accentColor.cls} shrink-0`} strokeWidth={1.5} />
-                        <span className={`text-[10px] font-mono font-black tracking-[0.12em] uppercase truncate ${accentColor.cls}`}>{parsed.eventName}</span>
-                        <span className="text-[8px] text-paper-white/20 font-mono">·</span>
-                        <span className="text-[9px] text-paper-white/40 font-serif italic truncate">:{parsed.target}</span>
-                    </div>
-                    {isCrit && (
-                        <span
-                            className={`text-[7px] font-mono font-black uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-sm ${accentColor.cls} shrink-0`}
-                            style={{ background: `rgba(${accentColor.rgb},0.12)`, border: `1px solid rgba(${accentColor.rgb},0.25)` }}
-                        >Cực hạn</span>
-                    )}
-                </div>
-
-                {/* ─── Row 2: Score Comparison Bar ─── */}
-                <div className="relative z-10 px-4 py-3">
-                    {/* Numbers row */}
-                    <div className="flex items-end justify-between mb-1.5">
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-[8px] text-paper-white/25 font-mono uppercase tracking-widest">DC</span>
-                            <span className="text-sm font-mono font-black text-paper-white/50">{difficultyValue}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span
-                                className={`text-2xl font-mono font-black ${accentColor.cls}`}
-                                style={{ textShadow: `0 0 12px rgba(${accentColor.rgb},0.5), 0 0 4px rgba(${accentColor.rgb},0.3)` }}
-                            >
-                                {scoreValue}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Progress bar */}
-                    <div className="relative w-full h-[6px] rounded-sm overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)' }}>
-                        {/* Difficulty threshold marker */}
-                        <div
-                            className="absolute top-0 bottom-0 w-[1px] z-10"
-                            style={{
-                                left: `${Math.min((difficultyValue / Math.max(scoreValue, difficultyValue, 1)) * 100, 100)}%`,
-                                background: 'rgba(255,255,255,0.25)',
-                                boxShadow: '0 0 3px rgba(255,255,255,0.1)',
-                            }}
-                        />
-                        {/* Score fill */}
-                        <div
-                            className="h-full rounded-sm transition-all duration-1000 ease-out relative"
-                            style={{
-                                width: `${normalizedBarPct}%`,
-                                background: `linear-gradient(90deg, rgba(${accentColor.rgb},0.3), rgba(${accentColor.rgb},0.7))`,
-                                boxShadow: `0 0 8px rgba(${accentColor.rgb},0.3)`,
-                            }}
-                        >
-                            <div
-                                className="absolute right-0 top-0 bottom-0 w-[2px]"
-                                style={{ background: `rgba(${accentColor.rgb},1)`, boxShadow: `0 0 6px rgba(${accentColor.rgb},0.8)` }}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Result label */}
-                    <div className="flex items-center justify-center mt-2.5">
-                        <span
-                            className={`text-xs font-serif font-black italic tracking-[0.2em] uppercase ${accentColor.cls}`}
-                            style={{ textShadow: `0 0 8px rgba(${accentColor.rgb},0.4)` }}
-                        >
-                            {statusLabel}
-                        </span>
-                    </div>
-                </div>
-
-                {/* ─── Row 3: Modifier Pills ─── */}
-                {parsed.modifiers.length > 0 && (
-                    <div className="relative z-10 px-4 pb-2.5 pt-0">
-                        <div className="flex flex-wrap gap-1">
-                            {parsed.modifiers.map((modifier, i) => {
-                                const isPositive = modifier.value !== null && modifier.value > 0;
-                                const isNegative = modifier.value !== null && modifier.value < 0;
-                                return (
-                                    <span
-                                        key={`${modifier.key}-${i}`}
-                                        className="inline-flex items-center gap-1 px-1.5 py-[2px] rounded-sm text-[8px] font-mono transition-colors cursor-default"
-                                        style={{
-                                            background: isPositive ? `rgba(${accentColor.rgb},0.08)` : isNegative ? 'rgba(180,50,50,0.08)' : 'rgba(255,255,255,0.02)',
-                                            border: `1px solid ${isPositive ? `rgba(${accentColor.rgb},0.15)` : isNegative ? 'rgba(180,50,50,0.15)' : 'rgba(255,255,255,0.05)'}`,
-                                        }}
-                                        title={modifier.reason || modifier.label}
-                                    >
-                                        <span className="text-paper-white/35 uppercase tracking-wider font-black">{modifier.label}</span>
-                                        {modifier.reason && <span className="text-paper-white/15 italic">({modifier.reason})</span>}
-                                        <span className={`font-bold ${isPositive ? accentColor.cls : isNegative ? 'text-wuxia-red/70' : 'text-paper-white/25'}`}>
-                                            {modifier.value === null ? '' : (modifier.value > 0 ? `+${modifier.value}` : modifier.value)}
-                                        </span>
-                                    </span>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-
-                {/* Bottom glow line */}
-                <div
-                    className="absolute bottom-0 left-0 right-0 h-[1px]"
-                    style={{ background: `linear-gradient(90deg, transparent, rgba(${accentColor.rgb},0.3), transparent)` }}
-                />
             </div>
         </div>
     );
