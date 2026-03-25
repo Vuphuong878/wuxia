@@ -47,20 +47,15 @@ const getChunkedEnvVars = (baseName: string): string[] => {
 };
 
 // Discovery endpoints for dynamic worker selection
-export const KOYEB_DISCOVERY_NEMOTRON = 'https://glorious-eveleen-truyem789-26b9b858.koyeb.app/api/nodes/nemotron';
-export const KOYEB_DISCOVERY_IMAGE_GEN = 'https://glorious-eveleen-truyem789-26b9b858.koyeb.app/api/nodes/image-gen';
 
-// For Cloudflare deployment, we use the consolidated worker URL
 export const DEFAULT_TEXT_GEN_WORKER_URLS = [
-    KOYEB_DISCOVERY_NEMOTRON,
-    'https://wuxia-nemotron-worker.autoqxeh7o.workers.dev'
+    'https://wuxia-api.vdt99.workers.dev/nemotron'
 ];
 
 export const DEFAULT_TEXT_GEN_WORKER_URL = DEFAULT_TEXT_GEN_WORKER_URLS[0];
 
 export const DEFAULT_IMAGE_GEN_WORKER_URLS = [
-    KOYEB_DISCOVERY_IMAGE_GEN,
-    'https://glorious-eveleen-truyem789-26b9b858.koyeb.app/api/image-gen'
+    'https://wuxia-api.vdt99.workers.dev/image-gen'
 ];
 export const DEFAULT_IMAGE_GEN_WORKER_URL = DEFAULT_IMAGE_GEN_WORKER_URLS[0];
 
