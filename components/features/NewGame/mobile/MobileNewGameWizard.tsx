@@ -22,7 +22,7 @@ interface Props {
     requestConfirm?: (options: { title?: string; message: string; confirmText?: string; cancelText?: string; danger?: boolean }) => Promise<boolean>;
 }
 
-const WORLD_NAMES = ['Thương Khung Giới', 'Huyền Âm Thế Giới', 'Thái Hư Kiếm Vực', 'Trọng Tiêu Thần Giới', 'Vạn Kiếm Thánh Địa', 'Hỗn Độn Thần Vực', 'Tử Tiêu Cửu Thiên', 'Huyết Sát Giang Hồ', 'Phong Lôi Vũ Giới', 'Thiên Long Bát Bộ Giới', 'Cửu Châu Kiếm Giới', 'Mặc Sắc Vô Biên Giới', 'Bách Kiếm Tông Thế Giới', 'Thiên Địa Huyền Hoàng Giới', 'Trường Hà Vạn Cổ Giới', 'Hồng Hoang Thần Giới', 'Kiếm Vũ Thiên Duyên Giới', 'Vô Cực Vạn Giới', 'Tiêu Diêu Vũ Giới', 'Đại Thiên Địa Giới', 'Thanh Hoá', 'Nam Định'];
+const WORLD_NAMES = ['Thương Khung Giới', 'Huyền Âm Thế Giới', 'Thái Hư Kiếm Vực', 'Trọng Tiêu Thần Giới', 'Vạn Kiếm Thánh Địa', 'Hỗn Độn Thần Vực', 'Tử Tiêu Cửu Thiên', 'Huyết Sát Giang Hồ', 'Phong Lôi Vũ Giới', 'Thiên Long Bát Bộ Giới', 'Cửu Châu Kiếm Giới', 'Mặc Sắc Vô Biên Giới', 'Bách Kiếm Tông Thế Giới', 'Thiên Địa Huyền Hoàng Giới', 'Trường Hà Vạn Cổ Giới', 'Hồng Hoang Thần Giới', 'Kiếm Vũ Thiên Duyên Giới', 'Vô Cực Vạn Giới', 'Tiêu Diêu Vũ Giới', 'Đại Thiên Địa Giới', 'Thanh Hoá', 'Nam Định', 'Bàn Cổ Giới', 'Hỗn Độn Tinh Không', 'Hồng Mông Đại Thế Giới', 'Thần Ma Chiến Trường', 'Cửu U Minh Giới', 'Thiên Đạo Thần Vực', 'Linh Giới', 'Tiên Giới', 'Phàm Nhân Giới', 'Yêu Giới', 'Ma Giới', 'Phật Quốc', 'Tu La Đạo', 'Sâm La Điện', 'Cửu Trùng Thiên', 'Thập Bát Tầng Địa Ngục', 'Vạn Yêu Cốc', 'Bách Thảo Viên', 'Kiếm Trủng', 'Đao Vực', 'Thủy Tinh Cung', 'Hỏa Diệm Sơn', 'Lôi Âm Tự', 'Phong Thần Đài', 'Tru Tiên Trận', 'Vạn Tiên Trận', 'Cửu Khúc Hoàng Hà Trận', 'Thái Cực Đồ', 'Bàn Cổ Phiên', 'Hỗn Độn Chung'];
 const DYNASTY_PRESETS = [
     'Anh hùng tranh đỉnh, cuối triều đại suy tàn, bốn phương nổi loạn',
     'Thiên hạ đại loạn, quần hùng cát cứ, giang sơn phân liệt',
@@ -43,7 +43,27 @@ const DYNASTY_PRESETS = [
     'Thế giới ngầm dưới lòng đất, các thành bang tranh đoạt tài nguyên khoáng thạch',
     'Quần đảo lơ lửng trên không, các tông môn chiến đấu giành giật linh mạch',
     'Thời kỳ mạt pháp, tu sĩ ẩn nấp, phàm nhân nắm quyền bằng hỏa khí',
-    'Thế giới bị nguyền rủa, màn đêm vĩnh hằng, ánh sáng là thứ xa xỉ nhất'
+    'Thế giới bị nguyền rủa, màn đêm vĩnh hằng, ánh sáng là thứ xa xỉ nhất',
+    'Đế quốc sụp đổ, chư hầu nổi lên, chiến tranh liên miên không dứt',
+    'Triều đại mới thành lập, bách phế đãi hưng, nhân tài được trọng dụng',
+    'Nữ đế đăng cơ, thiên hạ thái bình, nhưng sóng ngầm cuộn trào trong triều đình',
+    'Quyền thần lộng quyền, ấu chúa bù nhìn, trung thần nghĩa sĩ tìm cách cứu vãn',
+    'Ngoại tộc xâm lăng, sơn hà phá toái, anh hùng hào kiệt đứng lên bảo vệ đất nước',
+    'Tôn giáo trị quốc, thần quyền lấn át vương quyền, bá tánh lầm than',
+    'Thương nghiệp phồn thịnh, tiền tài quyết định tất cả, võ lâm bị đồng tiền chi phối',
+    'Khoa học kỹ thuật phát triển, cơ giáp kết hợp võ thuật, thời đại mới bắt đầu',
+    'Thế giới bị ô nhiễm, dị nhân xuất hiện, trật tự cũ sụp đổ, trật tự mới đang hình thành',
+    'Trái đất sau tận thế, con người sinh tồn trong những khu định cư nhỏ bé',
+    'Vương triều hủ bại, tham quan ô lại hoành hành, dân chúng lầm than oán thán',
+    'Hoàng đế u mê, sủng ái yêu phi, triều chính bỏ bê, trung gian nịnh thần lộng hành',
+    'Thái tử bị phế, chư hoàng tử tranh ngôi, cốt nhục tương tàn, máu chảy thành sông',
+    'Tiên triều giáng lâm, phàm nhân bị coi như kiến hôi, mặc tình chém giết',
+    'Yêu ma hoành hành, nhân loại co cụm trong những tòa thành được bảo vệ bởi trận pháp',
+    'Thế giới song song, hai triều đại đối lập nhau, chiến tranh không bao giờ kết thúc',
+    'Du mục trỗi dậy, kỵ binh càn quét thiên hạ, đế chế nông nghiệp sụp đổ',
+    'Hải tặc hoành hành, các quốc gia ven biển liên minh chống lại, đại chiến trên biển',
+    'Thế giới ngầm trỗi dậy, các bang phái hắc ám kiểm soát mọi thứ, chính quyền chỉ là bù nhìn',
+    'Thời đại hoàng kim, võ đạo hưng thịnh, thiên tài xuất hiện lớp lớp'
 ];
 const TIANJIAO_PRESETS = [
     'Thiên tài đồng xuất, tranh giành đỉnh phong, một thời hào kiệt vân tập',
@@ -65,10 +85,40 @@ const TIANJIAO_PRESETS = [
     'Kẻ mang huyết mạch cấm kỵ, bị cả thiên hạ truy sát nhưng càng đánh càng mạnh',
     'Khí vận chi tử, đi đường vấp cục đá cũng nhặt được thần binh',
     'Kiếm tu cực đoan, chỉ tu một kiếm, phá vạn pháp, chém rách thương khung',
-    'Luyện đan kỳ tài, lấy đan nhập đạo, khống chế vô số cường giả'
+    'Luyện đan kỳ tài, lấy đan nhập đạo, khống chế vô số cường giả',
+    'Sở hữu dị hỏa trong truyền thuyết, luyện đan luyện khí vô song',
+    'Mang trong mình huyết mạch Thần Long, nhục thân cường hãn vô địch',
+    'Trời sinh Kiếm Cốt, vạn kiếm thần phục, kiếm đạo thiên tài',
+    'Sở hữu Cửu Âm Tuyệt Mạch, tu luyện ma công tiến triển cực nhanh',
+    'Mang Thái Dương Chi Thể, hỏa hệ pháp thuật uy lực kinh người',
+    'Trời sinh Đạo Thể, tu luyện bất kỳ công pháp nào cũng dễ như trở bàn tay',
+    'Sở hữu Thiên Nhãn, nhìn thấu mọi ảo ảnh, trận pháp',
+    'Mang Không Gian Chi Lực, di chuyển tức thời, vô ảnh vô tung',
+    'Sở hữu Thời Gian Chi Lực, thao túng thời gian, nghịch chuyển sinh tử',
+    'Mang Hỗn Độn Chi Thể, dung hợp vạn vật, vạn pháp bất xâm',
+    'Trời sinh Phật Tâm, từ bi hỉ xả, độ hóa chúng sinh',
+    'Sở hữu Ma Tôn Truyền Thừa, tà ác vô cùng, sát phạt quyết đoán',
+    'Mang Yêu Tộc Huyết Mạch, biến hóa khôn lường, sức mạnh hoang dã',
+    'Sở hữu Quỷ Đạo Truyền Thừa, thao túng linh hồn, luyện chế ác quỷ',
+    'Trời sinh Độc Thể, vạn độc bất xâm, độc thuật thiên hạ đệ nhất',
+    'Mang Tinh Tú Chi Lực, mượn sức mạnh các vì sao, uy lực vô cùng',
+    'Sở hữu Ngũ Hành Chi Thể, tinh thông ngũ hành pháp thuật, tương sinh tương khắc',
+    'Trời sinh Lôi Đình Chi Thể, thao túng sấm sét, uy chấn bát phương',
+    'Mang Phong Bạo Chi Lực, tốc độ cực nhanh, xé rách không gian',
+    'Sở hữu Băng Tuyết Chi Thể, đóng băng vạn vật, tuyệt tình tuyệt nghĩa',
+    'Trời sinh Âm Dương Chi Thể, cân bằng âm dương, sinh tử luân hồi',
+    'Mang Sinh Mệnh Chi Lực, chữa trị mọi vết thương, cải tử hoàn sinh',
+    'Sở hữu Hủy Diệt Chi Lực, phá hủy mọi thứ, không gì cản nổi',
+    'Trời sinh Ảo Thuật Thiên Tài, tạo ra ảo ảnh chân thực, khiến người ta điên loạn',
+    'Mang Khôi Lỗi Chi Thuật, chế tạo khôi lỗi chiến đấu, một người như một đạo quân',
+    'Sở hữu Ngự Thú Chi Thuật, thuần phục vạn thú, thống lĩnh yêu tộc',
+    'Trời sinh Trận Pháp Tông Sư, bố trí trận pháp kinh thiên động địa',
+    'Mang Phù Lục Chi Thuật, vẽ bùa gọi thần, uy lực khôn lường',
+    'Sở hữu Luyện Khí Tông Sư, rèn đúc thần binh lợi khí, danh chấn thiên hạ',
+    'Trời sinh Luyện Đan Tông Sư, luyện chế tiên đan thần dược, cải tử hoàn sinh'
 ];
-const MALE_NAMES = ['Hàn Lập', 'Lý Vân', 'Thẩm Lãng', 'Vương Lâm', 'Lâm Động', 'Vũ Hao', 'Trần Phong', 'Tiêu Viêm', 'Lục Minh', 'Dương Khai', 'Trương Hiên', 'Lưu Vũ', 'Tề Thiên', 'Bạch Lộc', 'Hàn Yên', 'Giang Phong', 'Tuấn Kiệt', 'Mộ Dung Long', 'Diệp Phàm', 'Nhạc Thiên', 'Độ Mixi', 'Cố Trường Ca', 'Phương Hàn', 'Mạnh Hạo', 'Bạch Tiểu Thuần', 'Kỷ Ninh', 'La Phong', 'Tô Minh', 'Thạch Hạo', 'Diệp Tôn', 'Sở Phong', 'Trần Phàm', 'Lý Thất Dạ', 'Tiêu Thần', 'Lâm Minh', 'Dương Kỳ', 'Tần Vũ', 'Thạch Nham', 'Giang Trần', 'Lâm Phong', 'Sở Mặc'];
-const FEMALE_NAMES = ['Vân Nguyệt', 'Tiểu Tiên', 'Lệ Hồng', 'Tuyết Nhi', 'Linh Nhi', 'Băng Nhi', 'Tử Hà', 'Minh Nguyệt', 'Lam Tinh', 'Hương Hồng', 'Thúy Vân', 'Bạch Lộ', 'Tiểu Vũ', 'Thiên Tâm', 'Kim Tuyến', 'Mộng Nhi', 'Sương Nhi', 'Long Nữ', 'Phù Dao', 'Dao Cơ', 'Lãnh Như Sương', 'Nam Cung Uyển', 'Cơ Tử Nguyệt', 'An Diệu Y', 'Nhan Như Ngọc', 'Bích Dao', 'Lục Tuyết Kỳ', 'Hoa Thiên Cốt', 'Bạch Thiển', 'Phượng Cửu', 'Tô Đát Kỷ', 'Liễu Như Thị', 'Mục Niệm Từ', 'Tiểu Long Nữ', 'Vương Ngữ Yên', 'Nhậm Doanh Doanh', 'Chu Chỉ Nhược', 'Triệu Mẫn', 'Hoàng Dung', 'Lý Mạc Sầu'];
+const MALE_NAMES = ['Hàn Lập', 'Lý Vân', 'Thẩm Lãng', 'Vương Lâm', 'Lâm Động', 'Vũ Hao', 'Trần Phong', 'Tiêu Viêm', 'Lục Minh', 'Dương Khai', 'Trương Hiên', 'Lưu Vũ', 'Tề Thiên', 'Bạch Lộc', 'Hàn Yên', 'Giang Phong', 'Tuấn Kiệt', 'Mộ Dung Long', 'Diệp Phàm', 'Nhạc Thiên', 'Độ Mixi', 'Cố Trường Ca', 'Phương Hàn', 'Mạnh Hạo', 'Bạch Tiểu Thuần', 'Kỷ Ninh', 'La Phong', 'Tô Minh', 'Thạch Hạo', 'Diệp Tôn', 'Sở Phong', 'Trần Phàm', 'Lý Thất Dạ', 'Tiêu Thần', 'Lâm Minh', 'Dương Kỳ', 'Tần Vũ', 'Thạch Nham', 'Giang Trần', 'Lâm Phong', 'Sở Mặc', 'Bạch Khởi', 'Hạng Vũ', 'Lữ Bố', 'Quan Vũ', 'Trương Phi', 'Triệu Vân', 'Mã Siêu', 'Hoàng Trung', 'Gia Cát Lượng', 'Tào Tháo', 'Tôn Quyền', 'Lưu Bị', 'Chu Du', 'Tư Mã Ý', 'Quách Gia', 'Tuân Úc', 'Giả Hủ', 'Bàng Thống', 'Khương Duy', 'Đặng Ngải', 'Chung Hội', 'Lục Tốn', 'Lã Mông', 'Cam Ninh', 'Thái Sử Từ'];
+const FEMALE_NAMES = ['Vân Nguyệt', 'Tiểu Tiên', 'Lệ Hồng', 'Tuyết Nhi', 'Linh Nhi', 'Băng Nhi', 'Tử Hà', 'Minh Nguyệt', 'Lam Tinh', 'Hương Hồng', 'Thúy Vân', 'Bạch Lộ', 'Tiểu Vũ', 'Thiên Tâm', 'Kim Tuyến', 'Mộng Nhi', 'Sương Nhi', 'Long Nữ', 'Phù Dao', 'Dao Cơ', 'Lãnh Như Sương', 'Nam Cung Uyển', 'Cơ Tử Nguyệt', 'An Diệu Y', 'Nhan Như Ngọc', 'Bích Dao', 'Lục Tuyết Kỳ', 'Hoa Thiên Cốt', 'Bạch Thiển', 'Phượng Cửu', 'Tô Đát Kỷ', 'Liễu Như Thị', 'Mục Niệm Từ', 'Tiểu Long Nữ', 'Vương Ngữ Yên', 'Nhậm Doanh Doanh', 'Chu Chỉ Nhược', 'Triệu Mẫn', 'Hoàng Dung', 'Lý Mạc Sầu', 'Điêu Thuyền', 'Đại Kiều', 'Tiểu Kiều', 'Tôn Thượng Hương', 'Chân Mật', 'Thái Diễm', 'Hoàng Nguyệt Anh', 'Trương Xuân Hoa', 'Vương Nguyên Cơ', 'Tân Hiến Anh', 'Hạ Hầu Lệnh Nữ', 'Mã Vân Lộc', 'Lữ Linh Khởi', 'Quan Ngân Bình', 'Trương Tinh Thải', 'Bào Tam Nương', 'Hoa Mộc Lan', 'Võ Tắc Thiên', 'Dương Quý Phi', 'Vương Chiêu Quân', 'Tây Thi', 'Triệu Phi Yến', 'Đát Kỷ', 'Bao Tự', 'Lữ Hậu'];
 const APPEARANCE_PRESETS = [
     'Mình hạc xương mai, phong tư trác tuyệt, ánh mắt thâm thúy tựa tinh thần.',
     'Dáng người vạm vỡ, mặt mày góc cạnh, tản ra khí thế uy dũng áp bách.',
@@ -84,7 +134,30 @@ const APPEARANCE_PRESETS = [
     'Cơ bắp cuồn cuộn, xăm trổ đầy mình, tỏa ra hung uy của hồng hoang mãnh thú.',
     'Dung mạo tà dị, đôi mắt hai màu, nụ cười luôn mang theo sự nguy hiểm chết người.',
     'Thân hình nhỏ nhắn, khuôn mặt ngây thơ nhưng ánh mắt lại già dặn, thâm thúy vô cùng.',
-    'Mặc hắc bào che kín toàn thân, chỉ để lộ đôi mắt đỏ ngầu rực sáng trong đêm.'
+    'Mặc hắc bào che kín toàn thân, chỉ để lộ đôi mắt đỏ ngầu rực sáng trong đêm.',
+    'Khuôn mặt chữ điền, lông mày rậm, ánh mắt cương trực, toát lên vẻ chính khí lẫm liệt.',
+    'Dáng người gầy gò, ốm yếu, ho khan liên tục, nhưng ánh mắt lại sắc như dao.',
+    'Mập mạp, bụng phệ, luôn nở nụ cười hòa ái, trông như một vị phú gia hiền lành.',
+    'Thân hình cao lớn, vạm vỡ, cơ bắp cuồn cuộn, da ngăm đen, trông như một ngọn núi.',
+    'Khuôn mặt thanh tú, da trắng như tuyết, môi đỏ như son, đẹp như tranh vẽ.',
+    'Mắt xếch, môi mỏng, nụ cười nhếch mép, toát lên vẻ xảo quyệt, mưu mô.',
+    'Tóc bạc phơ, râu dài đến ngực, khuôn mặt đầy nếp nhăn, nhưng ánh mắt lại tinh anh.',
+    'Đầu trọc lốc, trên đầu có sáu chấm hương sẹo, mặc áo cà sa, tay cầm tràng hạt.',
+    'Mặc đạo bào, tay cầm phất trần, phong thái tiên phong đạo cốt.',
+    'Mặc y phục dạ hành đen tuyền, chỉ để lộ đôi mắt lạnh lẽo, vô tình.',
+    'Mặc chiến giáp uy vũ, tay cầm trường thương, khí thế hiên ngang, lẫm liệt.',
+    'Mặc cẩm bào lụa là, đeo ngọc bội, tay cầm quạt giấy, phong lưu phóng khoáng.',
+    'Mặc áo vải thô sơ, đi dép rơm, trông như một người nông dân bình thường.',
+    'Mặc y phục rách rưới, tóc tai bù xù, người bốc mùi hôi thối, trông như một kẻ ăn mày.',
+    'Khuôn mặt bị hủy dung, chằng chịt sẹo, trông vô cùng đáng sợ.',
+    'Cụt một tay, nhưng tay còn lại cầm kiếm vô cùng vững chắc.',
+    'Mù hai mắt, nhưng thính giác cực kỳ nhạy bén, có thể nghe tiếng gió đoán vị trí.',
+    'Đi thọt một chân, nhưng di chuyển lại vô cùng linh hoạt, quỷ dị.',
+    'Trên mặt có một vết sẹo dài từ trán xuống cằm, tăng thêm vẻ hung hãn.',
+    'Có một nốt ruồi son giữa trán, trông vô cùng đặc biệt.',
+    'Mắt hai màu, một bên xanh, một bên đỏ, trông vô cùng tà dị.',
+    'Tóc màu bạch kim, dài chấm gót, bay lượn trong gió.',
+    'Tóc màu đỏ rực, như ngọn lửa đang bùng cháy.'
 ];
 const PERSONALITY_PRESETS = [
     'Chí khí cao vời, coi trọng nghĩa khí, ghét ác như thù, luôn sẵn lòng giúp đỡ kẻ yếu.',
@@ -101,7 +174,37 @@ const PERSONALITY_PRESETS = [
     'Cẩn thận chặt chẽ, luôn chừa cho mình đường lui, không bao giờ tin tưởng ai hoàn toàn.',
     'Điên cuồng khát máu, càng trong nghịch cảnh càng hưng phấn, coi chiến đấu là lẽ sống.',
     'Bề ngoài ôn hòa, nho nhã nhưng bên trong tàn nhẫn, mưu mô xảo quyệt.',
-    'Chỉ quan tâm đến lợi ích, không màng tình cảm, sẵn sàng bán đứng tất cả vì trường sinh.'
+    'Chỉ quan tâm đến lợi ích, không màng tình cảm, sẵn sàng bán đứng tất cả vì trường sinh.',
+    'Tham lam, keo kiệt, coi tiền như mạng, sẵn sàng làm mọi thứ vì tiền.',
+    'Háo sắc, phong lưu, thấy gái đẹp là không rời mắt, dễ bị mỹ nhân kế.',
+    'Nhát gan, sợ chết, gặp nguy hiểm là bỏ chạy đầu tiên, luôn tìm cách bảo toàn tính mạng.',
+    'Nóng nảy, lỗ mãng, hành động thiếu suy nghĩ, dễ bị kích động.',
+    'Bảo thủ, cố chấp, không chịu lắng nghe ý kiến người khác, luôn cho mình là đúng.',
+    'Tự ti, mặc cảm, luôn nghĩ mình kém cỏi, không dám thể hiện bản thân.',
+    'Kiêu ngạo, tự phụ, coi thường người khác, luôn cho mình là nhất.',
+    'Đa nghi, tào tháo, không tin tưởng bất kỳ ai, luôn nghi ngờ người khác có ý đồ xấu.',
+    'Độc ác, tàn nhẫn, thích hành hạ người khác, không có tính người.',
+    'Giả tạo, đạo đức giả, bề ngoài thì tỏ ra tốt bụng, nhưng bên trong lại mưu mô xảo quyệt.',
+    'Lười biếng, ỷ lại, không muốn làm việc, chỉ thích hưởng thụ.',
+    'Vô trách nhiệm, đùn đẩy lỗi lầm cho người khác, không dám nhận sai.',
+    'Ba phải, gió chiều nào che chiều ấy, không có lập trường vững vàng.',
+    'Nịnh bợ, luồn cúi, luôn tìm cách lấy lòng cấp trên, chà đạp cấp dưới.',
+    'Ghen tị, đố kỵ, không muốn ai hơn mình, luôn tìm cách dìm hàng người khác.',
+    'Thù dai, nhớ lâu, ai đắc tội là nhớ mãi không quên, tìm cơ hội trả thù.',
+    'Cố chấp, thù hận, sống chỉ để trả thù, không quan tâm đến bất cứ điều gì khác.',
+    'Tuyệt vọng, bi quan, luôn nghĩ đến những điều tồi tệ nhất, không có niềm tin vào cuộc sống.',
+    'Điên loạn, mất trí, hành động không kiểm soát, không ai đoán trước được.',
+    'Lạnh nhạt, vô tình, không quan tâm đến bất kỳ ai, kể cả người thân.',
+    'Ngây thơ, trong sáng, dễ tin người, dễ bị lừa gạt.',
+    'Tốt bụng, hiền lành, luôn sẵn sàng giúp đỡ người khác, không màng danh lợi.',
+    'Dũng cảm, kiên cường, không sợ gian khổ, luôn tiến về phía trước.',
+    'Thông minh, tài trí, suy nghĩ logic, giải quyết vấn đề nhanh chóng.',
+    'Hài hước, vui tính, luôn mang lại tiếng cười cho mọi người.',
+    'Lãng mạn, mộng mơ, thích những điều bay bổng, không thực tế.',
+    'Thực dụng, tính toán, luôn cân nhắc lợi hại trước khi làm bất cứ việc gì.',
+    'Trầm cảm, u sầu, luôn mang trong mình một nỗi buồn không tên.',
+    'Lạc quan, yêu đời, luôn nhìn thấy mặt tốt của vấn đề.',
+    'Bình tĩnh, điềm đạm, không bao giờ hoảng loạn trước khó khăn.'
 ];
 
 const STEPS = ['Thế giới quan', 'Hồ sơ hiệp khách', 'Thuộc tính nhân vật', 'Thân thế xuất thân', 'Bất lợi bẩm sinh', 'Thiên phú linh khiếu', 'Xác nhận tạo'];
