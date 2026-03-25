@@ -1569,7 +1569,7 @@ export const generateMemoryRecall = async (
 
     // Use worker fallback when no API config is available
     if ((!apiConfig || !apiConfig.apiKey) && workerUrl) {
-        return requestWorkerText(workerUrl, messages, { 
+        return requestWorkerText(workerUrl, messages, {
             temperature: 0.2,
             id: streamOptions?.id,
             onDelta: streamOptions?.onDelta
@@ -1640,7 +1640,7 @@ export const generateWorldData = async (
     // Use worker fallback when no API config is available
     const effectiveWorkerUrl = workerUrl || DEFAULT_NEMOTRON_WORKER_URL;
     if ((!apiConfig || !apiConfig.apiKey) && effectiveWorkerUrl) {
-        const rawText = await requestWorkerText(effectiveWorkerUrl, messages, { 
+        const rawText = await requestWorkerText(effectiveWorkerUrl, messages, {
             temperature: 0.8,
             id: streamOptions?.id,
             onDelta: streamOptions?.onDelta
@@ -1774,7 +1774,7 @@ export const generateStoryResponse = async (
 
     if (useWorker) {
         // Use Cloudflare Worker (Nemotron) for text generation
-        rawText = await requestWorkerText(effectiveWorkerUrl!, apiMessages, { 
+        rawText = await requestWorkerText(effectiveWorkerUrl!, apiMessages, {
             temperature: 0.7,
             id: requestOptions?.id,
             onDelta: streamOptions?.onDelta
