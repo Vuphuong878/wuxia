@@ -25,10 +25,52 @@ interface Props {
 const STEPS = ['Thế giới quan', 'Hồ sơ hiệp khách', 'Thuộc tính nhân vật', 'Thân thế xuất thân', 'Bất lợi bẩm sinh', 'Thiên phú linh khiếu', 'Xác nhận tạo'];
 
 const WORLD_NAMES = ['Thương Khung Giới', 'Huyền Âm Thế Giới', 'Thái Hư Kiếm Vực', 'Trọng Tiêu Thần Giới', 'Vạn Kiếm Thánh Địa', 'Hỗn Độn Thần Vực', 'Tử Tiêu Cửu Thiên', 'Huyết Sát Giang Hồ', 'Phong Lôi Vũ Giới', 'Thiên Long Bát Bộ Giới', 'Cửu Châu Kiếm Giới', 'Mặc Sắc Vô Biên Giới', 'Bách Kiếm Tông Thế Giới', 'Thiên Địa Huyền Hoàng Giới', 'Trường Hà Vạn Cổ Giới', 'Hồng Hoang Thần Giới', 'Kiếm Vũ Thiên Duyên Giới', 'Vô Cực Vạn Giới', 'Tiêu Diêu Vũ Giới', 'Đại Thiên Địa Giới', 'Thanh Hoá', 'Nam Định'];
-const DYNASTY_PRESETS = ['Anh hùng tranh đỉnh, cuối triều đại suy tàn, bốn phương nổi loạn', 'Thiên hạ đại loạn, quần hùng cát cứ, giang sơn phân liệt', 'Thịnh thế thái bình, triều đình hưng thịnh nhưng ẩn chứa mưu đồ', 'Loạn thế xuân thu, chư hầu tranh bá, kẻ sĩ tứ phương tụ hội', 'Triều đại khai quốc, anh kiệt vân tập, vươn tay lập cơ nghiệp', 'Ma đạo quật khởi, chính tà đối lập, thiên hạ đại chiến sắp nổ ra', 'Bắc phương dị tộc nam xâm, biên cương nguy cấp, anh hùng xuất thế', 'Cố quốc phồn hoa, đế đô hào hoa náo nhiệt, tranh quyền đoạt vị thâm', 'Thiên tử mất quyền, quyền thần lộng hành, chư hầu mỗi người một cõi', 'Vương triều mạt thế, dân gian lầm than, hào kiệt tứ khởi khởi nghĩa'];
-const TIANJIAO_PRESETS = ['Thiên tài đồng xuất, tranh giành đỉnh phong, một thời hào kiệt vân tập', 'Thiên mệnh chi tử xuất thế, thần binh lợi khí tái xuất giang hồ', 'Bách niên kỳ tài cùng thời xuất hiện, võ học đỉnh thịnh chưa từng có', 'Thiên cơ đại biến, thiên kiều mỗi người thân mang cơ duyên trọng đại', 'Ma đạo thánh nhân tái thế, chính đạo liên minh đồng tâm đối kháng', 'Vạn kiếm quy tông, thiên kiều thân mang kiếm mệnh bẩm sinh đặc biệt', 'Cổ thần phong ấn tan vỡ, thiên địa linh khí bạo trướng phi thường', 'Thần ma đại chiến tàn dư giác thức, thiên kiều kế thừa cổ thần di sản', 'Kim thiếp xuất thế, tiên nhân truyền thừa, thiên tài tranh đoạt cơ duyên', 'Huyết mạch giác thức, phong thần bảng tái hiện, thiên kiều tham chiến'];
-const MALE_NAMES = ['Hàn Lập', 'Lý Vân', 'Thẩm Lãng', 'Vương Lâm', 'Lâm Động', 'Vũ Hao', 'Trần Phong', 'Tiêu Viêm', 'Lục Minh', 'Dương Khai', 'Trương Hiên', 'Lưu Vũ', 'Tề Thiên', 'Bạch Lộc', 'Hàn Yên', 'Giang Phong', 'Tuấn Kiệt', 'Mộ Dung Long', 'Diệp Phàm', 'Nhạc Thiên', 'Độ Mixi'];
-const FEMALE_NAMES = ['Vân Nguyệt', 'Tiểu Tiên', 'Lệ Hồng', 'Tuyết Nhi', 'Linh Nhi', 'Băng Nhi', 'Tử Hà', 'Minh Nguyệt', 'Lam Tinh', 'Hương Hồng', 'Thúy Vân', 'Bạch Lộ', 'Tiểu Vũ', 'Thiên Tâm', 'Kim Tuyến', 'Mộng Nhi', 'Sương Nhi', 'Long Nữ', 'Phù Dao', 'Dao Cơ'];
+const DYNASTY_PRESETS = [
+    'Anh hùng tranh đỉnh, cuối triều đại suy tàn, bốn phương nổi loạn',
+    'Thiên hạ đại loạn, quần hùng cát cứ, giang sơn phân liệt',
+    'Thịnh thế thái bình, triều đình hưng thịnh nhưng ẩn chứa mưu đồ',
+    'Loạn thế xuân thu, chư hầu tranh bá, kẻ sĩ tứ phương tụ hội',
+    'Triều đại khai quốc, anh kiệt vân tập, vươn tay lập cơ nghiệp',
+    'Ma đạo quật khởi, chính tà đối lập, thiên hạ đại chiến sắp nổ ra',
+    'Bắc phương dị tộc nam xâm, biên cương nguy cấp, anh hùng xuất thế',
+    'Cố quốc phồn hoa, đế đô hào hoa náo nhiệt, tranh quyền đoạt vị thâm',
+    'Thiên tử mất quyền, quyền thần lộng hành, chư hầu mỗi người một cõi',
+    'Vương triều mạt thế, dân gian lầm than, hào kiệt tứ khởi khởi nghĩa',
+    'Thượng cổ hồng hoang, vạn tộc mọc lên như nấm, nhân loại chỉ là hạt cát',
+    'Đế quốc tu chân hùng mạnh, cai trị tinh vực, khoa học và tiên pháp kết hợp',
+    'Thế giới tàn phá sau kỷ nguyên hắc ám, linh khí khô kiệt, tà ma hoành hành',
+    'Cửu thiên thập địa, tiên giới sụp đổ, chư thần vẫn lạc, trần gian hỗn loạn',
+    'Vương triều yêu tộc thống trị, nhân loại bị nô dịch, khởi nghĩa ngầm khắp nơi',
+    'Tam giới phân tranh, thiên, địa, nhân giới giao thoa, chiến hỏa liên miên',
+    'Thế giới ngầm dưới lòng đất, các thành bang tranh đoạt tài nguyên khoáng thạch',
+    'Quần đảo lơ lửng trên không, các tông môn chiến đấu giành giật linh mạch',
+    'Thời kỳ mạt pháp, tu sĩ ẩn nấp, phàm nhân nắm quyền bằng hỏa khí',
+    'Thế giới bị nguyền rủa, màn đêm vĩnh hằng, ánh sáng là thứ xa xỉ nhất'
+];
+const TIANJIAO_PRESETS = [
+    'Thiên tài đồng xuất, tranh giành đỉnh phong, một thời hào kiệt vân tập',
+    'Thiên mệnh chi tử xuất thế, thần binh lợi khí tái xuất giang hồ',
+    'Bách niên kỳ tài cùng thời xuất hiện, võ học đỉnh thịnh chưa từng có',
+    'Thiên cơ đại biến, thiên kiều mỗi người thân mang cơ duyên trọng đại',
+    'Ma đạo thánh nhân tái thế, chính đạo liên minh đồng tâm đối kháng',
+    'Vạn kiếm quy tông, thiên kiều thân mang kiếm mệnh bẩm sinh đặc biệt',
+    'Cổ thần phong ấn tan vỡ, thiên địa linh khí bạo trướng phi thường',
+    'Thần ma đại chiến tàn dư giác thức, thiên kiều kế thừa cổ thần di sản',
+    'Kim thiếp xuất thế, tiên nhân truyền thừa, thiên tài tranh đoạt cơ duyên',
+    'Huyết mạch giác thức, phong thần bảng tái hiện, thiên kiều tham chiến',
+    'Thần thể giáng thế, vạn năm hiếm gặp, dẫn động thiên địa dị tượng',
+    'Người mang hệ thống, nghịch thiên cải mệnh, càn quét mọi thiên tài',
+    'Trùng sinh giả mang theo ký ức kiếp trước, thề báo thù rửa hận',
+    'Kẻ xuyên không từ thế giới khác, mang theo tri thức hiện đại áp đảo quần hùng',
+    'Phế vật quật khởi, ngẫu nhiên đạt được truyền thừa thượng cổ',
+    'Yêu nghiệt song tu, chính tà kiêm tu, không dung nạp bởi thế gian',
+    'Kẻ mang huyết mạch cấm kỵ, bị cả thiên hạ truy sát nhưng càng đánh càng mạnh',
+    'Khí vận chi tử, đi đường vấp cục đá cũng nhặt được thần binh',
+    'Kiếm tu cực đoan, chỉ tu một kiếm, phá vạn pháp, chém rách thương khung',
+    'Luyện đan kỳ tài, lấy đan nhập đạo, khống chế vô số cường giả'
+];
+const MALE_NAMES = ['Hàn Lập', 'Lý Vân', 'Thẩm Lãng', 'Vương Lâm', 'Lâm Động', 'Vũ Hao', 'Trần Phong', 'Tiêu Viêm', 'Lục Minh', 'Dương Khai', 'Trương Hiên', 'Lưu Vũ', 'Tề Thiên', 'Bạch Lộc', 'Hàn Yên', 'Giang Phong', 'Tuấn Kiệt', 'Mộ Dung Long', 'Diệp Phàm', 'Nhạc Thiên', 'Độ Mixi', 'Cố Trường Ca', 'Phương Hàn', 'Mạnh Hạo', 'Bạch Tiểu Thuần', 'Kỷ Ninh', 'La Phong', 'Tô Minh', 'Thạch Hạo', 'Diệp Tôn', 'Sở Phong', 'Trần Phàm', 'Lý Thất Dạ', 'Tiêu Thần', 'Lâm Minh', 'Dương Kỳ', 'Tần Vũ', 'Thạch Nham', 'Giang Trần', 'Lâm Phong', 'Sở Mặc'];
+const FEMALE_NAMES = ['Vân Nguyệt', 'Tiểu Tiên', 'Lệ Hồng', 'Tuyết Nhi', 'Linh Nhi', 'Băng Nhi', 'Tử Hà', 'Minh Nguyệt', 'Lam Tinh', 'Hương Hồng', 'Thúy Vân', 'Bạch Lộ', 'Tiểu Vũ', 'Thiên Tâm', 'Kim Tuyến', 'Mộng Nhi', 'Sương Nhi', 'Long Nữ', 'Phù Dao', 'Dao Cơ', 'Lãnh Như Sương', 'Nam Cung Uyển', 'Cơ Tử Nguyệt', 'An Diệu Y', 'Nhan Như Ngọc', 'Bích Dao', 'Lục Tuyết Kỳ', 'Hoa Thiên Cốt', 'Bạch Thiển', 'Phượng Cửu', 'Tô Đát Kỷ', 'Liễu Như Thị', 'Mục Niệm Từ', 'Tiểu Long Nữ', 'Vương Ngữ Yên', 'Nhậm Doanh Doanh', 'Chu Chỉ Nhược', 'Triệu Mẫn', 'Hoàng Dung', 'Lý Mạc Sầu'];
 const APPEARANCE_PRESETS = [
     'Mình hạc xương mai, phong tư trác tuyệt, ánh mắt thâm thúy tựa tinh thần.',
     'Dáng người vạm vỡ, mặt mày góc cạnh, tản ra khí thế uy dũng áp bách.',
@@ -39,7 +81,12 @@ const APPEARANCE_PRESETS = [
     'Nho nhã điềm đạm, cử chỉ khoan thai, như thư sinh thế gia mang đầy thi thư khí chất.',
     'Gương mặt băng lãnh, ánh mắt vô diện vô ba, như người nhẫn nhịn ngàn năm tuyết.',
     'Thiên tư quốc sắc, dung mạo khuuyên thành, mỗi cái cau mày đều khiến thế nhân điên đảo.',
-    'Mình đầy sẹo chiến trận, ánh mắt kiên định, toát ra sát khí được tôi luyện qua ngàn trận sinh tử.'
+    'Mình đầy sẹo chiến trận, ánh mắt kiên định, toát ra sát khí được tôi luyện qua ngàn trận sinh tử.',
+    'Bạch y phiêu phiêu, tóc đen như thác, mang theo tiên khí mờ ảo không dính bụi trần.',
+    'Cơ bắp cuồn cuộn, xăm trổ đầy mình, tỏa ra hung uy của hồng hoang mãnh thú.',
+    'Dung mạo tà dị, đôi mắt hai màu, nụ cười luôn mang theo sự nguy hiểm chết người.',
+    'Thân hình nhỏ nhắn, khuôn mặt ngây thơ nhưng ánh mắt lại già dặn, thâm thúy vô cùng.',
+    'Mặc hắc bào che kín toàn thân, chỉ để lộ đôi mắt đỏ ngầu rực sáng trong đêm.'
 ];
 const PERSONALITY_PRESETS = [
     'Chí khí cao vời, coi trọng nghĩa khí, ghét ác như thù, luôn sẵn lòng giúp đỡ kẻ yếu.',
@@ -51,7 +98,12 @@ const PERSONALITY_PRESETS = [
     'Trầm tĩnh điềm đạm, suy nghĩ thấu đáo, hành sự cẩn trọng, là người đáng tin cậy trong mọi tình huống.',
     'Hoạt bát lém lỉnh, ham học hỏi, tính tình tò mò, đôi khi hơi tinh quái nhưng bản chất tốt.',
     'Chính trực vô tư, tuân thủ đạo lý, kiên định với lý tưởng của bản thân dù gặp bao gian khổ.',
-    'Âm trầm quái gở, lời nói sắc sảo, hành tung bí ẩn, khiến người khác vừa sợ vừa kính.'
+    'Âm trầm quái gở, lời nói sắc sảo, hành tung bí ẩn, khiến người khác vừa sợ vừa kính.',
+    'Sát phạt quả đoán, nhổ cỏ tận gốc, tuyệt đối không để lại hậu họa.',
+    'Cẩn thận chặt chẽ, luôn chừa cho mình đường lui, không bao giờ tin tưởng ai hoàn toàn.',
+    'Điên cuồng khát máu, càng trong nghịch cảnh càng hưng phấn, coi chiến đấu là lẽ sống.',
+    'Bề ngoài ôn hòa, nho nhã nhưng bên trong tàn nhẫn, mưu mô xảo quyệt.',
+    'Chỉ quan tâm đến lợi ích, không màng tình cảm, sẵn sàng bán đứng tất cả vì trường sinh.'
 ];
 const CUSTOM_TALENT_STORAGE_KEY = 'new_game_custom_talents';
 const CUSTOM_BACKGROUND_STORAGE_KEY = 'new_game_custom_backgrounds';
@@ -99,7 +151,7 @@ const STORY_STYLE_OPTIONS: Array<{ value: StoryStyleType; label: string }> = [
     { value: 'Thông thường', label: 'Thông thường (Cốt truyện tự nhiên)' },
     { value: 'Tu luyện', label: 'Tu luyện (Vượt cấp, tranh đoạt)' },
     { value: 'Tu la tràng', label: 'Tu la tràng (Drama, tranh giành tình cảm)' },
-    { value: 'Thuần ái', label: 'Thuần ái (Chung thủy, một đối một)' }
+    { value: 'Tu Tiên Ưu Ám', label: 'Tu Tiên Ưu Ám (U ám & Chân tình)' }
 ];
 
 
@@ -961,8 +1013,8 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
                         <div className="animate-slide-in w-full">
                             <div className="flex justify-between items-center border-b border-wuxia-gold/30 pb-3 mb-8">
                                 <h3 className="text-2xl font-serif font-bold text-wuxia-gold">Thân thế xuất thân</h3>
-                                <button 
-                                    onClick={() => triggerGacha('bg', gachaBackground)} 
+                                <button
+                                    onClick={() => triggerGacha('bg', gachaBackground)}
                                     className={`flex items-center gap-2 px-4 py-1.5 bg-wuxia-gold/10 hover:bg-wuxia-gold/20 text-wuxia-gold rounded-lg border border-wuxia-gold/30 transition-all font-serif text-sm group ${gachaFlash === 'bg' ? 'ring-2 ring-wuxia-gold bg-wuxia-gold/30' : ''}`}
                                     title="Gacha xuất thân (+ May mắn)"
                                 >
@@ -970,7 +1022,7 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
                                     <span>Gacha Thân thế</span>
                                 </button>
                             </div>
-                            
+
                             {showCustomBackground && (
                                 <div className="bg-black/40 border border-wuxia-gold/30 p-8 mb-8 rounded-xl space-y-6 shadow-glow-sm relative animate-in fade-in slide-in-from-top-4 duration-500">
                                     <button onClick={() => setShowCustomBackground(false)} className="absolute top-4 right-4 text-wuxia-gold/50 hover:text-red-400 transition-colors">

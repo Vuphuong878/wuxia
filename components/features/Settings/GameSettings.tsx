@@ -17,16 +17,16 @@ const GameSettings: React.FC<Props> = ({ settings, onSave }) => {
     const rootRef = useRef<HTMLDivElement | null>(null);
 
     const narrativePersonOptions: Array<{ value: GameSettingsType['narrativePerspective']; label: string }> = [
-        { value: 'Ngôi thứ nhất', label: 'Ngôi thứ nhất (Tôi)' },
-        { value: 'Ngôi thứ hai', label: 'Ngôi thứ hai (Bạn)' },
-        { value: 'Ngôi thứ ba', label: 'Ngôi thứ ba (Hắn/Tên)' }
+        { value: 'Ngôi thứ nhất', label: 'Ngôi thứ ba giới hạn' },
+        { value: 'Ngôi thứ hai', label: 'Ngôi thứ hai' },
+        { value: 'Ngôi thứ ba', label: 'Ngôi thứ ba Toàn tri' }
     ];
 
     const storyStyleOptions: Array<{ value: GameSettingsType['storyStyle']; label: string }> = [
-        { value: 'Tu luyện', label: 'Tu tiên' },
-        { value: 'Thông thường', label: 'Tổng hợp' },
-        { value: 'Tu la tràng', label: 'Tu La trường / Chiến đấu ác liệt' },
-        { value: 'Thuần ái', label: 'Tình yêu thuần khiết' }
+        { value: 'Tu luyện', label: 'Tu luyện' },
+        { value: 'Thông thường', label: 'Thông thường' },
+        { value: 'Tu la tràng', label: 'Tu la tràng' },
+        { value: 'Tu Tiên Ưu Ám', label: 'Tu Tiên Ưu Ám' }
     ];
 
     useEffect(() => {

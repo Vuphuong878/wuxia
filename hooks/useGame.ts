@@ -2523,6 +2523,22 @@ YÊU CẦU ĐỊNH DẠNG JSON (BẮT BUỘC):
     const saveSettings = async (newConfig: ApiSettings) => {
         const normalized = normalizeApiSettings(newConfig);
         console.log('[useGame] Persisting API settings:', normalized);
+        
+        // Auto-turn off NSFW prompt when useSystemGemini state changes
+        // This prevents accidental NSFW generation when switching environments
+        if (apiConfig.useSystemGemini !== normalized.useSystemGemini) {
+            const nsfwPromptIndex = prompts.findIndex(p => p.id === 'writing_nsfw');
+            if (nsfwPromptIndex !== -1 && prompts[nsfwPromptIndex].enabled) {
+                const newPrompts = [...prompts];
+                newPrompts[nsfwPromptIndex] = {
+                    ...newPrompts[nsfwPromptIndex],
+                    enabled: false
+                };
+                setPrompts(newPrompts);
+                await dbService.saveSetting('prompts', newPrompts);
+            }
+        }
+        
         setApiConfig(normalized);
         await dbService.saveSetting('api_settings', normalized);
     };

@@ -1472,6 +1472,68 @@ const requestWorkerText = async (
     });
 };
 
+import { GoogleGenAI } from '@google/genai';
+
+const requestSystemGeminiText = async (
+    apiConfig: ActiveApiConfig,
+    messages: GeneralMessage[],
+    temperature: number,
+    signal?: AbortSignal,
+    streamOptions?: UniversalStreamingOptions,
+    responseFormatJsonObject: boolean = false
+): Promise<string> => {
+    if (!apiConfig.apiKey) {
+        throw new Error("Hệ thống chưa được cấu hình GEMINI_API_KEY.");
+    }
+    const ai = new GoogleGenAI({ apiKey: apiConfig.apiKey });
+    const systemInstruction = messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n');
+    const userMessages = messages.filter(m => m.role !== 'system');
+    
+    const contents = userMessages.map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+    }));
+
+    const config: any = {
+        temperature,
+        systemInstruction: systemInstruction || undefined,
+    };
+    
+    if (responseFormatJsonObject) {
+        config.responseMimeType = 'application/json';
+    }
+
+    if (streamOptions?.stream) {
+        const responseStream = await ai.models.generateContentStream({
+            model: apiConfig.model,
+            contents,
+            config
+        });
+        
+        let accumulated = '';
+        for await (const chunk of responseStream) {
+            if (signal?.aborted) break;
+            const text = chunk.text || '';
+            accumulated += text;
+            if (streamOptions.onDelta) {
+                streamOptions.onDelta(text, accumulated);
+            }
+        }
+        return accumulated;
+    } else {
+        const response = await ai.models.generateContent({
+            model: apiConfig.model,
+            contents,
+            config
+        });
+        const text = response.text || '';
+        if (streamOptions?.onDelta) {
+            streamOptions.onDelta(text, text);
+        }
+        return text;
+    }
+};
+
 const requestModelText = async (
     apiConfig: ActiveApiConfig,
     messages: GeneralMessage[],
@@ -1485,12 +1547,23 @@ const requestModelText = async (
     }
 ): Promise<string> => {
     if (!apiConfig) throw new Error("API configuration is missing. Please check settings.");
-    if (apiConfig.provider !== 'worker' && !apiConfig.apiKey) throw new Error("API Key is missing for the selected provider. Please check settings.");
+    if (apiConfig.provider !== 'worker' && apiConfig.provider !== 'system_gemini' && !apiConfig.apiKey) throw new Error("API Key is missing for the selected provider. Please check settings.");
 
     // We force JSON mode globally as requested
     const jsonMode = true;
     const protocol = checkRequestProtocol(apiConfig);
     const resolvedTemperature = calculateRequestTemperature(apiConfig, protocol, options.temperature);
+
+    if (apiConfig.provider === 'system_gemini') {
+        return requestSystemGeminiText(
+            apiConfig,
+            messages,
+            resolvedTemperature,
+            options.signal,
+            options.streamOptions,
+            jsonMode
+        );
+    }
 
     if (apiConfig.provider === 'worker') {
         const workerUrl = apiConfig.baseUrl || DEFAULT_TEXT_GEN_WORKER_URLS;
@@ -1936,13 +2009,13 @@ export const generateStoryResponse = async (
 export const testConnection = async (
     apiConfig: ActiveApiConfig
 ): Promise<ConnectionTestResult> => {
-    if (!apiConfig || (apiConfig.provider !== 'worker' && !apiConfig.apiKey)) {
+    if (!apiConfig || (apiConfig.provider !== 'worker' && apiConfig.provider !== 'system_gemini' && !apiConfig.apiKey)) {
         return { ok: false, detail: 'Missing API Key' };
     }
-    if (apiConfig.provider !== 'worker' && !apiConfig.baseUrl) {
+    if (apiConfig.provider !== 'worker' && apiConfig.provider !== 'system_gemini' && !apiConfig.baseUrl) {
         return { ok: false, detail: 'Missing Base URL' };
     }
-    if (apiConfig.provider !== 'worker' && !apiConfig.model) {
+    if (apiConfig.provider !== 'worker' && apiConfig.provider !== 'system_gemini' && !apiConfig.model) {
         return { ok: false, detail: 'Missing model name' };
     }
 

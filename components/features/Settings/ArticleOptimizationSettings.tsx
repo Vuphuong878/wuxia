@@ -6,7 +6,7 @@ import InlineSelect from '../../ui/InlineSelect';
 import { defaultArticleOptimizationPrompt } from '../../../prompts/runtime/defaults';
 import { useModelOptions } from '../../../hooks/useModelOptions';
 import ParallelogramSaveButton from '../../ui/ParallelogramSaveButton';
-import { API_PRESET_TEMPLATES } from '../../../utils/apiConfig';
+import { API_PRESET_TEMPLATES, getCurrentApiConfig } from '../../../utils/apiConfig';
 
 interface Props {
     settings: InterfaceSettingsStructure;
@@ -15,7 +15,7 @@ interface Props {
 
 const ArticleOptimizationSettings: React.FC<Props> = ({ settings, onSave }) => {
     const fmp = settings.featureModelPlaceholder;
-    const activeMainConfig = settings.configs.find(c => c.id === settings.activeConfigId) || settings.configs[0];
+    const activeMainConfig = getCurrentApiConfig(settings);
 
     // Use the global model options hook
     const { options: models, loading: isFetchingModels, fetchModels } = useModelOptions(settings);

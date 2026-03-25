@@ -366,6 +366,7 @@ const normalizeFeatureModelPlaceholder = (raw: any): FeatureModelPlaceholderConf
 
 export const createEmptyApiSettings = (): ApiSettings => ({
     activeConfigId: null,
+    useSystemGemini: true,
     configs: [],
     featureModelPlaceholder: { ...DEFAULT_FEATURE_MODEL_PLACEHOLDER }
 });
@@ -499,6 +500,7 @@ export const normalizeApiSettings = (raw: unknown): ApiSettings => {
 
     return {
         activeConfigId,
+        useSystemGemini: source.useSystemGemini !== false,
         configs: normalizedConfigs,
         featureModelPlaceholder: normalizeFeatureModelPlaceholder(source.featureModelPlaceholder ?? source['Function model placeholder'])
     };
@@ -507,6 +509,20 @@ export const normalizeApiSettings = (raw: unknown): ApiSettings => {
 
 
 export const getCurrentApiConfig = (settings: ApiSettings): ActiveApiConfig | null => {
+    if (settings?.useSystemGemini !== false) {
+        return {
+            id: 'system_gemini',
+            name: 'Hệ thống (Gemini 3 Flash)',
+            provider: 'system_gemini',
+            protocolOverride: 'gemini',
+            baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
+            apiKey: process.env.GEMINI_API_KEY || '',
+            model: 'gemini-3-flash-preview',
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        };
+    }
+
     if (!settings || !Array.isArray(settings.configs) || settings.configs.length === 0) return null;
     const active = settings.configs.find(cfg => cfg.id === settings.activeConfigId) || settings.configs[0];
     if (!active) return null;
@@ -529,6 +545,10 @@ export const getMainStoryApiConfig = (settings: ApiSettings): ActiveApiConfig | 
     const current = getCurrentApiConfig(settings);
     if (!isApiConfigUsable(current)) return null;
 
+    if (current.provider === 'system_gemini') {
+        return current;
+    }
+
     const mainModel = readString(settings.featureModelPlaceholder?.mainStoryModel).trim();
     if (mainModel) {
         return {
@@ -549,6 +569,11 @@ export const getRecallApiConfig = (settings: ApiSettings): ActiveApiConfig | nul
     if (!isApiConfigUsable(current)) return null;
     const enabled = Boolean(settings.featureModelPlaceholder?.recallIndependentModelToggle);
     if (!enabled) return null;
+
+    if (current.provider === 'system_gemini') {
+        return current;
+    }
+
     const recallModel = readString(settings.featureModelPlaceholder?.recallModel).trim();
     if (!recallModel) return null;
     return {
@@ -559,7 +584,7 @@ export const getRecallApiConfig = (settings: ApiSettings): ActiveApiConfig | nul
 
 export const isApiConfigUsable = (config: ActiveApiConfig | null): config is ActiveApiConfig => {
     if (!config) return false;
-    if (config.provider === 'worker') return true;
+    if (config.provider === 'worker' || config.provider === 'system_gemini') return true;
     return Boolean(config.baseUrl?.trim() && config.apiKey?.trim());
 };
 
