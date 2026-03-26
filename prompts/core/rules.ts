@@ -30,10 +30,35 @@ export const CoreRules: PromptStructure = {
 
 ## 3) Quy tắc NPC (NHẤT QUÁN DANH TÍNH)
 - **Hợp nhất danh tính**: Khi một nhân vật xuất hiện lần đầu với tên riêng (VD: "Lão Lý"), AI phải quét danh sách NPC hiện có để tìm các danh xưng chung chung (VD: 'Trưởng Làng', 'Chị Dâu') phù hợp vai trò. Nếu tìm thấy, BẮT BUỘC gửi lệnh \`UPDATE\` cập nhật \`name\` thành tên riêng đó thay vì tạo NPC mới.
-- **Quy tắc tạo ID (Chỉ khi CREATE)**:
-  1. ID cơ sở = tên riêng \`snake_case\`, không dấu, viết thường (VD: \`lac_than\`).
-  2. Nếu trùng ID, thêm hậu tố số (\`_2\`, \`_3\`,...).
-  3. ID đã tạo là VĨNH VIỄN và KHÔNG ĐƯỢC THAY ĐỔI.
+- **BẮT BUỘC TẠO THỰC THỂ**: Nếu nhân vật mới xuất hiện có tên riêng hoặc danh xưng cụ thể mà không thể hợp nhất, bạn **BẮT BUỘC** gửi lệnh \`PUSH\` vào \`gameState.Social\` để tạo thực thể NPC mới ngay trong lượt đó. Nghiêm cấm chỉ để tên trong \`logs\` mà không có dữ liệu trong hệ thống.
+- **Mẫu Cấu trúc PUSH NPC mới (MANDATORY)**:
+  \`\`\`json
+  {
+    "action": "PUSH",
+    "key": "gameState.Social",
+    "value": {
+      "id": "snake_case_id",
+      "name": "Tiếng Việt có dấu",
+      "gender": "Nam/Nữ",
+      "age": 18,
+      "identity": "Thân phận cụ thể",
+      "realm": "Cảnh giới hiện tại",
+      "appearanceDescription": "Mô tả ngoại hình (Trang phục, khí chất, đặc điểm nhận dạng)",
+      "corePersonalityTraits": "Tính cách cốt lõi (Để AI roleplay nhất quán)",
+      "favorability": 0,
+      "relationStatus": "Người lạ",
+      "isPresent": true,
+      "currentHp": 100,
+      "maxHp": 100,
+      "status": "Khỏe mạnh",
+      "memories": []
+    }
+  }
+  \`\`\`
+- **Quy tắc Tên và ID**:
+  1. \`name\`: Tiếng Việt có dấu (VD: "Chung Hội", "Lão Ăn Mày").
+  2. \`id\`: \`snake_case\`, không dấu, viết thường, vĩnh viễn (VD: \`chung_hoi\`, \`lao_an_may\`).
+  3. Nếu trùng ID, thêm hậu tố số (\`_2\`, \`_3\`,...).
 - Cập nhật NPC xã hội qua \`gameState.Social[i].Field\` (VD: \`favorability\`, \`identity\`, \`memories\`).
 - Nhân vật rời cảnh phải set \`isPresent: false\`.
 - Tương tác xã hội phải ghi vào \`memories\` và cập nhật \`favorability\`.
