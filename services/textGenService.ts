@@ -57,8 +57,15 @@ export class TextGenService {
   private static readonly CAPACITY_RETRY_MAX = 5;
   private static readonly CAPACITY_RETRY_BASE_MS = 2000;
 
+  private static readonly ROUTING_RETRY_MAX = 5;
+  private static readonly ROUTING_RETRY_BASE_MS = 1000;
+
   private static isCapacityError(message: string): boolean {
     return message.includes('3040') || message.toLowerCase().includes('capacity temporarily exceeded');
+  }
+
+  private static isRoutingError(message: string): boolean {
+    return message.includes('4002') || message.toLowerCase().includes('could not route request to ai model');
   }
 
   static async generateText(workerUrl: string | string[], options: TextGenOptions): Promise<string> {
@@ -146,6 +153,22 @@ export class TextGenService {
             // Reset counter before falling through
             delete (this as any)[retryKey];
             console.warn(`[TextGenService] Đã hết lượt retry dung lượng (3040). Chuyển sang link dự phòng...`);
+          }
+
+          // Auto-retry for routing errors (4002) on the SAME URL with exponential backoff
+          if (this.isRoutingError(errorMessage)) {
+            const retryKey = `__routingRetry_${i}`;
+            const currentRetry = ((this as any)[retryKey] || 0) as number;
+            if (currentRetry < this.ROUTING_RETRY_MAX) {
+              (this as any)[retryKey] = currentRetry + 1;
+              const delayMs = this.ROUTING_RETRY_BASE_MS * Math.pow(2, currentRetry);
+              console.warn(`[TextGenService] Lỗi định tuyến (4002). Tự động thử lại lần ${currentRetry + 1}/${this.ROUTING_RETRY_MAX} sau ${delayMs / 1000}s...`);
+              await new Promise(r => setTimeout(r, delayMs));
+              continue;
+            }
+            // Reset counter before falling through
+            delete (this as any)[retryKey];
+            console.warn(`[TextGenService] Đã hết lượt retry định tuyến (4002). Chuyển sang link dự phòng...`);
           }
 
           if (isTransient && i < urls.length - 1) {
