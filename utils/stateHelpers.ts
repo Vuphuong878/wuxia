@@ -410,6 +410,14 @@ export const VIETNAMESE_SUBKEY_MAP: Record<string, string> = {
     "Kết quả": "eventResult",
     "Kết quả sự kiện": "eventResult",
     "Thời gian kết thúc": "endDate",
+
+    // Standardized/Modern Quest fields
+    "status": "currentStatus",
+    "start_time": "startTime",
+    "expiration_time": "deadline",
+    "difficulty": "recommendedRealm",
+    "reward": "rewardDescription",
+    "location_name": "location",
 };
 
 // Create a normalized map for case-insensitive lookups
@@ -748,7 +756,23 @@ export const applyStateCommand = (
                 return { char: newChar, env: newEnv, social: newSocial, world: newWorld, battle: newBattle, story: newStory, taskList: newTaskList, appointmentList: newAppointmentList, playerSect: newPlayerSect };
             }
             if (normalizedAction === 'push') {
-                newTaskList.push(translateObjectKeys(value));
+                const newTask = translateObjectKeys(value);
+                const newTitle = (newTask.title || newTask.name || '').trim();
+                const newId = (newTask.id || '').trim();
+
+                // Check for duplicates by ID or Title
+                const existingIndex = newTaskList.findIndex(t => {
+                    if (newId && t.id === newId) return true;
+                    if (newTitle && (t.title || t.name) === newTitle) return true;
+                    return false;
+                });
+
+                if (existingIndex !== -1) {
+                    // Merge into existing task
+                    newTaskList[existingIndex] = { ...newTaskList[existingIndex], ...newTask };
+                } else {
+                    newTaskList.push(newTask);
+                }
                 return { char: newChar, env: newEnv, social: newSocial, world: newWorld, battle: newBattle, story: newStory, taskList: newTaskList, appointmentList: newAppointmentList, playerSect: newPlayerSect };
             }
         }

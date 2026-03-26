@@ -36,7 +36,6 @@ export const WritingStyle: PromptStructure = {
 - **12. Từ ngữ Game**: Tuyệt đối không dùng số (%), điểm/chỉ số (HP, Sức mạnh...), hay từ ngữ hệ thống (UI, lượt, bot...) trong câu truyện. 
 - **13. Nhấn mạnh**: Tên nhân vật, địa điểm, võ công quan trọng phải bọc bằng dấu hoa thị * (VD: *Hàn Lập*).
 - **14. Cấu trúc JSON**: Mỗi lượt có \`shortTerm\`, \`tavern_commands\`, và \`action_options\` (3+ lựa chọn logic).
-- **15. Phán định**: Dòng kết quả phán định (nếu có) phải nằm riêng biệt.
 `,
   type: 'writing',
   enabled: true
