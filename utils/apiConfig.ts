@@ -189,7 +189,7 @@ const PROVIDER_DEFAULTS: Record<ApiProviderType, { baseUrl: string; model: strin
     },
     worker: {
         baseUrl: DEFAULT_TEXT_GEN_WORKER_URL,
-        model: '@cf/openai/gpt-oss-120b'
+        model: '@cf/zai-org/glm-4.7-flash'
     },
     system_gemini: {
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
@@ -223,6 +223,40 @@ const readTemperature = (value: unknown): number | undefined => {
         if (!Number.isFinite(raw)) return undefined;
         if (raw < 0 || raw > 2) return undefined;
         return Math.round(raw * 100) / 100;
+    };
+
+    if (typeof value === 'number') return normalize(value);
+    if (typeof value === 'string') {
+        const cleaned = value.trim();
+        if (!cleaned) return undefined;
+        const parsed = Number(cleaned);
+        return normalize(parsed);
+    }
+    return undefined;
+};
+
+const readTopP = (value: unknown): number | undefined => {
+    const normalize = (raw: number): number | undefined => {
+        if (!Number.isFinite(raw)) return undefined;
+        if (raw < 0 || raw > 1) return undefined;
+        return Math.round(raw * 100) / 100;
+    };
+
+    if (typeof value === 'number') return normalize(value);
+    if (typeof value === 'string') {
+        const cleaned = value.trim();
+        if (!cleaned) return undefined;
+        const parsed = Number(cleaned);
+        return normalize(parsed);
+    }
+    return undefined;
+};
+
+const readTopK = (value: unknown): number | undefined => {
+    const normalize = (raw: number): number | undefined => {
+        if (!Number.isFinite(raw)) return undefined;
+        if (raw < 1 || raw > 100) return undefined;
+        return Math.floor(raw);
     };
 
     if (typeof value === 'number') return normalize(value);
@@ -304,6 +338,9 @@ const normalizeSingleConfig = (raw: any, index: number): ApiConfig => {
     const model = readString(raw?.model, defaultPreset.model).trim() || defaultPreset.model;
     const maxTokens = readPositiveInt(raw?.maxTokens ?? raw?.max_tokens);
     const temperature = readTemperature(raw?.temperature);
+    const topP = readTopP(raw?.topP ?? raw?.top_p);
+    const topK = readTopK(raw?.topK ?? raw?.top_k);
+    const nsfwMode = Boolean(raw?.nsfwMode ?? raw?.nsfw_mode);
     const protocolOverride = normalizeProtocolOverride(raw?.['Protocol override'] ?? raw?.protocolOverride);
 
     const createdAt = typeof raw?.createdAt === 'number' && Number.isFinite(raw.createdAt) ? raw.createdAt : now;
@@ -319,7 +356,9 @@ const normalizeSingleConfig = (raw: any, index: number): ApiConfig => {
         apiKey,
         model,
         maxTokens,
-        temperature,
+        topP,
+        topK,
+        nsfwMode,
         createdAt,
         updatedAt
     };
@@ -404,7 +443,7 @@ export const API_PRESET_TEMPLATES: Array<{
         { label: 'SambaNova', provider: 'sambanova', baseUrl: 'https://api.sambanova.ai/v1', model: 'Meta-Llama-3.1-70B-Instruct' },
         { label: 'HuggingFace', provider: 'huggingface', baseUrl: 'https://api-inference.huggingface.co/v1', model: 'gpt2' },
         { label: 'Cloudflare', provider: 'cloudflare', baseUrl: 'https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/ai/v1', model: '@cf/meta/llama-3-8b-instruct' },
-        { label: 'Hệ thống (Nemotron-Free)', provider: 'worker', baseUrl: DEFAULT_TEXT_GEN_WORKER_URL, model: '@cf/openai/gpt-oss-120b' }
+        { label: 'Hệ thống (Free-Fast)', provider: 'worker', baseUrl: DEFAULT_TEXT_GEN_WORKER_URL, model: '@cf/zai-org/glm-4.7-flash' }
     ];
 
 export const createApiConfigFromPreset = (preset: typeof API_PRESET_TEMPLATES[number]): ApiConfig => {
@@ -420,6 +459,9 @@ export const createApiConfigFromPreset = (preset: typeof API_PRESET_TEMPLATES[nu
         model: preset.model,
         maxTokens: undefined,
         temperature: undefined,
+        topP: undefined,
+        topK: undefined,
+        nsfwMode: undefined,
         createdAt: now,
         updatedAt: now
     };
@@ -448,6 +490,9 @@ export const createApiConfigTemplate = (
         model: preset.model,
         maxTokens: undefined,
         temperature: undefined,
+        topP: undefined,
+        topK: undefined,
+        nsfwMode: undefined,
         createdAt: now,
         updatedAt: now
     };
@@ -487,10 +532,10 @@ export const normalizeApiSettings = (raw: unknown): ApiSettings => {
             id: 'nemotron-system-worker',
             name: 'Hệ thống (Nemotron-Free)',
             provider: 'worker',
-            model: '@cf/openai/gpt-oss-120b',
             baseUrl: DEFAULT_TEXT_GEN_WORKER_URL, // Added baseUrl
             apiKey: '', // Added apiKey
             protocolOverride: 'auto', // Added protocolOverride
+            model: '@cf/zai-org/glm-4.7-flash',
             createdAt: Date.now(),
             updatedAt: Date.now()
         };
@@ -541,6 +586,9 @@ export const getCurrentApiConfig = (settings: ApiSettings): ActiveApiConfig | nu
         model: active.model,
         maxTokens: active.maxTokens,
         temperature: active.temperature,
+        topP: active.topP,
+        topK: active.topK,
+        nsfwMode: active.nsfwMode,
         createdAt: active.createdAt,
         updatedAt: active.updatedAt
     };

@@ -12,6 +12,8 @@ export interface TextGenOptions {
   id?: string;
   onDelta?: (delta: string, accumulated: string) => void;
   model?: string;
+  top_p?: number;
+  top_k?: number;
 }
 
 export interface TextGenResponse {
@@ -49,6 +51,14 @@ export class TextGenService {
       console.warn(`[TextGenService] Health check failed for ${url}:`, error);
       return false;
     }
+  }
+
+  // Max retries for transient capacity errors (3040) on the same URL
+  private static readonly CAPACITY_RETRY_MAX = 5;
+  private static readonly CAPACITY_RETRY_BASE_MS = 2000;
+
+  private static isCapacityError(message: string): boolean {
+    return message.includes('3040') || message.toLowerCase().includes('capacity temporarily exceeded');
   }
 
   static async generateText(workerUrl: string | string[], options: TextGenOptions): Promise<string> {
@@ -92,13 +102,15 @@ export class TextGenService {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-model': options.model || '@cf/openai/gpt-oss-120b',
+            'x-model': options.model || '@cf/zai-org/glm-4.7-flash',
             ...(options.id ? { 'x-session-affinity': options.id } : {}),
           },
           body: JSON.stringify({
             messages: options.messages,
             max_tokens: options.max_tokens || 131000,
             temperature: options.temperature || 1,
+            top_p: options.top_p,
+            top_k: options.top_k,
             id: options.id,
             model: options.model
           }),
@@ -119,6 +131,22 @@ export class TextGenService {
             errorMessage.toLowerCase().includes('neurons');
 
           const isTransient = is4006 || response.status === 429 || response.status >= 500;
+
+          // Auto-retry for capacity errors (3040) on the SAME URL with exponential backoff
+          if (this.isCapacityError(errorMessage)) {
+            const retryKey = `__capacityRetry_${i}`;
+            const currentRetry = ((this as any)[retryKey] || 0) as number;
+            if (currentRetry < this.CAPACITY_RETRY_MAX) {
+              (this as any)[retryKey] = currentRetry + 1;
+              const delayMs = this.CAPACITY_RETRY_BASE_MS * Math.pow(2, currentRetry);
+              console.warn(`[TextGenService] Lỗi dung lượng tạm thời (3040). Tự động thử lại lần ${currentRetry + 1}/${this.CAPACITY_RETRY_MAX} sau ${delayMs / 1000}s...`);
+              await new Promise(r => setTimeout(r, delayMs));
+              continue;
+            }
+            // Reset counter before falling through
+            delete (this as any)[retryKey];
+            console.warn(`[TextGenService] Đã hết lượt retry dung lượng (3040). Chuyển sang link dự phòng...`);
+          }
 
           if (isTransient && i < urls.length - 1) {
             console.warn(`[TextGenService] Worker ${normalizedUrl} lỗi (${response.status}/${errorMessage.slice(0, 50)}). Đang tìm link dự phòng...`);

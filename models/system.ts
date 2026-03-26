@@ -37,6 +37,9 @@ export interface ApiConfig {
     model: string;
     maxTokens?: number;
     temperature?: number;
+    topP?: number;
+    topK?: number;
+    nsfwMode?: boolean;
     createdAt: number;
     updatedAt: number;
 }
@@ -52,7 +55,7 @@ export type OpenAICompatibilitySolution = 'custom' | 'openrouter' | 'siliconflow
 
 export type RequestProtocolOverride = 'auto' | 'openai' | 'gemini' | 'claude' | 'deepseek';
 
-export type ActiveApiConfig = Pick<ApiConfig, 'id' | 'name' | 'provider' | 'protocolOverride' | 'baseUrl' | 'apiKey' | 'model' | 'maxTokens' | 'temperature' | 'createdAt' | 'updatedAt'>;
+export type ActiveApiConfig = Pick<ApiConfig, 'id' | 'name' | 'provider' | 'protocolOverride' | 'baseUrl' | 'apiKey' | 'model' | 'maxTokens' | 'temperature' | 'topP' | 'topK' | 'nsfwMode' | 'createdAt' | 'updatedAt'>;
 
 export interface FeatureModelPlaceholderConfig {
     mainStoryModel: string;

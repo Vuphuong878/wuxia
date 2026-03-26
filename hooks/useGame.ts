@@ -215,11 +215,48 @@ export const useGame = () => {
         contextSize, setContextSize,
         scrollRef, abortControllerRef
     } = gameState;
+
+    const currentApi = getCurrentApiConfig(apiConfig);
+    const workerUrl = visualConfig.textGenWorkerUrl;
     const roundSnapshotStackRef = useRef<RoundSnapshot[]>([]);
     const recentAutoSaveTimestampRef = useRef<number>(0);
     const recentAutoSaveSignatureRef = useRef<string>('');
     const [repeatableRollCount, setRepeatableRollCount] = useState(0);
     const [recentStartingConfig, setRecentStartingConfig] = useState<RecentStartingConfig | null>(null);
+
+    // Discovery System: Update visited nodes when character moves
+    useEffect(() => {
+        if (environment.x === undefined || environment.y === undefined) return;
+        
+        // Find nodes close to current coordinates
+        const nearNodes = MapService.getNodesByProximity(environment.x, environment.y, 50);
+        const newlyVisited: string[] = [];
+
+        if (nearNodes.length > 0) {
+            const nearest = nearNodes[0];
+            if (!world.visitedNodeIds?.includes(nearest.id)) {
+                newlyVisited.push(nearest.id);
+            }
+        }
+
+        // Automatically unlock 10 more "Kiến trúc" (Nodes) as requested
+        const allNodes = MapService.getAllNodes();
+        const visitedSet = new Set(world.visitedNodeIds || []);
+        const unvisited = allNodes.filter(n => !visitedSet.has(n.id) && !newlyVisited.includes(n.id));
+        
+        // Pick 10 random unvisited nodes to simulate wide-spread discovery
+        const random10 = unvisited
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 10)
+            .map(n => n.id);
+        
+        if (newlyVisited.length > 0 || random10.length > 0) {
+            setWorld(prev => ({
+                ...prev,
+                visitedNodeIds: [...(prev.visitedNodeIds || []), ...newlyVisited, ...random10]
+            }));
+        }
+    }, [environment.x, environment.y]);
 
     // --- Actions ---
     const deepCopy = <T,>(data: T): T => {
@@ -512,6 +549,7 @@ export const useGame = () => {
                 ongoingEvents: Array.isArray(worldData.ongoingEvents) ? worldData.ongoingEvents : [],
                 settledEvents: Array.isArray(worldData.settledEvents) ? worldData.settledEvents : [],
                 worldHistory: Array.isArray(worldData.worldHistory) ? worldData.worldHistory : [],
+                visitedNodeIds: [],
                 time: worldData.time || { Year: 2026, Month: 3, Day: 23, Hour: 6, Minute: 15 }
             };
         }
@@ -523,6 +561,7 @@ export const useGame = () => {
             ongoingEvents: Array.isArray(worldData.ongoingEvents) ? worldData.ongoingEvents : [],
             settledEvents: Array.isArray(worldData.settledEvents) ? worldData.settledEvents : [],
             worldHistory: Array.isArray(worldData.worldHistory) ? worldData.worldHistory : [],
+            visitedNodeIds: Array.isArray(worldData.visitedNodeIds) ? worldData.visitedNodeIds : [],
             time: worldData.time || { Year: 2026, Month: 3, Day: 23, Hour: 6, Minute: 15 }
         };
     };
@@ -1551,13 +1590,23 @@ export const useGame = () => {
                 workerUrl
             );
 
-            // 4. Update state with full world skeleton data and dynamic starting location
+            // 4. Update state with filtered world skeleton data (we still transform full skeleton but with discovery filtering later)
+            // Note: user specifically asked to unlock based on XY, so we don't filter the maps array in world state yet, 
+            // but we filter the MapGraph display.
             const worldSkeletonData = WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
+            
+            // 4.1 Initialize visited nodes (Discovery system - radius 150 around starting XY)
+            // This reveals approximately 15-25 nodes depending on density, meeting user requirement.
+            const sx = startingLocation.x || 500;
+            const sy = startingLocation.y || 500;
+            const initialVisitedNodes = MapService.getNodesByProximity(sx, sy, 150);
+            const initialVisitedIds = initialVisitedNodes.map(n => n.id);
 
             openingBase.world = {
                 ...openingBase.world,
                 maps: worldSkeletonData.maps || [],
                 buildings: worldSkeletonData.buildings || [],
+                visitedNodeIds: initialVisitedIds,
             };
 
             openingBase.environment = {
@@ -1593,7 +1642,7 @@ export const useGame = () => {
                 alert("Worldview prompt written. Please input commands in the chat box to start initialization.");
             } else {
                 // We pass genData explicitly because state updates might be async/batched
-                await generateOpeningStory(openingBase, finalPrompts, openingStreaming, currentApi);
+                await generateOpeningStory(openingBase, finalPrompts, openingStreaming, currentApi, startingLocation.reason);
                 // Trigger Visual Summary review step
             }
         } catch (error: any) {
@@ -1637,7 +1686,8 @@ export const useGame = () => {
         contextData: any,
         promptSnapshot: PromptStructure[],
         useStreaming: boolean,
-        apiForOpening: ApiConfig
+        apiForOpening: ApiConfig,
+        startingReason?: string
     ) => {
         const initialHistory: ChatHistory[] = [
             {
@@ -1718,7 +1768,7 @@ export const useGame = () => {
             const aiResult = await aiService.generateStoryResponse(
                 openingContext.systemPrompt,
                 openingScriptContext,
-                startingInitializationTaskPrompt,
+                `${startingInitializationTaskPrompt}\n\n【Lý do chọn địa điểm xuất phát】\n${startingReason || 'Hệ thống tự động chọn vị trí phù hợp với căn cơ.'}`,
                 apiForOpening,
                 controller.signal,
                 useStreaming

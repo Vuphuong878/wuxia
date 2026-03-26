@@ -4,6 +4,9 @@ import { parseJsonWithRepair } from '../utils/jsonRepair';
 import { WORLD_GENERATION_SYSTEM_PROMPT, constructWorldviewUserPrompt } from '../prompts/runtime/worldGeneration';
 import { constructStartingLocationPrompt } from '../prompts/runtime/worldSetup';
 import { DEFAULT_COT_PROMPT } from '../prompts/runtime/defaults';
+import { NSFW_RULES_PROMPT } from '../prompts/runtime/nsfwRules';
+import { WORLD_RULES_PROMPT } from '../prompts/runtime/worldRules';
+import { NSFW_DETAILED_INSTRUCTIONS } from '../prompts/writing/nsfw';
 import { TextGenService } from './textGenService';
 import { DEFAULT_TEXT_GEN_WORKER_URLS } from '../utils/apiConfig';
 import { WorldDataExporter } from './worldDataExporter';
@@ -1463,6 +1466,8 @@ const requestWorkerText = async (
         max_tokens?: number;
         id?: string;
         model?: string;
+        top_p?: number;
+        top_k?: number;
         onDelta?: (delta: string, accumulated: string) => void;
     }
 ): Promise<string> => {
@@ -1472,6 +1477,8 @@ const requestWorkerText = async (
         max_tokens: options.max_tokens,
         id: options.id,
         model: options.model,
+        top_p: options.top_p,
+        top_k: options.top_k,
         onDelta: options.onDelta
     });
 };
@@ -1754,6 +1761,7 @@ export interface StartingLocationResult {
     y: number;
     biomeId: string;
     regionId: string;
+    selectedContinents: string[];
 }
 
 export const determineStartingLocation = async (
@@ -1762,8 +1770,8 @@ export const determineStartingLocation = async (
     apiConfig: ActiveApiConfig | null,
     workerUrl?: string
 ): Promise<StartingLocationResult> => {
-    const worldStructure = WorldDataExporter.getBiomeOnlyStructure(skeleton);
-    const systemPrompt = "Bạn là hệ thống định vị nhân vật trong trò chơi Võ Hiệp. Hãy chọn địa điểm khởi đầu phù hợp nhất dựa trên Biome.";
+    const worldStructure = WorldDataExporter.getDetailedBiomeRegistry(skeleton);
+    const systemPrompt = "Bạn là hệ thống định vị nhân vật trong trò chơi Võ Hiệp. Hãy chọn Vùng đất (Biome) và Loại địa điểm khởi đầu phù hợp nhất dựa trên bối cảnh và thiên phú.";
     const userPrompt = constructStartingLocationPrompt(charData, worldStructure);
 
     const messages: GeneralMessage[] = [
@@ -1775,66 +1783,76 @@ export const determineStartingLocation = async (
         try {
             const parsed = parseJsonWithRepair<any>(content);
             const data = parsed.value;
-            if (data && data.majorLocation) {
-                // Find the chosen biome in skeleton
-                const biomes = skeleton?.world_skeleton?.level_1_biomes || [];
-                const chosenBiome = biomes.find((b: any) =>
-                    b.name === data.majorLocation || b.id === data.majorLocation || (typeof b.name === 'string' && b.name.includes(data.majorLocation))
-                ) || biomes[Math.floor(Math.random() * biomes.length)];
+            
+            const targetBiomeId = data.biomeId;
+            const targetLocationType = data.locationType;
 
-                // Pick random region
-                const regions = chosenBiome.level_2_regions || [];
-                const chosenRegion = regions[Math.floor(Math.random() * regions.length)];
+            const biomes = skeleton?.world_skeleton?.level_1_biomes || [];
+            
+            // 1. Find the target biome
+            let selectedBiome = biomes.find((b: any) => b.id === targetBiomeId) || biomes[0];
+            
+            // 2. Find all nodes in this biome that match the location type
+            let candidateNodes: any[] = [];
+            let fallbackNodes: any[] = []; // All nodes in the biome
 
-                // Pick node based on type if requested by AI
-                const nodes = chosenRegion.level_3_nodes || [];
-                let filteredNodes = nodes;
-                if (data.type) {
-                    const requestedType = data.type.toLowerCase();
-                    filteredNodes = nodes.filter((n: any) =>
-                        (n.type && n.type.toLowerCase().includes(requestedType)) || (typeof n.type === 'string' && requestedType.includes(n.type.toLowerCase()))
-                    );
-                }
+            (selectedBiome.level_2_regions || []).forEach((region: any) => {
+                (region.level_3_nodes || []).forEach((node: any) => {
+                    fallbackNodes.push({ node, region, biome: selectedBiome });
+                    if (node.type === targetLocationType) {
+                        candidateNodes.push({ node, region, biome: selectedBiome });
+                    }
+                });
+            });
 
-                // Final selection (fallback to any node if type-filtering yields empty)
-                const finalNodes = filteredNodes.length > 0 ? filteredNodes : nodes;
-                const chosenNode = finalNodes[Math.floor(Math.random() * finalNodes.length)];
+            // 3. Pick a random node from candidates, or fallback to any node in biome
+            let finalSelection = candidateNodes.length > 0 
+                ? candidateNodes[Math.floor(Math.random() * candidateNodes.length)]
+                : (fallbackNodes.length > 0 ? fallbackNodes[Math.floor(Math.random() * fallbackNodes.length)] : null);
 
-                return {
-                    majorLocation: chosenBiome.name,
-                    mediumLocation: chosenRegion.name,
-                    minorLocation: chosenNode.name,
-                    personalityStats: data.personalityStats,
-                    reason: data.reason,
-                    x: chosenNode.x || 0,
-                    y: chosenNode.y || 0,
-                    biomeId: chosenBiome.id,
-                    regionId: chosenRegion.id
-                };
+            // 4. Final Fallback if biome is empty (unlikely)
+            if (!finalSelection) {
+                const firstBiome = biomes[0];
+                const firstRegion = firstBiome?.level_2_regions?.[0];
+                const firstNode = firstRegion?.level_3_nodes?.[0];
+                finalSelection = { node: firstNode, region: firstRegion, biome: firstBiome };
             }
-        } catch (e) {
-            console.error("Failed to parse starting location:", e);
-        }
 
-        // Fallback to defaults if AI fails
-        return {
-            majorLocation: "Trung Nguyên",
-            mediumLocation: "Thanh Vân Thành",
-            minorLocation: "Tửu Lầu",
-            personalityStats: {
-                righteousness: 50,
-                evil: 0,
-                arrogance: 10,
-                humility: 30,
-                coldness: 10,
-                passion: 50
-            },
-            reason: "Hệ thống tự động chọn địa điểm khởi đầu mặc định.",
-            x: 500,
-            y: 500,
-            biomeId: "biome_trung_nguyen",
-            regionId: "region_thanh_van_thanh"
-        };
+            const { node: finalNode, region: finalRegion, biome: finalBiome } = finalSelection;
+
+            return {
+                majorLocation: finalBiome?.name || "Võ Lâm",
+                mediumLocation: finalRegion?.name || "Trung Nguyên",
+                minorLocation: finalNode?.name || "Khởi đầu",
+                biomeId: finalBiome?.id || "b001",
+                regionId: finalRegion?.id || "r001",
+                x: finalNode?.x || 500,
+                y: finalNode?.y || 500,
+                personalityStats: data.personalityStats || {
+                    righteousness: 50, evil: 50, arrogance: 50, humility: 50, coldness: 50, passion: 50
+                },
+                reason: data.reason || "Khởi đầu tại vị trí phù hợp với căn cơ.",
+                selectedContinents: [] 
+            };
+        } catch (e) {
+            console.error("Failed to parse starting location JSON", e);
+            const fallbackBiome = skeleton?.world_skeleton?.level_1_biomes?.[0];
+            const fallbackRegion = fallbackBiome?.level_2_regions?.[0];
+            const fallbackNode = fallbackRegion?.level_3_nodes?.[0];
+
+            return {
+                majorLocation: fallbackBiome?.name || "Võ Lâm", 
+                mediumLocation: fallbackRegion?.name || "Trung Nguyên", 
+                minorLocation: fallbackNode?.name || "Khởi đầu",
+                biomeId: fallbackBiome?.id || "b001", 
+                regionId: fallbackRegion?.id || "r001", 
+                x: fallbackNode?.x || 500, 
+                y: fallbackNode?.y || 500,
+                personalityStats: { righteousness: 50, evil: 50, arrogance: 50, humility: 50, coldness: 50, passion: 50 },
+                reason: "Lỗi xử lý, chọn địa điểm mặc định.",
+                selectedContinents: []
+            };
+        }
     };
 
     if ((!apiConfig || !apiConfig.apiKey) && workerUrl) {
@@ -1895,6 +1913,12 @@ export const generateStoryResponse = async (
         ? playerInput
         : 'Start task.';
 
+    // NSFW & World Rules injection
+    let finalSystemPrompt = normalizedSystemPrompt;
+    if (apiConfig?.nsfwMode) {
+        finalSystemPrompt = `${finalSystemPrompt}\n\n${NSFW_RULES_PROMPT}\n\n${WORLD_RULES_PROMPT}\n\n${NSFW_DETAILED_INSTRUCTIONS}`;
+    }
+
     const apiMessages: GeneralMessage[] = [];
     const enableClaudeMode = requestOptions?.enableClaudeMode === true;
 
@@ -1903,7 +1927,7 @@ export const generateStoryResponse = async (
         // Supplementary non-core prompts (length, style, disclaimer, outputProtocol, extra) are
         // merged into the system block to avoid interleaved user/assistant turns that Claude dislikes.
         const systemParts: string[] = [];
-        if (normalizedSystemPrompt) systemParts.push(normalizedSystemPrompt);
+        if (finalSystemPrompt) systemParts.push(finalSystemPrompt);
         if (normalizedContext) systemParts.push(normalizedContext);
         if (leadingSystemPrompt) systemParts.push(leadingSystemPrompt);
         if (lengthRequirementPrompt) systemParts.push(lengthRequirementPrompt);
@@ -1916,8 +1940,8 @@ export const generateStoryResponse = async (
         if (mergedSystem) apiMessages.push({ role: 'system', content: mergedSystem });
         apiMessages.push({ role: 'user', content: normalizedPlayerInput });
     } else {
-        if (normalizedSystemPrompt) {
-            apiMessages.push({ role: 'system', content: normalizedSystemPrompt });
+        if (finalSystemPrompt) {
+            apiMessages.push({ role: 'system', content: finalSystemPrompt });
         }
         if (normalizedContext) {
             apiMessages.push({ role: 'system', content: normalizedContext });

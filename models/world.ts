@@ -97,6 +97,7 @@ export interface WorldDataStructure {
     ongoingEvents: WorldEventStructure[];
     settledEvents: WorldEventStructure[];
     worldHistory: WorldEventStructure[]; // Giang hồ sử sách
+    visitedNodeIds: string[]; // Các địa điểm đã khám phá
     time?: GameTimeObject;
     mapCamera?: MapCamera; // Vị trí và độ phóng đại của bản đồ vô tận
 }

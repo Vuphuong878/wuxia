@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { WorldDataStructure } from '../../../models/world';
 import { EnvironmentData } from '../../../models/environment';
+import { MapService } from '../../../services/mapService';
 
 interface Props {
     world: WorldDataStructure;
@@ -36,6 +37,17 @@ const WorldModal: React.FC<Props> = ({ world, environment, onClose }) => {
 
     const events = getSafeVal(world, ['ongoingEvents', 'Ongoing events']) || [];
     const npcs = getSafeVal(world, ['activeNpcList', 'Active NPCs']) || [];
+
+    // Discovery Stats Calculation
+    const visitedNodes = world.visitedNodeIds || [];
+    const allNodes = MapService.getAllNodes();
+    
+    // Calculate unique regions discovered
+    const unlockedRegions = new Set();
+    visitedNodes.forEach(id => {
+        const node = allNodes.find(n => n.id === id);
+        if (node) unlockedRegions.add(node.regionId);
+    });
 
     return (
         <div className="fixed inset-0 bg-ink-black/95 backdrop-blur-xl z-[200] flex items-center justify-center p-0 lg:p-4 font-sans">
@@ -292,14 +304,14 @@ const WorldModal: React.FC<Props> = ({ world, environment, onClose }) => {
                                 <div className="space-y-6 lg:space-y-10 pb-10">
                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
                                         {[
-                                            { label: 'Cao Thủ', val: npcs.length, color: 'text-wuxia-gold' },
-                                            { label: 'Đại Địa', val: Array.isArray(world.maps) ? world.maps.length : 0, color: 'text-wuxia-cyan' },
-                                            { label: 'Thành Thị', val: Array.isArray(world.maps) ? world.maps.reduce((acc, m) => acc + (Array.isArray(m.cities) ? m.cities.length : 0), 0) : 0, color: 'text-wuxia-gold' },
-                                            { label: 'Kiến Trúc', val: Array.isArray(world.buildings) ? world.buildings.length : 0, color: 'text-gray-200' },
+                                            { label: 'Cao Thủ', val: `${npcs.length}`, color: 'text-wuxia-gold' },
+                                            { label: 'Đại Địa', val: `${Array.isArray(world.maps) ? world.maps.length : 0}`, color: 'text-wuxia-cyan' },
+                                            { label: 'Kiến Trúc Đã Mở', val: `${visitedNodes.length} / ${allNodes.length}`, color: 'text-wuxia-gold' },
+                                            { label: 'Khu Vực Đã Mở', val: `${unlockedRegions.size} / 30`, color: 'text-gray-200' },
                                         ].map((stat, i) => (
                                             <div key={i} className="bg-white/5 border border-white/10 p-4 lg:p-5 rounded-none backdrop-blur-sm relative group overflow-hidden">
                                                 <div className="text-[8px] lg:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-1 lg:mb-2">{stat.label}</div>
-                                                <div className={`text-2xl lg:text-4xl font-serif font-black ${stat.color}`}>{stat.val}</div>
+                                                <div className={`text-xl lg:text-3xl font-serif font-black ${stat.color}`}>{stat.val}</div>
                                             </div>
                                         ))}
                                     </div>

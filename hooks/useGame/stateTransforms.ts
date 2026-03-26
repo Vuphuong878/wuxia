@@ -138,7 +138,27 @@ const normalizeEnvironment = (rawEnv?: any): EnvironmentData => {
         season: typeof source?.season === 'string' ? source.season : 'Xuân',
         timeProgressEnabled: source?.timeProgressEnabled ?? true,
         karma: typeof source?.karma === 'number' && Number.isFinite(source.karma) ? source.karma : (typeof source?.['Nghiệp Lực'] === 'number' ? source?.['Nghiệp Lực'] : 0),
-        worldTick: typeof source?.worldTick === 'number' && Number.isFinite(source.worldTick) ? source.worldTick : (typeof source?.['Pháp Tắc'] === 'number' ? source?.['Pháp Tắc'] : 0)
+        worldTick: typeof source?.worldTick === 'number' && Number.isFinite(source.worldTick) ? source.worldTick : (typeof source?.['Pháp Tắc'] === 'number' ? source?.['Pháp Tắc'] : 0),
+        
+        // Advanced Coordinate Parsing
+        x: (() => {
+            if (typeof source?.x === 'number' && !isNaN(source.x)) return source.x;
+            const coord = source?.coordinate || source?.['Tọa độ'];
+            if (typeof coord === 'string' && coord.includes(',')) {
+                return parseFloat(coord.split(',')[0]);
+            }
+            if (typeof source?.x === 'string') return parseFloat(source.x);
+            return source?.x;
+        })(),
+        y: (() => {
+            if (typeof source?.y === 'number' && !isNaN(source.y)) return source.y;
+            const coord = source?.coordinate || source?.['Tọa độ'];
+            if (typeof coord === 'string' && coord.includes(',')) {
+                return parseFloat(coord.split(',')[1]);
+            }
+            if (typeof source?.y === 'string') return parseFloat(source.y);
+            return source?.y;
+        })()
     } as any;
 };
 const buildFullLocation = (env: any): string => {

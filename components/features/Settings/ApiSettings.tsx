@@ -585,6 +585,53 @@ const ApiSettings: React.FC<Props> = ({ settings, onSave }) => {
                                 </div>
                             </div>
 
+                            {/* NSFW Mode Toggle - DEBUG: BRIGHT BORDER */}
+                            <div className="rounded-md border-2 border-red-500 bg-ink-black/60 p-4 space-y-4 shadow-[0_0_15px_rgba(255,0,0,0.3)]">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-sm text-red-400 font-bold uppercase tracking-wider">Chế độ Nội dung Người lớn (NSFW Mode)</div>
+                                        <div className="text-[10px] text-paper-white/60 mt-1">Bật để kích hoạt các quy tắc viết lách và bối cảnh NSFW chuyên sâu cho mô hình GLM-4.7-Flash.</div>
+                                    </div>
+                                    <ToggleSwitch
+                                        checked={!!activeConfig.nsfwMode}
+                                        onChange={(checked) => updateActiveConfig({ nsfwMode: checked })}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Top P & Top K Settings - DEBUG: BRIGHT BORDER */}
+                            <div className="rounded-md border-2 border-yellow-500 bg-ink-black/60 p-4 space-y-4 shadow-[0_0_15px_rgba(255,255,0,0.2)]">
+                                <div className="text-xs text-yellow-500 font-bold uppercase tracking-tighter mb-2">Cấu hình lấy mẫu cấp cao (Sampling)</div>
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div className="space-y-3">
+                                        <label className="text-sm text-wuxia-gold font-bold">Top P (Nucleus Sampling)</label>
+                                        <input
+                                            type="number"
+                                            step="0.05"
+                                            min="0"
+                                            max="1"
+                                            value={activeConfig.topP ?? 0.7}
+                                            onChange={(e) => updateActiveConfig({ topP: parseFloat(e.target.value) || 0.7 })}
+                                            className="w-full bg-ink-black/40 border border-wuxia-gold/40 focus:border-wuxia-gold p-2 text-paper-white text-sm rounded-md outline-none"
+                                        />
+                                        <div className="text-[10px] text-paper-white/40">Giới hạn lựa chọn từ ngữ trong top xác suất tích lũy P. Mặc định 0.7.</div>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-sm text-wuxia-gold font-bold">Top K</label>
+                                        <input
+                                            type="number"
+                                            step="1"
+                                            min="1"
+                                            max="100"
+                                            value={activeConfig.topK ?? 50}
+                                            onChange={(e) => updateActiveConfig({ topK: parseInt(e.target.value) || 50 })}
+                                            className="w-full bg-ink-black/40 border border-wuxia-gold/40 focus:border-wuxia-gold p-2 text-paper-white text-sm rounded-md outline-none"
+                                        />
+                                        <div className="text-[10px] text-paper-white/40">Giới hạn lựa chọn trong K từ ngữ có xác suất cao nhất. Mặc định 50.</div>
+                                    </div>
+                                </div>
+                            </div>
+
 
                             <div className="grid grid-cols-1 gap-3 pt-2">
                                 <GameButton

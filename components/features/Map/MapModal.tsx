@@ -13,7 +13,7 @@ interface MapModalProps {
   workerUrl?: string;
 }
 
-export const MapModal: React.FC<MapModalProps> = ({ onClose, onUpdateEnv, env }) => {
+export const MapModal: React.FC<MapModalProps> = ({ onClose, onUpdateEnv, env, world }) => {
   return (
     <AnimatePresence>
        <motion.div
@@ -36,14 +36,15 @@ export const MapModal: React.FC<MapModalProps> = ({ onClose, onUpdateEnv, env })
               <div className="text-wuxia-gold font-bold text-xl leading-none">×</div>
             </button>
           </div>
-
+ 
           {/* Main Map Content Area */}
           <div className="w-full h-full max-w-6xl max-h-[85vh] relative bg-[#0a0a0a] rounded-none md:rounded-2xl border border-white/5 shadow-2xl overflow-hidden flex flex-col">
               <div className="flex-1 relative">
                   <MapGraph 
-                    onUpdateEnv={onUpdateEnv} 
+                    currentLocation={env?.minorLocation || env?.specificLocation || ''}
                     currentX={env?.x ?? 500}
                     currentY={env?.y ?? 500}
+                    visitedNodeIds={world?.visitedNodeIds}
                   />
               </div>
 

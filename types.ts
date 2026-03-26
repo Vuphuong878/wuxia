@@ -71,6 +71,7 @@ export interface Background {
     description: string;
     effect: string;
     rank: 'Dễ' | 'Bình thường' | 'Khó' | 'Cực khó';
+    origin?: string; // Links to map node origins
 }
 
 // GameDifficulty settings
