@@ -98,7 +98,7 @@ export class TextGenService {
           body: JSON.stringify({
             messages: options.messages,
             max_tokens: options.max_tokens || 131000,
-            temperature: options.temperature || 0.7,
+            temperature: options.temperature || 1,
             id: options.id,
             model: options.model
           }),

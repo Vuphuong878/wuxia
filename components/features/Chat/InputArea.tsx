@@ -66,7 +66,7 @@ const InputArea: React.FC<Props> = ({
         }
     }, [initialValue, onInitialValueConsumed]);
 
-    const [isStreaming, setIsStreaming] = useState(true);
+    const [isStreaming, setIsStreaming] = useState(false);
     const [lastSentContent, setLastSentContent] = useState('');
     const [isPreparing, setIsPreparing] = useState(false);
     const [attachedRecallPreview, setAttachedRecallPreview] = useState('');
@@ -463,9 +463,9 @@ const InputArea: React.FC<Props> = ({
                     {/* Stream Toggle */}
                     <button
                         onClick={() => setIsStreaming(!isStreaming)}
-                        className={`w-10 h-full rounded-lg flex items-center justify-center transition-all ${isStreaming ? 'text-wuxia-cyan bg-wuxia-cyan/10' : 'text-gray-600 hover:text-gray-400'}`}
-                        title={isStreaming ? "Đang bật phát trực tiếp" : "Đã tắt phát trực tiếp"}
-                        disabled={busy}
+                        className={`w-10 h-full rounded-lg flex items-center justify-center transition-all ${isStreaming ? 'text-wuxia-cyan bg-wuxia-cyan/10' : 'text-gray-600 hover:text-gray-400 opacity-50 cursor-not-allowed'}`}
+                        title="Đã tắt phát trực tiếp (Tạm khóa)"
+                        disabled={true}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />

@@ -248,27 +248,73 @@ export class ImageService {
     favorability?: number
   }): string {
     const isNPC = !character.isPlayer;
-    const qualityKeywords = "16:9 aspect ratio, 4K resolution, ultra-detailed, cinematic lighting";
-    const basePrompt = `Wuxia style, traditional Chinese painting combined with modern digital art, ${qualityKeywords}`;
-    
-    // Gender-specific base
-    let genderTerm = "";
     const gender = (character.gender || "").toLowerCase();
-    if (gender === 'nam' || gender === 'male') {
-        genderTerm = "handsome male martial artist, heroic features, tall stature, dignified posture";
-    } else if (gender === 'nữ' || gender === 'female') {
-        genderTerm = "stunningly beautiful female, elegant features, flowing silk robes, graceful demeanor";
+    const isMale = gender === 'nam' || gender === 'male';
+
+    const randomChoice = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+
+    const backgrounds = [
+        "Misty mountain silhouettes, swirling clouds, and flying cranes in the background",
+        "A tranquil bamboo forest with creeping fog and a serene koi pond in the background",
+        "Ancient pavilion ruins partly hidden by low clouds and a pale full moon in the background",
+        "A raging waterfall crashing down sheer cliffs covered in ancient pines in the background",
+        "A serene lotus pond at dawn with mist rising from the water and distant mountains",
+        "Snow-covered peaks under a starry night sky with ethereal glowing mist",
+        "An ancient courtyard with blooming plum blossoms and scattered petals in the wind",
+        "A majestic cliff face overlooking a sea of clouds at sunset"
+    ];
+
+    const maleClothes = [
+        "wearing flowing black and white Daoist robes with silver crane embroidery",
+        "wearing a midnight blue brocade overcoat with golden dragon motifs",
+        "wearing pristine white scholar robes with light blue sashes fluttering in the wind",
+        "wearing dark grey martial artist attire with leather bracers and a silver belt",
+        "wearing an emerald green traditional hanfu layered with white silk",
+        "wearing crimson inner robes covered by a shadowy black longcoat",
+        "wearing plain but elegant grey linen robes with a wide bamboo hat on his back"
+    ];
+
+    const femaleClothes = [
+        "wearing a flowing traditional Chinese hanfu with silk ribbons fluttering in the wind",
+        "wearing an ethereal white silk dress with pale blue accents and wide sleeves",
+        "wearing a vibrant red martial arts outfit with gold embroidery and dark silken sashes",
+        "wearing a pale pink multilayered dress with delicate lotus patterns",
+        "wearing an elegant lavender ruqun with sheer translucent outer layers",
+        "wearing a dark emerald and gold traditional dress with a trailing skirt",
+        "wearing a striking black silk hanfu with crimson flower embroidery"
+    ];
+
+    const baseStyle = "A traditional Chinese ink wash painting (Shuimofeng) of a";
+    const cameraAndPose = "standing in the center of the frame, looking directly into the camera.";
+    
+    let characterSubject = "";
+    let outfit = "";
+    let specificColors = "";
+    let pronoun = "";
+
+    if (isMale) {
+        characterSubject = "handsome male immortal martial artist, heroic features, tall stature, dignified posture";
+        outfit = randomChoice(maleClothes);
+        specificColors = "subtle, elegant color accents like pale gold or deep crimson on his attire, and sharp, defining ink strokes for his features";
+        pronoun = "He";
+    } else {
+        characterSubject = "beautiful female immortal, stunningly elegant features, graceful demeanor";
+        outfit = randomChoice(femaleClothes);
+        specificColors = "subtle, elegant color accents like pale red on her lips, soft peach on her cheeks, and a hint of blue or gold in her silk robes";
+        pronoun = "She";
     }
 
+    const background = randomChoice(backgrounds);
+    const artStyle = `The artwork features minimalist black and white ink drawings but with ${specificColors}. Ethereal and poetic atmosphere, expressive brushwork, high quality, artistic masterpiece. Cinematic lighting, hyper-realistic, 1080p resolution, highly detailed face and eyes, perfectly drawn hands, five fingers on each hand, anatomically correct hands, no deformed fingers, fantasy art style.`;
+
     let details = `${character.name}`;
-    if (genderTerm) details += `, ${genderTerm}`;
     if (character.title) details += `, ${character.title}`;
     if (character.realm) details += `, cultivation realm: ${character.realm}`;
     
     // Support both NPC and Player appearance fields
     const desc = character.appearanceDescription || character.appearance;
     if (desc) details += `, appearance: ${desc}`;
-    
+
     // Affection/Favorability based mood for NPCs
     if (isNPC && character.favorability !== undefined) {
         const fav = character.favorability;
@@ -285,19 +331,20 @@ export class ImageService {
         }
     }
     
-    // Sect-based outfit logic
+    // Sect-based outfit logic (Optional additive details)
+    let sectDetails = "";
     if (character.sectId) {
        const isEvil = character.sectId.toLowerCase().includes('ma') || character.sectId.toLowerCase().includes('tà') || character.sectId.toLowerCase().includes('cốt');
        if (isEvil) {
-           details += ", wearing dark sinister robes with intricate patterns, evil demonic sect attire, sharp aura";
+           sectDetails = "The attire incorporates dark sinister motifs with intricate patterns, reflecting an evil demonic sect vibe.";
        } else if (character.sectId !== 'none') {
-           details += ", wearing elegant orthodox sect robes in white or blue, righteous and pure aura";
+           sectDetails = "The attire reflects orthodox sect elegance, giving a righteous and pure aura.";
        } else {
-           details += ", wearing wandering martial artist clothes, travel-worn but stylish";
+           sectDetails = "The clothing has a wandering martial artist style, travel-worn but stylish.";
        }
     }
 
-    return `${basePrompt}, ${details}, vibrant colors, mystical atmosphere, looking at camera, full body or hip-up view`;
+    return `${baseStyle} ${characterSubject} ${cameraAndPose} ${pronoun} is ${outfit}. ${background}. ${artStyle} ${sectDetails} Character details: ${details}.`;
   }
 
   /**

@@ -371,8 +371,25 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
             <div className="absolute inset-0 bg-ink-wash opacity-10 pointer-events-none mix-blend-overlay"></div>
             
             {/* ── Identity Section ── */}
-            <div className="mb-10 shrink-0 group relative mt-4">
-                <div className="flex items-start gap-6">
+            <div className="mb-10 shrink-0 group relative mt-6">
+                <div className="flex flex-col items-center gap-5">
+                    {/* Name & Title Top side */}
+                    <div className="w-full flex flex-col items-center text-center px-2">
+                        <h2 className="text-2xl font-black font-serif text-paper-white tracking-widest truncate drop-shadow-md leading-tight max-w-full">
+                            {Role.name}
+                        </h2>
+                        <span className="text-[9px] text-wuxia-gold font-serif italic tracking-[0.15em] uppercase opacity-70 block mt-2 truncate max-w-full">
+                            {Role.title || (typeof Role.background === 'object' ? Role.background.name : Role.background) || 'Giang hồ tản nhân'}
+                        </span>
+                        {/* Realm Indicator Pill — only in profile */}
+                        {isProfile && (
+                            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 border border-wuxia-red/30 rounded-full bg-wuxia-red/5 mt-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-wuxia-red"></div>
+                                <span className="text-[8px] text-paper-white/70 uppercase tracking-[0.2em]">{Role.realm}</span>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Avatar box from mockup */}
                     <div className="relative w-28 h-28 shrink-0">
                         <div 
@@ -447,26 +464,6 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
                             className="hidden"
                             onChange={handleAvatarUpload}
                         />
-                    </div>
-
-                    {/* Name & Title right side */}
-                    <div className="flex-1 min-w-0 pt-2">
-                        {/* Name and Title Section */}
-                        <div className="mb-4 pl-1">
-                            <h2 className="text-2xl font-black font-serif text-paper-white tracking-widest truncate drop-shadow-md leading-tight">
-                                {Role.name}
-                            </h2>
-                            <span className="text-[9px] text-wuxia-gold font-serif italic tracking-[0.15em] uppercase opacity-70 block mt-1.5 truncate">
-                                {Role.title || (typeof Role.background === 'object' ? Role.background.name : Role.background) || 'Giang hồ tản nhân'}
-                            </span>
-                        </div>
-                        {/* Realm Indicator Pill — only in profile */}
-                        {isProfile && (
-                            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 border border-wuxia-red/30 rounded-full bg-wuxia-red/5">
-                                <div className="w-1.5 h-1.5 rounded-full bg-wuxia-red"></div>
-                                <span className="text-[8px] text-paper-white/70 uppercase tracking-[0.2em]">{Role.realm}</span>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
