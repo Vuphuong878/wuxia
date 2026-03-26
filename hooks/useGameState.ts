@@ -144,6 +144,8 @@ export const useGameState = () => {
             ongoingEvents: [],
             settledEvents: [],
             worldHistory: [],
+            visitedNodeIds: [],
+            dynamicNodes: [],
             time: { Year: 2026, Month: 3, Day: 23, Hour: 6, Minute: 15 }
         };
     };

@@ -17,6 +17,12 @@ export interface MapNode {
     connections: string[];
 }
 
+export interface TransientNode extends MapNode {
+    parentId: string;
+    expiresInMinutes: number; // Thời gian sống tính bằng phút (e.g., 6000 phút = 100h)
+    createdAtMinutes: number; // Mốc phút trong game khi tạo ra
+}
+
 export const MapService = {
     /**
      * Get nodes near a specific coordinate
@@ -154,6 +160,35 @@ export const MapService = {
             possibleOrigins,
             typicalPersonalities,
             connections: node.connections || []
+        };
+    },
+
+    /**
+     * Tạo một địa điểm động (tiểu địa danh tạm thời)
+     */
+    generateDynamicNode(parent: MapNode, name: string, type: string, description: string, currentTimeMinutes: number): TransientNode {
+        // Random offset: -100 to 100 so it sits somewhere close to parent
+        const offsetX = (Math.random() - 0.5) * 150;
+        const offsetY = (Math.random() - 0.5) * 150;
+
+        return {
+            id: `dyn_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            name,
+            type, // 'cave', 'forest', 'stream', etc.
+            x: parent.x + offsetX,
+            y: parent.y + offsetY,
+            description,
+            regionName: parent.regionName,
+            biomeName: parent.biomeName,
+            regionId: parent.regionId,
+            biomeId: parent.biomeId,
+            faction: parent.faction,
+            possibleOrigins: parent.possibleOrigins,
+            typicalPersonalities: parent.typicalPersonalities,
+            connections: [parent.id], // Connects to the main node
+            parentId: parent.id,
+            expiresInMinutes: 6000, // 100h * 60m
+            createdAtMinutes: currentTimeMinutes
         };
     }
 };

@@ -45,6 +45,8 @@ export const MapModal: React.FC<MapModalProps> = ({ onClose, onUpdateEnv, env, w
                     currentX={env?.x ?? 500}
                     currentY={env?.y ?? 500}
                     visitedNodeIds={world?.visitedNodeIds}
+                    dynamicNodes={world?.dynamicNodes}
+                    currentTimeMinutes={env?.gameDays ? (env.gameDays * 24 * 60 + env?.Hour * 60 + env?.Minute) : 0}
                   />
               </div>
 

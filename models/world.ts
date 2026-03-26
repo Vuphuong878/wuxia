@@ -1,4 +1,5 @@
 // --- Định nghĩa cơ bản ---
+import { TransientNode } from '../services/mapService';
 
 // Định dạng thời gian nghiêm ngặt: YYYY:MM:DD:HH:MM (Ví dụ: 2024:03:12:12:00)
 export type GameTimeFormat = string;
@@ -100,4 +101,5 @@ export interface WorldDataStructure {
     visitedNodeIds: string[]; // Các địa điểm đã khám phá
     time?: GameTimeObject;
     mapCamera?: MapCamera; // Vị trí và độ phóng đại của bản đồ vô tận
+    dynamicNodes?: TransientNode[]; // Các tiểu địa danh ngẫu nhiên (tuổi thọ 100h)
 }
