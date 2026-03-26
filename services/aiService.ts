@@ -758,7 +758,7 @@ export const parseCommandBlock = (commandBlock: string): Array<{ action: 'add' |
 
         // Use a regex that supports spaces in keys when followed by '='
         // Group 1: action, Group 2: key (can contain spaces if followed by '='), Group 3: value
-        const eqMatch = normalized.match(/^(add|set|push|delete)\s+([^=]+?)\s*=\s*([\s\S]*)$/i);
+        const eqMatch = normalized.match(/^(add|set|push|delete|sub)\s*([^=]+?)\s*=\s*([\s\S]*)$/i);
 
         if (eqMatch) {
             const action = eqMatch[1].toLowerCase() as 'add' | 'set' | 'push' | 'delete' | 'sub';
@@ -771,8 +771,8 @@ export const parseCommandBlock = (commandBlock: string): Array<{ action: 'add' |
         }
 
         // Fallback for delete without '='
-        if (normalized.toLowerCase().startsWith('delete ')) {
-            const key = normalized.substring(7).trim();
+        if (normalized.toLowerCase().startsWith('delete')) {
+            const key = normalized.substring(6).trim();
             if (key) {
                 commands.push({ action: 'delete', key, value: null });
                 continue;
@@ -781,7 +781,7 @@ export const parseCommandBlock = (commandBlock: string): Array<{ action: 'add' |
 
         // Fallback for old format: add|set|push key value
         // Support spaces in gameState keys if followed by a value-start character ({, [, digit, or quote)
-        const legacyMatch = normalized.match(/^(add|set|push|sub)\s+(gameState\.(?:[^\s]|\s+(?![{\[\d"']))+)\s+([\s\S]+)$/i);
+        const legacyMatch = normalized.match(/^(add|set|push|sub)\s*(gameState\.(?:[^\s]|\s+(?![{\[\d"']))+)\s+([\s\S]+)$/i);
         if (legacyMatch) {
             const [_, action, key, rawValue] = legacyMatch;
             const actionType = action.toLowerCase() as 'add' | 'set' | 'push' | 'delete' | 'sub';

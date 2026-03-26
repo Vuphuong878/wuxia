@@ -98,6 +98,7 @@ export interface WorldDataStructure {
     settledEvents: WorldEventStructure[];
     worldHistory: WorldEventStructure[]; // Giang hồ sử sách
     visitedNodeIds: string[]; // Các địa điểm đã khám phá
+    metNpcIds: string[]; // Danh sách các NPC đã gặp để tránh lặp lại
     time?: GameTimeObject;
     mapCamera?: MapCamera; // Vị trí và độ phóng đại của bản đồ vô tận
     dynamicNodes?: TransientNode[]; // Các tiểu địa danh ngẫu nhiên (tuổi thọ 100h)

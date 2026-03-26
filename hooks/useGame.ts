@@ -75,7 +75,8 @@ import {
     normalizeWorldStatus,
     normalizeCombatStatus,
     normalizeStoryStatus,
-    normalizeGameSettings
+    normalizeGameSettings,
+    mergeSameNamesNPCList
 } from './useGame/stateTransforms';
 
 
@@ -529,8 +530,11 @@ export const useGame = () => {
     });
 
     const createOpeningBlankWorld = (): WorldDataStructure => {
-
-        return WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
+        const skeleton = WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
+        return {
+            ...skeleton,
+            time: { Year: 2026, Month: 3, Day: 23, Hour: 6, Minute: 15 }
+        };
     };
 
     const standardizeWorldStatus = (raw?: any): WorldDataStructure => {
@@ -549,6 +553,7 @@ export const useGame = () => {
                 settledEvents: Array.isArray(worldData.settledEvents) ? worldData.settledEvents : [],
                 worldHistory: Array.isArray(worldData.worldHistory) ? worldData.worldHistory : [],
                 visitedNodeIds: [],
+                metNpcIds: Array.isArray(worldData.metNpcIds) ? worldData.metNpcIds : [],
                 time: worldData.time || { Year: 2026, Month: 3, Day: 23, Hour: 6, Minute: 15 }
             };
         }
@@ -560,6 +565,7 @@ export const useGame = () => {
             settledEvents: Array.isArray(worldData.settledEvents) ? worldData.settledEvents : [],
             worldHistory: Array.isArray(worldData.worldHistory) ? worldData.worldHistory : [],
             visitedNodeIds: Array.isArray(worldData.visitedNodeIds) ? worldData.visitedNodeIds : [],
+            metNpcIds: Array.isArray(worldData.metNpcIds) ? worldData.metNpcIds : [],
             time: worldData.time || { Year: 2026, Month: 3, Day: 23, Hour: 6, Minute: 15 }
         };
     };
@@ -744,7 +750,11 @@ export const useGame = () => {
             setSocial(standardizeSocialList(socialUpdate));
         }
         if (gameStateData.world) {
-            setWorld(normalizeWorldStatus(gameStateData.world));
+            const worldRaw = normalizeWorldStatus(gameStateData.world);
+            setWorld(prev => ({
+                ...worldRaw,
+                metNpcIds: Array.isArray(worldRaw.metNpcIds) ? worldRaw.metNpcIds : prev.metNpcIds
+            }));
         }
         if (gameStateData.battle) {
             setBattle(normalizeCombatStatus(gameStateData.battle));
@@ -768,7 +778,8 @@ export const useGame = () => {
         setEnvironment(normalizeEnvironment(openingBase.environment || openingBase.Environment));
         const socialData = openingBase.social || openingBase.Social || openingBase.SocialNet || openingBase['Danh hiệp phả'] || [];
         setSocial(standardizeSocialList(socialData));
-        setWorld(normalizeWorldStatus(openingBase.world || openingBase.World));
+        const worldRaw = normalizeWorldStatus(openingBase.world || openingBase.World);
+        setWorld(worldRaw);
         setBattle(normalizeCombatStatus(openingBase.battle || openingBase.Combat));
         setPlayerSect(openingBase.playerSect || openingBase.PlayerSect);
         setTaskList(openingBase.taskList || openingBase.TaskList || []);
@@ -1793,6 +1804,21 @@ export const useGame = () => {
             setTaskList(Array.isArray(contextData.taskList) ? contextData.taskList : []);
             setAppointmentList(Array.isArray(contextData.appointmentList) ? contextData.appointmentList : []);
             setWorldEvents([]);
+ 
+            // NPC Discovery: Identify NPCs mentioned in the opening response
+            const responseNpcs = Array.isArray(aiData?.logs) 
+                ? aiData.logs.map((log: any) => log.sender).filter((sender: string) => sender && sender !== 'Hệ thống')
+                : [];
+            const discoveredNpcIds = (mergedWorldForOpening.activeNpcList || [])
+                .filter((npc: any) => responseNpcs.includes(npc.fullName) || responseNpcs.includes(npc.appellation))
+                .map((npc: any) => npc.id);
+
+            if (discoveredNpcIds.length > 0) {
+                setWorld(prev => ({
+                    ...prev,
+                    metNpcIds: [...new Set([...(prev.metNpcIds || []), ...discoveredNpcIds])]
+                }));
+            }
 
             const openingCanonicalTime = normalizeCanonicalGameTime(openingStateAfterCommands?.environment?.time);
             const openingTime = openingCanonicalTime
@@ -1879,6 +1905,18 @@ export const useGame = () => {
         let taskListBuffer = deepCopy(taskList);
         let appointmentListBuffer = deepCopy(appointmentList);
         let playerSectBuffer = deepCopy(playerSect);
+
+        // 0. Update buffers with top-level fields from response if present
+        // This ensures that full-state updates in the JSON are respected before partial commands are applied.
+        const rawResponse = response as any;
+        if (rawResponse.character) charBuffer = { ...charBuffer, ...rawResponse.character };
+        if (rawResponse.environment) envBuffer = normalizeEnvironment({ ...envBuffer, ...rawResponse.environment });
+        if (rawResponse.social) socialBuffer = standardizeSocialList(mergeSameNamesNPCList([...socialBuffer, ...(Array.isArray(rawResponse.social) ? rawResponse.social : [])]));
+        if (rawResponse.world) worldBuffer = normalizeWorldStatus({ ...worldBuffer, ...rawResponse.world });
+        if (rawResponse.battle) battleBuffer = normalizeCombatStatus({ ...battleBuffer, ...rawResponse.battle });
+        if (rawResponse.story) storyBuffer = normalizeStoryStatus({ ...storyBuffer, ...rawResponse.story }, envBuffer);
+
+
 
         const allCommands: any[] = [
             ...(Array.isArray(response.tavern_commands) ? response.tavern_commands : [])
@@ -2323,6 +2361,21 @@ export const useGame = () => {
                 if (aiData.story.narrative) {
                     aiData.story.narrative = formatNarrative(aiData.story.narrative);
                 }
+            }
+
+            // NPC Discovery: Identify NPCs mentioned in the story response
+            const responseNpcs = Array.isArray(aiData?.logs) 
+                ? aiData.logs.map((log: any) => log.sender).filter((sender: string) => sender && sender !== 'Hệ thống')
+                : [];
+            const discoveredNpcIds = (world.activeNpcList || [])
+                .filter((npc: any) => responseNpcs.includes(npc.fullName) || responseNpcs.includes(npc.appellation))
+                .map((npc: any) => npc.id);
+
+            if (discoveredNpcIds.length > 0) {
+                setWorld(prev => ({
+                    ...prev,
+                    metNpcIds: [...new Set([...(prev.metNpcIds || []), ...discoveredNpcIds])]
+                }));
             }
 
             // 7. Process Result

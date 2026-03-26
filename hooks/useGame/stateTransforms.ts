@@ -494,7 +494,8 @@ const getFieldText = (obj: any, key: string): string | undefined => {
 const textQualityScore = (raw?: string): number => {
     if (!raw || raw.trim().length === 0) return 0;
     const text = raw.trim();
-    if (/^(Unknown|None|None|Not recorded|Unnamed|\?+|n\/a)$/i.test(text)) return 1;
+    if (/^(Unknown|None|None|Not recorded|Unnamed|Vô danh|Người qua đường|Bình thường|Chưa có giới thiệu|\?+|n\/a)$/i.test(text)) return 1;
+    if (/^(npc_|char_|role_)[a-z0-9_]+$/i.test(text)) return 1.5; // IDs should have low score compared to real names
     return 2 + Math.min(text.length, 200) / 1000;
 };
 
@@ -630,6 +631,7 @@ const mergeRelationshipVariables = (a: any, b: any): Array<{ targetName: string;
 
 
 export const standardizeSingleNPC = (rawNpc: any, fallbackIndex: number): any => {
+    // console.log('Standardizing NPC:', rawNpc?.id || rawNpc?.name || 'unknown');
     const npc = rawNpc && typeof rawNpc === 'object' ? rawNpc : {};
     const appearanceDescription = getFirstNonEmptyText(
         npc?.appearanceDescription,
@@ -644,7 +646,24 @@ export const standardizeSingleNPC = (rawNpc: any, fallbackIndex: number): any =>
         npc?.clothingStyle,
         npc?.clothingStyle
     );
-    const memories = standardizationNPCMemory(npc?.memories || npc?.Memory || npc?.memory || npc?.['Ký ức']);
+    const rawMemories = [
+        ...(Array.isArray(npc?.memories) ? npc.memories : []),
+        ...(Array.isArray(npc?.Memory) ? npc.Memory : []),
+        ...(Array.isArray(npc?.memory) ? npc.memory : []),
+        ...(Array.isArray(npc?.['Ký ức']) ? npc['Ký ức'] : [])
+    ];
+    
+    // Also capture string-based memories
+    const pushStringMemory = (val: any) => {
+        if (typeof val === 'string' && val.trim().length > 0) {
+            rawMemories.push({ content: val.trim(), time: '' });
+        }
+    };
+    if (!Array.isArray(npc?.memories)) pushStringMemory(npc?.memories);
+    if (!Array.isArray(npc?.Memory)) pushStringMemory(npc?.Memory);
+    if (!Array.isArray(npc?.memory)) pushStringMemory(npc?.memory);
+    if (!Array.isArray(npc?.['Ký ức'])) pushStringMemory(npc?.['Ký ức']);
+    const memories = standardizationNPCMemory(rawMemories);
     const corePersonalityTraits = getFirstNonEmptyText(npc?.corePersonalityTraits || npc?.personality || npc?.personalityDescription || npc?.['Tính cách']);
     const favorabilityBreakthroughCondition = getFirstNonEmptyText(npc?.favorabilityBreakthroughCondition || npc?.['Điều kiện đột phá hảo cảm']);
     const relationBreakthroughCondition = getFirstNonEmptyText(npc?.relationBreakthroughCondition || npc?.['Điều kiện đột phá quan hệ']);
@@ -711,6 +730,7 @@ export const standardizeSingleNPC = (rawNpc: any, fallbackIndex: number): any =>
 const mergeNPCObject = (leftRaw: any, rightRaw: any, fallbackIndex: number): any => {
     const left = standardizeSingleNPC(leftRaw, fallbackIndex);
     const right = standardizeSingleNPC(rightRaw, fallbackIndex);
+    // console.log(`Merging NPCs: leftName=${left.name}, rightName=${right.name}`);
     const mergedMemories = standardizationNPCMemory([...(left.memories || []), ...(right.memories || [])]);
 
     const mergedEquip = (() => {
@@ -731,7 +751,8 @@ const mergeNPCObject = (leftRaw: any, rightRaw: any, fallbackIndex: number): any
         ...left,
         ...right,
         id: getFirstNonEmptyText(right.id, left.id, `npc_${fallbackIndex}`) || `npc_${fallbackIndex}`,
-        name: getFirstNonEmptyText(right.name, left.name, `Role${fallbackIndex}`) || `Role${fallbackIndex}`,
+        name: getBetterText(getFieldText(left, 'name'), getFieldText(right, 'name')) || getFirstNonEmptyText(right.name, left.name, `Role${fallbackIndex}`) || `Role${fallbackIndex}`,
+        avatar: getBetterText(getFieldText(left, 'avatar'), getFieldText(right, 'avatar')) || getBetterText(getFieldText(left, 'image'), getFieldText(right, 'image')),
         gender: getBetterText(getFieldText(left, 'gender'), getFieldText(right, 'gender')) || 'Unknown',
         age: Number.isFinite(Number(right?.age))
             ? Number(right.age)
@@ -748,8 +769,8 @@ const mergeNPCObject = (leftRaw: any, rightRaw: any, fallbackIndex: number): any
         favorability: Number.isFinite(Number(right?.favorability))
             ? Number(right.favorability)
             : (Number.isFinite(Number(left?.favorability)) ? Number(left.favorability) : 0),
-        relationStatus: getBetterText(getFieldText(left, 'relationStatus'), getFieldText(right, 'relationStatus')) || 'Unknown',
-        description: getBetterText(getFieldText(left, 'description'), getFieldText(right, 'description')) || 'No intro yet',
+        relationStatus: getBetterText(getFieldText(left, 'relationStatus'), getFieldText(right, 'relationStatus')),
+        description: getBetterText(getFieldText(left, 'description'), getFieldText(right, 'description')),
         corePersonalityTraits: getBetterText(getFieldText(left, 'corePersonalityTraits'), getFieldText(right, 'corePersonalityTraits')),
         favorabilityBreakthroughCondition: getBetterText(getFieldText(left, 'favorabilityBreakthroughCondition'), getFieldText(right, 'favorabilityBreakthroughCondition')),
         relationBreakthroughCondition: getBetterText(getFieldText(left, 'relationBreakthroughCondition'), getFieldText(right, 'relationBreakthroughCondition')),
@@ -788,7 +809,7 @@ const mergeNPCObject = (leftRaw: any, rightRaw: any, fallbackIndex: number): any
     };
 };
 
-const mergeSameNamesNPCList = (list: any[]): any[] => {
+export const mergeSameNamesNPCList = (list: any[]): any[] => {
     if (!Array.isArray(list)) return [];
     const merged: any[] = [];
     const nameIndexMap = new Map<string, number>();
@@ -972,6 +993,7 @@ const normalizeWorldStatus = (raw?: any): any => {
         ongoingEvents: rawOngoing,
         settledEvents: rawSettled,
         worldHistory: Array.isArray(world.worldHistory) ? world.worldHistory : [],
+        metNpcIds: Array.isArray(world.metNpcIds) ? world.metNpcIds : [],
         mapCamera: world.mapCamera && typeof world.mapCamera === 'object' 
             ? { 
                 x: Number(world.mapCamera.x) || 0, 

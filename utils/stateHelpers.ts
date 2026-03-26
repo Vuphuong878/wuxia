@@ -1,6 +1,6 @@
 import { CharacterData, EnvironmentData, NpcStructure, WorldDataStructure, BattleStatus, StorySystemStructure } from '../types';
 import { DetailedSectStructure } from '../models/sect';
-import { standardizeSingleNPC, standardizeSocialList } from '../hooks/useGame/stateTransforms';
+import { standardizeSingleNPC, standardizeSocialList, mergeSameNamesNPCList } from '../hooks/useGame/stateTransforms';
 
 export const VIETNAMESE_SUBKEY_MAP: Record<string, string> = {
     // Character / Role
@@ -569,7 +569,13 @@ export const applyStateCommand = (
         
         if (rootSegment === "character" || rootSegment === "role") {
             if (!path && normalizedAction === 'set') {
-                newChar = translateObjectKeys(value);
+                const translatedValue = translateObjectKeys(value);
+                // Robust merging for root-level character updates
+                if (typeof translatedValue === 'object' && !Array.isArray(translatedValue)) {
+                    newChar = { ...newChar, ...translatedValue };
+                } else {
+                    newChar = translatedValue;
+                }
                 return { char: newChar, env: newEnv, social: newSocial, world: newWorld, battle: newBattle, story: newStory, taskList: newTaskList, appointmentList: newAppointmentList, playerSect: newPlayerSect };
             }
         }
@@ -630,23 +636,63 @@ export const applyStateCommand = (
             path = subPath || "mediumLocation";
         }
     } else if (lowerKey.startsWith("gamestate.social")) {
+        // Handle bracketed keys by converting them to root merge/push
+        // Correctly handles: gameState.Social[npc_id], gameState.Social.NPC_LIST[npc_id], etc.
+        const bracketMatch = key.match(/^gameState\.Social\.?(?:NPC_LIST\.?)?\[(.+?)\](?:\.(.+))?/i);
+        if (bracketMatch) {
+            const bracketValue = bracketMatch[1].trim();
+            const subProp = bracketMatch[2] || "";
+            const translatedValue = translateObjectKeys(value);
+            
+            let actualId = bracketValue;
+            let actualName = bracketValue;
+            
+            // If it's a numeric index, resolve to real ID/Name for better merging
+            if (/^\d+$/.test(bracketValue)) {
+                const index = parseInt(bracketValue);
+                if (newSocial[index]) {
+                    actualId = newSocial[index].id || actualId;
+                    actualName = newSocial[index].name || actualName;
+                }
+            }
+            
+            // Create a skeleton NPC to merge
+            let npcToMerge: any = { id: actualId };
+            // Only include name if it's not just a repeat of the ID/bracket value
+            if (actualName && actualName !== actualId && !/^(npc_|char_|role_)/i.test(actualName)) {
+                npcToMerge.name = actualName;
+            }
+            
+            if (subProp === "memories" || subProp.toLowerCase().includes("ký ức")) {
+                npcToMerge.memories = Array.isArray(translatedValue) ? translatedValue : [translatedValue];
+            } else if (subProp) {
+                npcToMerge[subProp] = translatedValue;
+            } else {
+                npcToMerge = { ...npcToMerge, ...translatedValue };
+            }
+            
+            newSocial = mergeSameNamesNPCList([...newSocial, npcToMerge]);
+            return { char: newChar, env: newEnv, social: newSocial, world: newWorld, battle: newBattle, story: newStory, taskList: newTaskList, appointmentList: newAppointmentList, playerSect: newPlayerSect };
+        }
+
         const isRootSocial = lowerKey === "gamestate.social" || lowerKey === "gamestate.social.npc_list";
         if (isRootSocial) {
             const translatedValue = translateObjectKeys(value);
             if (normalizedAction === 'set') {
-                newSocial = Array.isArray(translatedValue) ? standardizeSocialList(translatedValue) : (translatedValue.NPC_LIST ? standardizeSocialList(translatedValue.NPC_LIST) : newSocial);
+                const incomingNpcs = Array.isArray(translatedValue) ? translatedValue : (translatedValue.NPC_LIST || []);
+                newSocial = mergeSameNamesNPCList([...newSocial, ...incomingNpcs]);
                 return { char: newChar, env: newEnv, social: newSocial, world: newWorld, battle: newBattle, story: newStory, taskList: newTaskList, appointmentList: newAppointmentList, playerSect: newPlayerSect };
             }
             if (normalizedAction === 'push') {
                 const standardized = standardizeSingleNPC(translatedValue, newSocial.length);
-                newSocial.push(standardized);
+                // Also merge if PUSHing an existing NPC (by ID/Name)
+                newSocial = mergeSameNamesNPCList([...newSocial, standardized]);
                 return { char: newChar, env: newEnv, social: newSocial, world: newWorld, battle: newBattle, story: newStory, taskList: newTaskList, appointmentList: newAppointmentList, playerSect: newPlayerSect };
             }
         }
         targetObj = { Social: newSocial };
         path = key.replace(/^gameState\.Social\.?(NPC_LIST\.?)?/i, "Social");
-        // If it was just "gameState.Social" it becomes "Social", if it was "gameState.Social[0]" it becomes "Social[0]"
-        // If it was "gameState.Social.NPC_LIST[0]" it becomes "Social[0]"
+        // Maintain legacy path adjustment for nested generic objects if needed
         if (path === "Social" && key.toLowerCase().includes("social.") && !key.toLowerCase().includes("social.npc_list")) {
              path = "Social." + key.substring(key.toLowerCase().indexOf("social.") + 7);
          }
@@ -681,7 +727,24 @@ export const applyStateCommand = (
         if (isRootKey) {
             if (normalizedAction === 'set') {
                 const translatedValue = translateObjectKeys(value);
-                newTaskList = Array.isArray(translatedValue) ? translatedValue : [translatedValue];
+                const aiTasks = Array.isArray(translatedValue) ? translatedValue : [translatedValue];
+                // Merge by title/name
+                const taskMap = new Map();
+                newTaskList.forEach(t => {
+                    const title = (t.title || t.name || '').trim();
+                    if (title) taskMap.set(title, t);
+                });
+                aiTasks.forEach(t => {
+                    const title = (t.title || t.name || '').trim();
+                    if (title) {
+                        if (taskMap.has(title)) {
+                            taskMap.set(title, { ...taskMap.get(title), ...t });
+                        } else {
+                            taskMap.set(title, t);
+                        }
+                    }
+                });
+                newTaskList = Array.from(taskMap.values());
                 return { char: newChar, env: newEnv, social: newSocial, world: newWorld, battle: newBattle, story: newStory, taskList: newTaskList, appointmentList: newAppointmentList, playerSect: newPlayerSect };
             }
             if (normalizedAction === 'push') {

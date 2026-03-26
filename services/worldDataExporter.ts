@@ -37,7 +37,8 @@ export class WorldDataExporter {
                 ongoingEvents: [], 
                 settledEvents: [], 
                 worldHistory: [],
-                visitedNodeIds: [] 
+                visitedNodeIds: [],
+                metNpcIds: [] 
             };
         }
 
@@ -85,7 +86,8 @@ export class WorldDataExporter {
             ongoingEvents: [],
             settledEvents: [],
             worldHistory: [],
-            visitedNodeIds: []
+            visitedNodeIds: [],
+            metNpcIds: []
         };
     }
 
