@@ -67,7 +67,7 @@ export const buildNpcContext = (socialData: any[], memoryConfig: MemoryConfig): 
             relationStatus: typeof npc?.relationStatus === 'string' ? npc.relationStatus : 'Unknown',
             favorability: typeof npc?.favorability === 'number' ? npc.favorability : 0,
             introduction: typeof npc?.introduction === 'string' ? npc.introduction : (typeof npc?.description === 'string' ? npc.description : 'No intro yet'),
-            appearanceDescription: typeof npc?.appearanceDescription === 'string' ? npc.appearanceDescription : '',
+            appearance: typeof npc?.appearance === 'string' ? npc.appearance : '',
             ...(corePersonalityTraits ? { corePersonalityTraits } : {}),
             ...(favorabilityBreakthroughCondition ? { favorabilityBreakthroughCondition } : {}),
             ...(relationBreakthroughCondition ? { relationBreakthroughCondition } : {}),
@@ -80,7 +80,7 @@ export const buildNpcContext = (socialData: any[], memoryConfig: MemoryConfig): 
         return clearEmptyFields({
             ...basic,
             age: typeof npc?.age === 'number' ? npc.age : undefined,
-            appearanceDescription: typeof npc?.appearanceDescription === 'string' ? npc.appearanceDescription : undefined,
+            appearance: typeof npc?.appearance === 'string' ? npc.appearance : undefined,
             bodyDescription: typeof npc?.bodyDescription === 'string' ? npc.bodyDescription : undefined,
             clothingStyle: typeof npc?.clothingStyle === 'string' ? npc.clothingStyle : undefined,
             breastSize: typeof npc?.breastSize === 'string' ? npc.breastSize : undefined,
@@ -155,7 +155,7 @@ export const buildNpcContext = (socialData: any[], memoryConfig: MemoryConfig): 
             completeData,
             combatStatus,
             lastInteraction,
-            appearanceDescription: baseData.appearanceDescription,
+            appearance: baseData.appearance,
             memories: standardizeMemory(npc, memoryLimit)
         };
     };

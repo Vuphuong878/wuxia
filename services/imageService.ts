@@ -241,7 +241,6 @@ export class ImageService {
     gender?: string, 
     title?: string, 
     realm?: string, 
-    appearanceDescription?: string, 
     appearance?: string, 
     sectId?: string, 
     isPlayer?: boolean,
@@ -264,25 +263,6 @@ export class ImageService {
         "A majestic cliff face overlooking a sea of clouds at sunset"
     ];
 
-    const maleClothes = [
-        "wearing flowing black and white Daoist robes with silver crane embroidery",
-        "wearing a midnight blue brocade overcoat with golden dragon motifs",
-        "wearing pristine white scholar robes with light blue sashes fluttering in the wind",
-        "wearing dark grey martial artist attire with leather bracers and a silver belt",
-        "wearing an emerald green traditional hanfu layered with white silk",
-        "wearing crimson inner robes covered by a shadowy black longcoat",
-        "wearing plain but elegant grey linen robes with a wide bamboo hat on his back"
-    ];
-
-    const femaleClothes = [
-        "wearing a flowing traditional Chinese hanfu with silk ribbons fluttering in the wind",
-        "wearing an ethereal white silk dress with pale blue accents and wide sleeves",
-        "wearing a vibrant red martial arts outfit with gold embroidery and dark silken sashes",
-        "wearing a pale pink multilayered dress with delicate lotus patterns",
-        "wearing an elegant lavender ruqun with sheer translucent outer layers",
-        "wearing a dark emerald and gold traditional dress with a trailing skirt",
-        "wearing a striking black silk hanfu with crimson flower embroidery"
-    ];
 
     const baseStyle = "A traditional Chinese ink wash painting (Shuimofeng) of a";
     const cameraAndPose = "standing in the center of the frame, looking directly into the camera.";
@@ -293,14 +273,12 @@ export class ImageService {
     let pronoun = "";
 
     if (isMale) {
-        characterSubject = "handsome male immortal martial artist, heroic features, tall stature, dignified posture";
-        outfit = randomChoice(maleClothes);
-        specificColors = "subtle, elegant color accents like pale gold or deep crimson on his attire, and sharp, defining ink strokes for his features";
+        characterSubject = "male immortal martial artist";
+        specificColors = "subtle, elegant color accents like pale gold or deep crimson, and sharp, defining ink strokes";
         pronoun = "He";
     } else {
-        characterSubject = "beautiful female immortal, stunningly elegant features, graceful demeanor";
-        outfit = randomChoice(femaleClothes);
-        specificColors = "subtle, elegant color accents like pale red on her lips, soft peach on her cheeks, and a hint of blue or gold in her silk robes";
+        characterSubject = "female immortal character";
+        specificColors = "subtle, elegant color accents like pale red, soft peach, and a hint of blue or gold";
         pronoun = "She";
     }
 
@@ -308,29 +286,18 @@ export class ImageService {
     const artStyle = `The artwork features minimalist black and white ink drawings but with ${specificColors}. Ethereal and poetic atmosphere, expressive brushwork, high quality, artistic masterpiece. Cinematic lighting, hyper-realistic, 1080p resolution, highly detailed face and eyes, perfectly drawn hands, five fingers on each hand, anatomically correct hands, no deformed fingers, fantasy art style.`;
 
     let details = `${character.name}`;
-    if (character.title) details += `, ${character.title}`;
+    const role = character.title || (character as any).identity;
+    if (role) details += `, ${role}`;
     if (character.realm) details += `, cultivation realm: ${character.realm}`;
     
     // Support both NPC and Player appearance fields
-    const desc = character.appearanceDescription || character.appearance;
-    if (desc) details += `, appearance: ${desc}`;
-
-    // Affection/Favorability based mood for NPCs
-    if (isNPC && character.favorability !== undefined) {
-        const fav = character.favorability;
-        if (fav >= 80) {
-            details += ", deeply in love, intimate expression, looking at viewer with devotion, soft blush, romantic atmosphere";
-        } else if (fav >= 40) {
-            details += ", affectionate gaze, gentle smile, warm and caring expression, slight blush";
-        } else if (fav >= 20) {
-            details += ", friendly and slightly bashful, pleasant expression, approachable aura";
-        } else if (fav >= 10) {
-            details += ", polite but reserved, modest smile, calm demeanor";
-        } else {
-            details += ", neutral expression, dignified and distant, mysterious aura";
-        }
+    const desc = character.appearance;
+    if (desc) {
+        details += `, appearance & outfit: ${desc}`;
+    } else {
+        details += `, appearance: elegant and dignified`;
     }
-    
+
     // Sect-based outfit logic (Optional additive details)
     let sectDetails = "";
     if (character.sectId) {
@@ -344,7 +311,7 @@ export class ImageService {
        }
     }
 
-    return `${baseStyle} ${characterSubject} ${cameraAndPose} ${pronoun} is ${outfit}. ${background}. ${artStyle} ${sectDetails} Character details: ${details}.`;
+    return `${baseStyle} ${characterSubject} portrait, ${cameraAndPose} ${background}. ${artStyle} ${sectDetails} Character details: ${details}.`;
   }
 
   /**

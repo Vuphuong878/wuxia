@@ -27,7 +27,7 @@ export const CoreChainOfThoughtMulti: PromptStructure = {
 - \`gameState.PlayerSect\`
 
 ## 2. Ràng buộc trường NPC (English Keys)
-- \`id\`, \`name\`, \`gender\`, \`age\`, \`identity\`, \`realm\`, \`appearanceDescription\`, \`corePersonalityTraits\`, \`goals\`, \`favorability\`, \`relationStatus\`, \`socialNetworkVariables\`, \`memories\`, \`isPresent\`.
+- \`id\`, \`name\`, \`gender\`, \`age\`, \`identity\`, \`realm\`, \`appearance\`, \`corePersonalityTraits\`, \`goals\`, \`favorability\`, \`relationStatus\`, \`socialNetworkVariables\`, \`memories\`, \`isPresent\`.
 
 ## 3. Các phân đoạn đầu ra:
 - \`[t_input]\`: Phân tích nhập liệu.

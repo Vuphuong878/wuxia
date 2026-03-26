@@ -8,12 +8,13 @@ export const StatNpcReference: PromptStructure = {
 # 【Quy tắc Dữ liệu NPC (Ánh xạ vào gameState.NPCs)】
 
 ## 1. Định danh Trường Bắt buộc (BẮT BUỘC sử dụng các khóa Tiếng Anh này)
-- **Cơ bản**: \`id / name / gender / age / title / realm\`
+- **Cơ bản**: \`id / name / gender / age / title / realm / appearance\`
 - **Trạng thái**: \`currentHp / maxHp / status\`
 - **Vị trí**: \`currentLocation (ID Map) / isPresent (Boolean)\`
 - **Quan hệ**: \`favorability (-100 đến 100) / relationStatus (Kẻ thù/Người lạ/Bạn bè/Tri kỷ...)\`
 - **Chiến đấu**: \`combatPower (Chỉ số sức mạnh tổng hợp)\`
 - **Ghi nhớ**: \`shortTermMemory (Tóm tắt các tương tác gần đây)\`
+- **Ngoại hình**: \`appearance (Mô tả chi tiết: kiểu tóc, y phục, đặc điểm khuôn mặt, khí chất, vật phẩm mang theo - Dùng để vẽ chân dung)\`
 
 ## 2. Phần mở rộng Teammate (Nếu là đồng đội)
 - Nếu NPC trong \`gameState.Party\`, sử dụng các trường tương tự như Player:

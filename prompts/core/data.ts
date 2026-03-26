@@ -27,7 +27,7 @@ export const coreDataFormat: PromptStructure = {
 
 ## 1. NPC Structure (Social/Team)
 - \`id\` (BẮT BUỘC: \`snake_case\`, không dấu, permanent), \`name\`, \`gender\`, \`age\`, \`identity\`, \`realm\`
-- \`appearanceDescription\`: Visual description (Mandatory for key NPCs)
+- \`appearance\`: Visual description (Mandatory for key NPCs)
 - \`corePersonalityTraits\`: Personality description (Mandatory for accurate roleplay)
 - \`favorability\`: Number (Interpersonal point)
 - \`relationStatus\`: String (Stranger, Friend, Lover, Enemy, etc.)

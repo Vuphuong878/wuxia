@@ -21,6 +21,7 @@ interface Props {
     allAvatars?: Record<string, string>;
     onOpenSocial?: (id: string) => void;
     selectedNpcId?: string;
+    isProfile?: boolean;
 }
 
 
@@ -142,7 +143,7 @@ const NpcSlot: React.FC<{ npc: NpcStructure; visualConfig: VisualSettings; isGen
         const translated = t(`social.values.${val}`);
         return translated === `social.values.${val}` ? val : translated;
     };
-    const isNSFW = npc.socialNetworkVariables?.some(v => v.tags?.includes('NSFW')) || false;
+    const isNSFW = npc.socialNetworkVariables?.some(v => (v as any).tags?.includes('NSFW')) || false;
     const [showTooltip, setShowTooltip] = useState(false);
     const [coords, setCoords] = useState({ top: 0, left: 0 });
     const slotRef = useRef<HTMLDivElement>(null);
@@ -360,8 +361,9 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
     const getEquipName = (key: string) => {
         const idOrName = (Role.equipment as any)[key];
         if (!idOrName || idOrName === 'None') return 'Chưa trang bị';
-        const item = Role.itemList.find(i => i.ID === idOrName || i.Name === idOrName);
-        return item ? item.Name : idOrName;
+        if (!idOrName || idOrName === 'None') return 'Chưa trang bị';
+        const item = Role.itemList.find(i => i.id === idOrName || i.name === idOrName);
+        return item ? item.name : idOrName;
     };
 
 
@@ -475,6 +477,18 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
 
                 {isProfile && (
                     <>
+                        {/* ── Appearance (Ngoại hình) ── */}
+                        <div className="px-5 py-3 bg-transparent border border-white/[0.05] rounded-xl relative overflow-hidden mb-6">
+                            <h3 className="text-[9px] text-wuxia-gold uppercase tracking-[0.3em] font-black mb-3 flex items-center gap-2">
+                                <span className="opacity-40 text-wuxia-gold font-mono">#</span> Ngoại hình
+                            </h3>
+                            <p className="text-[10px] leading-relaxed text-paper-white/70 font-serif italic min-h-[1.5em]">
+                                {Role.appearance || (
+                                    <span className="text-paper-white/20 italic">Chưa có mô tả ngoại hình...</span>
+                                )}
+                            </p>
+                        </div>
+
                         {/* ── Personality (Tính cách) ── */}
                         <div className="px-5 py-3 bg-transparent border border-white/[0.05] rounded-xl relative overflow-hidden mb-6">
                             <h3 className="text-[9px] text-wuxia-gold uppercase tracking-[0.3em] font-black mb-3 flex items-center gap-2">
@@ -517,7 +531,7 @@ const LeftPanel: React.FC<Props> = ({ Role, Social = [], onOpenCharacter, visual
                                         </div>
                                         <StatBar 
                                             value={stat.current} 
-                                            maxValue={30} 
+                                            max={30} 
                                             color={STAT_COLORS[stat.key] || '#e6c86e'} 
                                             label=""
                                         />

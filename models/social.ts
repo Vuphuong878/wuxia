@@ -76,7 +76,7 @@ export interface NpcStructure {
     inventory?: string[]; // Danh sách tên vật phẩm
 
     // --- Miêu tả ngoại hình ---
-    appearanceDescription?: string;
+    appearance?: string;
     bodyDescription?: string;
     clothingStyle?: string;
 

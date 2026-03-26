@@ -144,8 +144,8 @@ export const VIETNAMESE_SUBKEY_MAP: Record<string, string> = {
     "Đặc điểm tính cách cốt lõi": "corePersonalityTraits",
     "Điều kiện đột phá hảo cảm": "favorabilityBreakthroughCondition",
     "Điều kiện đột phá quan hệ": "relationBreakthroughCondition",
-    "Miêu tả ngoại hình": "appearanceDescription",
-    "Mô tả ngoại hình": "appearanceDescription",
+    "Miêu tả ngoại hình": "appearance",
+    "Mô tả ngoại hình": "appearance",
     "Lực tấn công": "attack",
     "Lực phòng ngự": "defense",
     "Miêu tả dáng người": "bodyDescription",
@@ -491,6 +491,7 @@ export const translateObjectKeys = (obj: any): any => {
             result[newKey] = value;
         }
     }
+    
     // Special handling for events: map 'name' to 'title' if 'title' is missing
     if (result.name && !result.title) {
         result.title = result.name;

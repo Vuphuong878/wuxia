@@ -633,8 +633,8 @@ const mergeRelationshipVariables = (a: any, b: any): Array<{ targetName: string;
 export const standardizeSingleNPC = (rawNpc: any, fallbackIndex: number): any => {
     // console.log('Standardizing NPC:', rawNpc?.id || rawNpc?.name || 'unknown');
     const npc = rawNpc && typeof rawNpc === 'object' ? rawNpc : {};
-    const appearanceDescription = getFirstNonEmptyText(
-        npc?.appearanceDescription,
+    const appearance = getFirstNonEmptyText(
+        npc?.appearance,
         npc?.appearance,
         npc?.['Ngoại hình']
     );
@@ -721,7 +721,7 @@ export const standardizeSingleNPC = (rawNpc: any, fallbackIndex: number): any =>
         ...(favorabilityBreakthroughCondition ? { favorabilityBreakthroughCondition } : {}),
         ...(relationBreakthroughCondition ? { relationBreakthroughCondition } : {}),
         ...(Array.isArray(socialNetworkVariables) && socialNetworkVariables.length > 0 ? { socialNetworkVariables } : {}),
-        ...(appearanceDescription ? { appearanceDescription } : {}),
+        ...(appearance ? { appearance } : {}),
         ...(bodyDescription ? { bodyDescription } : {}),
         ...(clothingStyle ? { clothingStyle } : {})
     };
@@ -775,7 +775,7 @@ const mergeNPCObject = (leftRaw: any, rightRaw: any, fallbackIndex: number): any
         favorabilityBreakthroughCondition: getBetterText(getFieldText(left, 'favorabilityBreakthroughCondition'), getFieldText(right, 'favorabilityBreakthroughCondition')),
         relationBreakthroughCondition: getBetterText(getFieldText(left, 'relationBreakthroughCondition'), getFieldText(right, 'relationBreakthroughCondition')),
         socialNetworkVariables: mergedRelationNet,
-        appearanceDescription: getBetterText(getFieldText(left, 'appearanceDescription'), getFieldText(right, 'appearanceDescription')),
+        appearance: getBetterText(getFieldText(left, 'appearance'), getFieldText(right, 'appearance')),
         bodyDescription: getBetterText(getFieldText(left, 'bodyDescription'), getFieldText(right, 'bodyDescription')),
         clothingStyle: getBetterText(getFieldText(left, 'clothingStyle'), getFieldText(right, 'clothingStyle')),
         attack: Number.isFinite(Number(right?.attack))

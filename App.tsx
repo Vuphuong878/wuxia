@@ -256,7 +256,7 @@ const App: React.FC = () => {
                             name: npc.name,
                             gender: npc.gender,
                             realm: npc.realm || 'Phàm nhân',
-                            appearanceDescription: `${npc.identity || ''}. ${npc.appearanceDescription || ''}`.trim()
+                            appearance: `${npc.identity || ''}. ${npc.appearance || ''}`.trim()
                         });
                         const cacheKey = await ImageCacheService.generateCacheKey(prompt, 'npc', (state as any).storyId);
                         const existingNpcImage = await ImageService.checkImageExists('', cacheKey);

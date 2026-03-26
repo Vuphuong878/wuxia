@@ -53,7 +53,7 @@ export const Core_OutputFormat: PromptStructure = {
 - For \`gameState.Social[INDEX]\` updates, ALWAYS use the NPC's **id** provided in the context (e.g., \`npc_ton_ngo_vuong\`).
 - If you don't have the ID, use the EXACT **fullName** or **name** inside the brackets.
 - The property name MUST be **memories** (plural).
-- **NEW NPC EXAMPLE**: \`{"action": "PUSH", "key": "gameState.Social", "value": {"id": "lao_ly", "name": "Lão Lý", "gender": "Nam", "age": 65, "identity": "Chủ tiệm bánh bao", "realm": "Phàm nhân", "appearanceDescription": "Tóc bạc phơ, mặc áo vải thô sạch sẽ, nụ cười hiền hậu.", "corePersonalityTraits": "Nhiệt tình, hay giúp đỡ nhưng hơi lẩm cẩm.", "favorability": 15, "relationStatus": "Quen biết", "isPresent": true, "currentHp": 100, "maxHp": 100, "status": "Khỏe mạnh", "memories": []}}\`
+- **NEW NPC EXAMPLE**: \`{"action": "PUSH", "key": "gameState.Social", "value": {"id": "lao_ly", "name": "Lão Lý", "gender": "Nam", "age": 65, "identity": "Chủ tiệm bánh bao", "realm": "Phàm nhân", "appearance": "Tóc bạc phơ búi cao, mặc áo vải thô màu xám sạch sẽ, khuôn mặt phúc hậu với nhiều nếp nhăn nơi khóe mắt, nụ cười hiền từ. (Dùng vẽ chân dung)", "corePersonalityTraits": "Nhiệt tình, hay giúp đỡ nhưng hơi lẩm cẩm.", "favorability": 15, "relationStatus": "Quen biết", "isPresent": true, "currentHp": 100, "maxHp": 100, "status": "Khỏe mạnh", "memories": []}}\`
 - Example update: \`{"action": "PUSH", "key": "gameState.Social[npc_ton_ngo_vuong].memories", "value": {"content": "...", "time": "..."}}\`
 `,
     type: 'core',

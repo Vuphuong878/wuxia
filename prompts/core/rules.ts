@@ -43,7 +43,7 @@ export const CoreRules: PromptStructure = {
       "age": 18,
       "identity": "Thân phận cụ thể",
       "realm": "Cảnh giới hiện tại",
-      "appearanceDescription": "Mô tả ngoại hình (Trang phục, khí chất, đặc điểm nhận dạng)",
+      "appearance": "Mô tả ngoại hình (Trang phục, khí chất, đặc điểm nhận dạng)",
       "corePersonalityTraits": "Tính cách cốt lõi (Để AI roleplay nhất quán)",
       "favorability": 0,
       "relationStatus": "Người lạ",

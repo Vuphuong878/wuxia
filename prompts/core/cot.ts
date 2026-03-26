@@ -57,7 +57,7 @@ Khi tạo hoặc cập nhật NPC (\`gameState.Social\` / \`gameState.Team\`), P
 - \`age\`: Tuổi (Số)
 - \`identity\`: Thân phận (Trưởng Đạo, Kiếm khách, v.v.) - Dùng thay cho 'title'
 - \`realm\`: Cảnh giới võ học
-- \`appearanceDescription\`: Mô tả ngoại hình chi tiết (BẮT BUỘC)
+- \`appearance\`: Mô tả ngoại hình chi tiết (BẮT BUỘC)
 - \`corePersonalityTraits\`: Mô tả tính cách (BẮT BUỘC) - Dùng để AI nhập vai chính xác
 - \`goals\`: Mục tiêu hiện tại của NPC
 - \`favorability\`: Điểm hảo cảm (Số) - Bắt buộc cập nhật khi có tương tác
@@ -74,7 +74,7 @@ Khi tạo hoặc cập nhật NPC (\`gameState.Social\` / \`gameState.Team\`), P
   - \`Step4: Kiểm tra trước diễn biến thế giới, móc nối cốt truyện & check NSFW Twist\`
   - \`Step5: Ánh xạ chỉ mục và NPC có mặt\`
   - \`Step6: Diễn tập phán đoán và lệnh ứng cử\`
-  - \`Step7: Quy hoạch nội dung chính văn (Thể hiện tính cách NPC)\`
+  - \`Step7: Quy hoạch nội dung chính văn (Thể hiện tính cách NPC & Mô tả ngoại hình chi tiết phục vụ vẽ chân dung chân thực)\`
   - \`Step8: Thu gọn thứ tự lệnh và tính hợp pháp\`
   - \`Step9: Kiểm tra tính nhất quán sau chính văn\`
   - \`Step10: Sửa lỗi và thực hiện cuối cùng\`
