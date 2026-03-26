@@ -2,9 +2,11 @@ import { GameResponse } from '../types';
 import type { ApiConfig, ActiveApiConfig, ApiProviderType } from '../types';
 import { parseJsonWithRepair } from '../utils/jsonRepair';
 import { WORLD_GENERATION_SYSTEM_PROMPT, constructWorldviewUserPrompt } from '../prompts/runtime/worldGeneration';
+import { constructStartingLocationPrompt } from '../prompts/runtime/worldSetup';
 import { DEFAULT_COT_PROMPT } from '../prompts/runtime/defaults';
 import { TextGenService } from './textGenService';
 import { DEFAULT_TEXT_GEN_WORKER_URLS } from '../utils/apiConfig';
+import { WorldDataExporter } from './worldDataExporter';
 
 
 type UniversalMessageRole = 'system' | 'user' | 'assistant';
@@ -1490,7 +1492,7 @@ const requestSystemGeminiText = async (
     const ai = new GoogleGenAI({ apiKey: apiConfig.apiKey });
     const systemInstruction = messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n');
     const userMessages = messages.filter(m => m.role !== 'system');
-    
+
     const contents = userMessages.map(m => ({
         role: m.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: m.content }]
@@ -1500,7 +1502,7 @@ const requestSystemGeminiText = async (
         temperature,
         systemInstruction: systemInstruction || undefined,
     };
-    
+
     if (responseFormatJsonObject) {
         config.responseMimeType = 'application/json';
     }
@@ -1511,7 +1513,7 @@ const requestSystemGeminiText = async (
             contents,
             config
         });
-        
+
         let accumulated = '';
         for await (const chunk of responseStream) {
             if (signal?.aborted) break;
@@ -1742,6 +1744,114 @@ export const generateWorldData = async (
     return parseWorldResponse(rawText);
 };
 
+export interface StartingLocationResult {
+    majorLocation: string;
+    mediumLocation: string;
+    minorLocation: string;
+    personalityStats: any;
+    reason: string;
+    x: number;
+    y: number;
+    biomeId: string;
+    regionId: string;
+}
+
+export const determineStartingLocation = async (
+    charData: any,
+    skeleton: any,
+    apiConfig: ActiveApiConfig | null,
+    workerUrl?: string
+): Promise<StartingLocationResult> => {
+    const worldStructure = WorldDataExporter.getBiomeOnlyStructure(skeleton);
+    const systemPrompt = "Bạn là hệ thống định vị nhân vật trong trò chơi Võ Hiệp. Hãy chọn địa điểm khởi đầu phù hợp nhất dựa trên Biome.";
+    const userPrompt = constructStartingLocationPrompt(charData, worldStructure);
+
+    const messages: GeneralMessage[] = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+    ];
+
+    const parseResponse = (content: string): StartingLocationResult => {
+        try {
+            const parsed = parseJsonWithRepair<any>(content);
+            const data = parsed.value;
+            if (data && data.majorLocation) {
+                // Find the chosen biome in skeleton
+                const biomes = skeleton?.world_skeleton?.level_1_biomes || [];
+                const chosenBiome = biomes.find((b: any) =>
+                    b.name === data.majorLocation || b.id === data.majorLocation || (typeof b.name === 'string' && b.name.includes(data.majorLocation))
+                ) || biomes[Math.floor(Math.random() * biomes.length)];
+
+                // Pick random region
+                const regions = chosenBiome.level_2_regions || [];
+                const chosenRegion = regions[Math.floor(Math.random() * regions.length)];
+
+                // Pick node based on type if requested by AI
+                const nodes = chosenRegion.level_3_nodes || [];
+                let filteredNodes = nodes;
+                if (data.type) {
+                    const requestedType = data.type.toLowerCase();
+                    filteredNodes = nodes.filter((n: any) =>
+                        (n.type && n.type.toLowerCase().includes(requestedType)) || (typeof n.type === 'string' && requestedType.includes(n.type.toLowerCase()))
+                    );
+                }
+
+                // Final selection (fallback to any node if type-filtering yields empty)
+                const finalNodes = filteredNodes.length > 0 ? filteredNodes : nodes;
+                const chosenNode = finalNodes[Math.floor(Math.random() * finalNodes.length)];
+
+                return {
+                    majorLocation: chosenBiome.name,
+                    mediumLocation: chosenRegion.name,
+                    minorLocation: chosenNode.name,
+                    personalityStats: data.personalityStats,
+                    reason: data.reason,
+                    x: chosenNode.x || 0,
+                    y: chosenNode.y || 0,
+                    biomeId: chosenBiome.id,
+                    regionId: chosenRegion.id
+                };
+            }
+        } catch (e) {
+            console.error("Failed to parse starting location:", e);
+        }
+
+        // Fallback to defaults if AI fails
+        return {
+            majorLocation: "Trung Nguyên",
+            mediumLocation: "Thanh Vân Thành",
+            minorLocation: "Tửu Lầu",
+            personalityStats: {
+                righteousness: 50,
+                evil: 0,
+                arrogance: 10,
+                humility: 30,
+                coldness: 10,
+                passion: 50
+            },
+            reason: "Hệ thống tự động chọn địa điểm khởi đầu mặc định.",
+            x: 500,
+            y: 500,
+            biomeId: "biome_trung_nguyen",
+            regionId: "region_thanh_van_thanh"
+        };
+    };
+
+    if ((!apiConfig || !apiConfig.apiKey) && workerUrl) {
+        const rawText = await requestWorkerText(workerUrl, messages, { temperature: 0.3 });
+        return parseResponse(rawText);
+    }
+
+    if (!apiConfig) throw new Error("API configuration is missing.");
+
+    const rawText = await requestModelText(apiConfig, messages, {
+        temperature: 0.3,
+        responseFormatJsonObject: true
+    });
+
+    return parseResponse(rawText);
+};
+
 export const generateStoryResponse = async (
     systemPrompt: string,
     userContext: string,
@@ -1851,8 +1961,8 @@ export const generateStoryResponse = async (
     let rawText: string;
 
     if (useWorker) {
-        // Use Cloudflare Worker (Nemotron) for text generation
-        const maxTokens = (apiConfig ? calculateMaxOutputToken(apiConfig, 'openai', apiMessages) : 4096);
+        // Use Cloudflare Worker (Nemotron) for text generation4096
+        const maxTokens = (apiConfig ? calculateMaxOutputToken(apiConfig, 'openai', apiMessages) : 131000);
         rawText = await requestWorkerText(effectiveWorkerUrl!, apiMessages, {
             temperature: 0.7,
             max_tokens: maxTokens,

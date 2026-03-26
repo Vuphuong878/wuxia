@@ -132,7 +132,7 @@ export interface VisualSettings {
     textGenWorkerUrl?: string;
 }
 
-export type StoryStyleType = 'Tu luyện' | 'Thông thường' | 'Tu la tràng' | 'Tu Tiên Ưu Ám';
+export type StoryStyleType = 'Tu luyện' | 'Thông thường' | 'Tu la tràng' | 'Tu Tiên Ưu Ám' | 'Thuần ái';
 
 export interface GameSettings {
     bodyLengthRequirement: number; // Độ dài tối thiểu của thân bài logs

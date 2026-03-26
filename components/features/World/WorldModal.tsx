@@ -64,8 +64,8 @@ const WorldModal: React.FC<Props> = ({ world, environment, onClose }) => {
                             <span className="text-xl lg:text-2xl font-serif text-wuxia-gold drop-shadow-sm">武</span>
                         </div>
                         <div>
-                            <h3 className="text-wuxia-gold font-serif font-bold text-xl lg:text-3xl tracking-[0.2em] lg:tracking-[0.4em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">TÌNH HÌNH VÕ LÂM</h3>
-                            <p className="text-gray-400 text-[9px] lg:text-[11px] tracking-[0.1em] lg:tracking-[0.2em] mt-0.5 lg:mt-1 italic opacity-80 uppercase">World Status & Chronicles</p>
+                            <h3 className="text-wuxia-gold font-serif font-bold text-xl lg:text-3xl tracking-[0.2em] lg:tracking-[0.4em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">TÌNH HÌNH THẾ GIỚI</h3>
+                            <p className="text-gray-400 text-[9px] lg:text-[11px] tracking-[0.1em] lg:tracking-[0.2em] mt-0.5 lg:mt-1 italic opacity-80 uppercase">World Status</p>
                         </div>
                     </div>
                     
@@ -96,7 +96,7 @@ const WorldModal: React.FC<Props> = ({ world, environment, onClose }) => {
                         {[
                             { id: 'events', label: 'Sự Kiện' },
                             { id: 'npcs', label: 'Nhân Sĩ' },
-                            { id: 'overview', label: 'Sử Ký' },
+                            { id: 'overview', label: 'Thế Giới' },
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -120,7 +120,7 @@ const WorldModal: React.FC<Props> = ({ world, environment, onClose }) => {
                             {[
                                 { id: 'events', label: 'Bách Hiểu Sinh', sub: 'Thế giới đại sự' },
                                 { id: 'npcs', label: 'Anh Hùng Bảng', sub: 'Nhân sĩ hoạt động' },
-                                { id: 'overview', label: 'Võ Lâm Sử Ký', sub: 'Thiên hạ bản đồ' },
+                                { id: 'overview', label: 'Biến Thiên', sub: 'Thiên hạ bản đồ' },
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -293,9 +293,9 @@ const WorldModal: React.FC<Props> = ({ world, environment, onClose }) => {
                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
                                         {[
                                             { label: 'Cao Thủ', val: npcs.length, color: 'text-wuxia-gold' },
-                                            { label: 'Kỳ Vực', val: Array.isArray((world as any).Map) ? (world as any).Map.length : 0, color: 'text-wuxia-cyan' },
-                                            { label: 'Kiến Trúc', val: Array.isArray((world as any).Building) ? (world as any).Building.length : 0, color: 'text-gray-200' },
-                                            { label: 'Sự Kiện', val: events.length, color: 'text-wuxia-red' },
+                                            { label: 'Đại Địa', val: Array.isArray(world.maps) ? world.maps.length : 0, color: 'text-wuxia-cyan' },
+                                            { label: 'Thành Thị', val: Array.isArray(world.maps) ? world.maps.reduce((acc, m) => acc + (Array.isArray(m.cities) ? m.cities.length : 0), 0) : 0, color: 'text-wuxia-gold' },
+                                            { label: 'Kiến Trúc', val: Array.isArray(world.buildings) ? world.buildings.length : 0, color: 'text-gray-200' },
                                         ].map((stat, i) => (
                                             <div key={i} className="bg-white/5 border border-white/10 p-4 lg:p-5 rounded-none backdrop-blur-sm relative group overflow-hidden">
                                                 <div className="text-[8px] lg:text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-1 lg:mb-2">{stat.label}</div>

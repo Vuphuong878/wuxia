@@ -403,7 +403,7 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
     const [talentFilter, setTalentFilter] = useState<'all' | TalentRank>('all');
     const [showCustomTalent, setShowCustomTalent] = useState(false);
     const [showCustomDebuff, setShowCustomDebuff] = useState(false);
-    const [customBackground, setCustomBackground] = useState<Background>({ name: '', description: '', effect: '' });
+    const [customBackground, setCustomBackground] = useState<Background>({ name: '', description: '', effect: '', rank: 'Bình thường' });
     const [showCustomBackground, setShowCustomBackground] = useState(false);
     const [openingStreaming, setOpeningStreaming] = useState(true);
     const [saveMsg, setSaveMsg] = useState('');
@@ -665,7 +665,7 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
         const nextCustomBackgroundList = mergeAndDeduplicateBackgrounds([...customBackgroundList, nextBg]);
         setCustomBackgroundList(nextCustomBackgroundList);
         setSelectedBackground(nextBg);
-        setCustomBackground({ name: '', description: '', effect: '' });
+        setCustomBackground({ name: '', description: '', effect: '', rank: 'Bình thường' });
         setShowCustomBackground(false);
         try {
             await dbService.saveSetting(CUSTOM_BACKGROUND_STORAGE_KEY, nextCustomBackgroundList);
@@ -685,6 +685,7 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
         const charData: CharacterData = {
             // Format birthday string from state
             birthDate: `${birthMonth}Tháng${birthDay}Ngày`,
+            id: crypto.randomUUID(),
 
             ...stats, // Strength, agility, constitution, rootBone, intelligence, luck, tamTinh
             name: charName.trim(),
@@ -701,6 +702,9 @@ const NewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, request
             // Defaults
             title: "", realm: "",
             sectId: "none", sectPosition: "None", sectContribution: 0,
+            karma: 0,
+            meridianStatus: 'Bình thường',
+            personalityStats: { righteousness: 50, evil: 0, arrogance: 0, humility: 50, coldness: 0, passion: 50 },
             money: { gold: 0, silver: 0, copper: 0 },
             currentEnergy: 100, maxEnergy: 100,
             currentFullness: 80, maxFullness: 100,

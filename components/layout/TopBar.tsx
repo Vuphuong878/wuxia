@@ -80,7 +80,6 @@ const mapMinuteToKe = (minute: number): string => {
 };
 
 const TopBar: React.FC<Props> = ({ Environment, timeFormat, festivals = [] }) => {
-    const [mobileLeftMode, setMobileLeftMode] = useState<'weather' | 'environment'>('weather');
     const [mobileRightMode, setMobileRightMode] = useState<'journey' | 'festival'>('journey');
     const parsedTime = parseCanonicalGameTime(Environment) || parseCanonicalGameTime(Environment?.time);
     const month = parsedTime?.month ?? Environment?.Month ?? null;
@@ -122,20 +121,6 @@ const TopBar: React.FC<Props> = ({ Environment, timeFormat, festivals = [] }) =>
         }
         return 'Không rõ';
     }, [Environment]);
-    const environmentDisplay = useMemo(() => {
-        const envVar = Environment?.envVariables;
-        if (envVar && typeof envVar === 'object') {
-            const name = typeof (envVar as any)?.name === 'string' ? (envVar as any).name.trim() : '';
-            const description = typeof (envVar as any)?.description === 'string' ? (envVar as any).description.trim() : '';
-            const effect = typeof (envVar as any)?.effect === 'string' ? (envVar as any).effect.trim() : '';
-            return name || description || effect || 'Không có';
-        }
-        return 'Không có';
-    }, [Environment?.envVariables]);
-    const mobileLeftLabel = mobileLeftMode === 'weather' ? 'Thời tiết' : 'Môi trường';
-    const mobileLeftValue = mobileLeftMode === 'weather'
-        ? weatherDisplay
-        : environmentDisplay;
     const mobileRightLabel = mobileRightMode === 'journey' ? 'Hành trình' : 'Lễ hội';
     const mobileRightValue = mobileRightMode === 'journey'
         ? `Ngày ${Environment?.gameDays || 1}`
@@ -194,19 +179,10 @@ const TopBar: React.FC<Props> = ({ Environment, timeFormat, festivals = [] }) =>
                 {/* Left Side Information */}
                 <div className="flex items-center">
                     <div className="md:hidden">
-                        <button
-                            type="button"
-                            onClick={() => setMobileLeftMode(prev => (prev === 'weather' ? 'environment' : 'weather'))}
-                            title="Nhấn để chuyển Thời tiết / Môi trường"
-                            className="bg-transparent border-0 p-0 cursor-pointer"
-                        >
-                            <TopItem label={mobileLeftLabel} value={mobileLeftValue} />
-                        </button>
+                        <TopItem label="Thời tiết" value={weatherDisplay} />
                     </div>
                     <div className="hidden md:flex items-center">
                         <TopItem label="Thời tiết" value={weatherDisplay} />
-                        <Divider />
-                        <TopItem label="Môi trường" value={environmentDisplay} />
                     </div>
                 </div>
 
@@ -274,8 +250,6 @@ const TopBar: React.FC<Props> = ({ Environment, timeFormat, festivals = [] }) =>
                         />
                         <Divider />
                         <TopItem label="Hành trình" value={`Ngày ${Environment.gameDays || 1}`} />
-                        <Divider />
-                        <TopItem label="Nghiệp" value={Environment.karma || 0} />
                         <Divider />
                         <TopItem label="Thế giới" value={Environment.worldTick || 0} />
                     </div>

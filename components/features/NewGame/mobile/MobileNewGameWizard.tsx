@@ -373,7 +373,7 @@ const MobileNewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, r
     const [showCustomTalent, setShowCustomTalent] = useState(false);
     const [showCustomDebuff, setShowCustomDebuff] = useState(false);
     const [talentFilter, setTalentFilter] = useState<'all' | TalentRank>('all');
-    const [customBackground, setCustomBackground] = useState<Background>({ name: '', description: '', effect: '' });
+    const [customBackground, setCustomBackground] = useState<Background>({ name: '', description: '', effect: '', rank: 'Bình thường' });
     const [showCustomBackground, setShowCustomBackground] = useState(false);
     const [openingStreaming, setOpeningStreaming] = useState(true);
     const [saveLoadMsg, setSaveLoadMsg] = useState<string | null>(null);
@@ -663,7 +663,7 @@ const MobileNewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, r
         const nextCustomBackgroundList = mergeAndDeduplicateBackgrounds([...customBackgroundList, nextBg]);
         setCustomBackgroundList(nextCustomBackgroundList);
         setSelectedBackground(nextBg);
-        setCustomBackground({ name: '', description: '', effect: '' });
+        setCustomBackground({ name: '', description: '', effect: '', rank: 'Bình thường' });
         setShowCustomBackground(false);
         try {
             await dbService.saveSetting(CUSTOM_BACKGROUND_STORAGE_KEY, nextCustomBackgroundList);
@@ -681,6 +681,7 @@ const MobileNewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, r
 
         // Construct final character data object mapping to CharacterData interface
         const charData: CharacterData = {
+            id: crypto.randomUUID(),
             name: charName.trim(),
             gender: charGender === 'Male' ? 'Nam' : 'Nữ',
             age: charAge,
@@ -692,12 +693,16 @@ const MobileNewGameWizard: React.FC<Props> = ({ onComplete, onCancel, loading, r
             background: selectedBackground,
 
             ...stats,
+            baseStats: { ...stats },
 
             title: "Fresh from the mountains",
             realm: "Mortal",
             sectId: "none",
             sectPosition: "None",
             sectContribution: 0,
+            karma: 0,
+            meridianStatus: 'Bình thường',
+            personalityStats: { righteousness: 50, evil: 0, arrogance: 0, humility: 50, coldness: 0, passion: 50 },
             money: { gold: 0, silver: 0, copper: 0 },
 
             currentEnergy: 100,

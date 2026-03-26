@@ -63,6 +63,9 @@ import { CoreChainOfThoughtMulti as Core_ChainOfThought_MultiThought } from '../
 import { Core_OutputFormat_MultiThought } from '../prompts/core/formatMulti';
 import { WritingNoControl as Writing_PreventSpeaking } from '../prompts/writing/noControl';
 import { ImageService, ImageCacheService } from '../services/imageService';
+import { WORLD_STRUCTURE, FULL_WORLD_SKELETON } from '../data/worldData';
+import { WorldDataExporter } from '../services/worldDataExporter';
+import { MapService } from '../services/mapService';
 
 import {
     normalizeEnvironment,
@@ -488,24 +491,39 @@ export const useGame = () => {
         worldTick: 0
     });
 
-    const createOpeningBlankWorld = (): WorldDataStructure => ({
-        activeNpcList: [],
-        maps: [],
-        buildings: [],
-        ongoingEvents: [],
-        settledEvents: [],
-        worldHistory: []
-    });
+    const createOpeningBlankWorld = (): WorldDataStructure => {
+        // Transform the full 3400+ node skeleton into the initial world state
+        return WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
+    };
 
     const standardizeWorldStatus = (raw?: any): WorldDataStructure => {
         const worldData = raw && typeof raw === 'object' ? raw : {};
+        const buildings = Array.isArray(worldData.buildings) ? worldData.buildings : [];
+        
+        // Data Migration: If the world has 113 or fewer buildings (legacy WORLD_STRUCTURE size),
+        // we auto-expand it to the full 3400+ node skeleton.
+        if (buildings.length <= 113) {
+            console.log(`[useGame] World expansion triggered: migrating from ${buildings.length} nodes to 3400+ nodes.`);
+            const fullSkeleton = WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
+            return {
+                activeNpcList: Array.isArray(worldData.activeNpcList) ? worldData.activeNpcList : [],
+                maps: fullSkeleton.maps,
+                buildings: fullSkeleton.buildings,
+                ongoingEvents: Array.isArray(worldData.ongoingEvents) ? worldData.ongoingEvents : [],
+                settledEvents: Array.isArray(worldData.settledEvents) ? worldData.settledEvents : [],
+                worldHistory: Array.isArray(worldData.worldHistory) ? worldData.worldHistory : [],
+                time: worldData.time || { Year: 2026, Month: 3, Day: 23, Hour: 6, Minute: 15 }
+            };
+        }
+
         return {
-            activeNpcList: Array.isArray(worldData?.activeNpcList) ? worldData.activeNpcList : [],
-            maps: Array.isArray(worldData?.maps) ? worldData.maps : [],
-            buildings: Array.isArray(worldData?.buildings) ? worldData.buildings : [],
-            ongoingEvents: Array.isArray(worldData?.ongoingEvents) ? worldData.ongoingEvents : [],
-            settledEvents: Array.isArray(worldData?.settledEvents) ? worldData.settledEvents : [],
-            worldHistory: Array.isArray(worldData?.worldHistory) ? worldData.worldHistory : []
+            activeNpcList: Array.isArray(worldData.activeNpcList) ? worldData.activeNpcList : [],
+            maps: Array.isArray(worldData.maps) ? worldData.maps : [],
+            buildings: buildings,
+            ongoingEvents: Array.isArray(worldData.ongoingEvents) ? worldData.ongoingEvents : [],
+            settledEvents: Array.isArray(worldData.settledEvents) ? worldData.settledEvents : [],
+            worldHistory: Array.isArray(worldData.worldHistory) ? worldData.worldHistory : [],
+            time: worldData.time || { Year: 2026, Month: 3, Day: 23, Hour: 6, Minute: 15 }
         };
     };
 
@@ -770,6 +788,11 @@ export const useGame = () => {
                 mediumLocation: env.mediumLocation || '',
                 minorLocation: env.minorLocation || '',
                 specificLocation: env.specificLocation || '',
+                x: env.x,
+                y: env.y,
+                biomeId: env.biomeId,
+                regionId: env.regionId,
+                nearbyNodes: env.nearbyNodes,
                 festival: env.festival,
                 weather: env.weather,
                 environmentalVariables: env.envVariables,
@@ -852,6 +875,10 @@ export const useGame = () => {
         );
         const buildWorldStatusText = (payload: any) => {
             const world = normalizeWorldStatus(payload?.World || payload?.world);
+            
+            // USE COMPACT SUMMARY INSTEAD OF SENDING 3400+ NODES
+            const worldSummary = WorldDataExporter.getStoryContextSummary(FULL_WORLD_SKELETON);
+
             const orderedWorld = {
                 activeNpcList: (world.activeNpcList || []).slice(0, 20).map((npc: any) => ({
                     id: npc.id || '',
@@ -863,28 +890,15 @@ export const useGame = () => {
                     status: npc.status || '',
                     currentActionDescription: npc.currentActionDescription || '',
                     actionStartTime: npc.actionStartTime || '',
-                    estimatedCompletionTime: npc.estimatedCompletionTime || '',
-                    holdingHeavyTreasure: npc.holdingHeavyTreasure || []
+                    estimatedCompletionTime: npc.estimatedCompletionTime || ''
                 })),
-                maps: (world.maps || []).slice(0, 100).map((item: any) => ({
-                    name: item.name || '',
-                    coordinate: item.coordinate || '',
-                    description: item.description || '',
-                    affiliation: item.affiliation || { majorLocation: '', mediumLocation: '', minorLocation: '' },
-                    cities: item.cities || [],
-                    internalBuildings: item.internalBuildings || []
-                })),
-                buildings: (world.buildings || []).slice(0, 200).map((item: any) => ({
-                    name: item.name || '',
-                    description: item.description || '',
-                    affiliation: item.affiliation || { majorLocation: '', mediumLocation: '', minorLocation: '' }
-                })),
+                worldSummary: worldSummary,
                 ongoingEvents: (world.ongoingEvents || []),
                 settledEvents: (world.settledEvents || []).slice(-15),
-                worldHistory: (world.worldHistory || []).slice(-20)
+                worldHistory: (world.worldHistory || []).slice(-10)
             };
 
-            return `【Thông tin thế giới】\n${JSON.stringify(orderedWorld, null, 2)} `;
+            return `【Thông tin thế giới】\n${JSON.stringify(orderedWorld, null, 2)}`;
         };
         const buildCombatStatusText = (payload: any) => {
             const battle = normalizeCombatStatus(payload?.Combat || payload?.battle);
@@ -1210,25 +1224,25 @@ export const useGame = () => {
 
         // World Evolution prompt injection
         const fmp = apiConfig?.featureModelPlaceholder;
-        const isWorldEvolutionEnabled = world?.evolutionSettings?.enabled !== false;
+        const isWorldEvolutionEnabled = fmp?.worldEvolutionIndependentModelToggle !== false;
         const worldEvolutionBlock = (isWorldEvolutionEnabled && fmp?.worldEvolutionPrompt)
             ? `【Tiến hóa thế giới】\n${fmp.worldEvolutionPrompt}`
             : '';
 
         // Tavern Presets (Prompt Library) injection
         const activePreset = tavernSettings?.presets?.find(p => p.id === tavernSettings.activePresetId);
-        const presetPrompt = activePreset?.postProcessing || '';
-        const presetStrategy = activePreset?.strategy || 'append';
-        const isPresetEnabled = activePreset?.enabled !== false;
+        const presetPrompt = activePreset?.prompt || '';
+        const presetStrategy = tavernSettings?.postProcessing || 'Thêm vào sau prompt thế giới/cốt truyện gốc';
+        const isPresetEnabled = tavernSettings?.enabled !== false;
 
         let finalSystemPrompt = worldPrompt.trim();
         let tavernPresetBlock = '';
 
         if (isPresetEnabled && presetPrompt) {
             tavernPresetBlock = `【Thư viện Prompt - ${activePreset?.name}】\n${presetPrompt}`;
-            if (presetStrategy === 'prepend') {
+            if (presetStrategy === 'Thêm vào trước prompt thế giới') {
                 finalSystemPrompt = `${tavernPresetBlock}\n\n${finalSystemPrompt}`;
-            } else if (presetStrategy === 'overwrite') {
+            } else if (presetStrategy === 'Đè hoàn toàn prompt hệ thống') {
                 finalSystemPrompt = tavernPresetBlock;
             } else {
                 // Default: append
@@ -1528,49 +1542,42 @@ export const useGame = () => {
             if (worldStreamHeartbeat) clearInterval(worldStreamHeartbeat);
 
             const worldPromptContent = worldResponse.world_prompt?.trim() || worldPromptSeed;
-            const worldSkeleton = worldResponse.world_skeleton;
 
-            // Merge skeleton data into initial base state if present
-            if (worldSkeleton) {
-                const skeletonMaps = Array.isArray(worldSkeleton.maps) ? worldSkeleton.maps : [];
-                const skeletonBuildings = Array.isArray(worldSkeleton.buildings) ? worldSkeleton.buildings : [];
-                
-                // 1. Generate images for each city and collect all buildings
-                const extraBuildings: any[] = [];
-                for (const map of skeletonMaps) {
-                    if (Array.isArray(map.cities)) {
-                        for (const city of map.cities) {
+            // 3. Determine starting location based on character data and full skeleton (now handles biome-only then random)
+            const startingLocation = await aiService.determineStartingLocation(
+                charData,
+                FULL_WORLD_SKELETON,
+                currentApi,
+                workerUrl
+            );
 
-                            // Flatten buildings
-                            if (Array.isArray(city.buildings)) {
-                                city.buildings.forEach((b: any) => {
-                                    const bRealName = typeof b === 'string' ? b : (b?.name || '');
-                                    const bType = typeof b === 'object' ? b.type : undefined;
-                                    const bDesc = typeof b === 'object' ? b.description : '';
-                                    if (bRealName && !skeletonBuildings.some((sb: any) => (sb.name || sb) === bRealName)) {
-                                        extraBuildings.push({
-                                            name: bRealName,
-                                            type: bType,
-                                            description: bDesc || `Kiến trúc tại ${city.name}, ${map.name}`,
-                                            affiliation: {
-                                                majorLocation: map.name,
-                                                mediumLocation: city.name,
-                                                minorLocation: bRealName
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    }
+            // 4. Update state with full world skeleton data and dynamic starting location
+            const worldSkeletonData = WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
+
+            openingBase.world = {
+                ...openingBase.world,
+                maps: worldSkeletonData.maps || [],
+                buildings: worldSkeletonData.buildings || [],
+            };
+
+            openingBase.environment = {
+                ...openingBase.environment,
+                majorLocation: startingLocation.majorLocation,
+                mediumLocation: startingLocation.mediumLocation,
+                minorLocation: startingLocation.minorLocation,
+                specificLocation: startingLocation.minorLocation,
+                x: startingLocation.x,
+                y: startingLocation.y,
+                biomeId: startingLocation.biomeId,
+                regionId: startingLocation.regionId,
+            };
+
+            openingBase.character = {
+                ...openingBase.character,
+                personalityStats: startingLocation.personalityStats || {
+                    righteousness: 50, evil: 0, arrogance: 10, humility: 30, coldness: 10, passion: 50
                 }
-
-                openingBase.world = {
-                    ...openingBase.world,
-                    maps: skeletonMaps,
-                    buildings: [...skeletonBuildings, ...extraBuildings],
-                };
-            }
+            };
 
             const finalPrompts = updatedPrompts.map(p => (
                 p.id === 'core_world' ? { ...p, content: worldPromptContent } : p
@@ -1586,7 +1593,7 @@ export const useGame = () => {
                 alert("Worldview prompt written. Please input commands in the chat box to start initialization.");
             } else {
                 // We pass genData explicitly because state updates might be async/batched
-                await generateOpeningStory(openingBase, finalPrompts, openingStreaming, currentApi, worldSkeleton);
+                await generateOpeningStory(openingBase, finalPrompts, openingStreaming, currentApi);
                 // Trigger Visual Summary review step
             }
         } catch (error: any) {
@@ -1630,8 +1637,7 @@ export const useGame = () => {
         contextData: any,
         promptSnapshot: PromptStructure[],
         useStreaming: boolean,
-        apiForOpening: ApiConfig,
-        worldSkeleton?: any
+        apiForOpening: ApiConfig
     ) => {
         const initialHistory: ChatHistory[] = [
             {
@@ -1651,13 +1657,7 @@ export const useGame = () => {
             const openingMem: MemorySystem = { recallArchives: [], instantMemory: [], shortTermMemory: [], midTermMemory: [], longTermMemory: [] };
             const openingEnv = normalizeEnvironment(contextData?.environment || environment);
             
-            // Merge worldSkeleton into world payload if it explicitly exists for the opening
-            const baseWorldForOpening = contextData.world || world;
-            const mergedWorldForOpening = worldSkeleton ? {
-                ...baseWorldForOpening,
-                maps: Array.isArray(worldSkeleton.maps) ? worldSkeleton.maps : baseWorldForOpening.maps,
-                buildings: Array.isArray(worldSkeleton.buildings) ? worldSkeleton.buildings : baseWorldForOpening.buildings,
-            } : baseWorldForOpening;
+            const mergedWorldForOpening = contextData.world || world;
 
             const openingStatePayload = {
                 character: contextData.character || character,
@@ -1713,8 +1713,7 @@ export const useGame = () => {
             const openingLengthRequirementPrompt = constructWordCountRequirementPrompt(10000);
             const openingDisclaimerRequirementPrompt = openingContext.contextPieces.disclaimerOutputPrompt || undefined;
             const openingOutputProtocolPrompt = openingContext.contextPieces.outputProtocolPrompt;
-            const skeletonPrompt = worldSkeleton ? `\n\n【Bản đồ thế giới dự kiến - BẮT BUỘC SỬ DỤNG】\n${JSON.stringify(worldSkeleton)}` : '';
-            const combinedExtraPrompt = (openingGameConfig.extraPrompt || '') + skeletonPrompt;
+            const combinedExtraPrompt = openingGameConfig.extraPrompt || '';
 
             const aiResult = await aiService.generateStoryResponse(
                 openingContext.systemPrompt,
@@ -1957,9 +1956,9 @@ export const useGame = () => {
 
     const buildContextSnapshot = (): ContextSnapshot => {
         const normalizedMem = standardizeMemorySystem(memorySystem);
-        const recallConfig = apiConfig?.featureModelPlaceholderConfig || ({} as any);
-        const recallFeatureEnabled = Boolean(recallConfig.enableStorylineMemoryIndependentModel);
-        const recallMinRound = Math.max(1, Number(recallConfig.earliestRoundToTriggerStorylineMemory) || 10);
+        const recallConfig = apiConfig?.featureModelPlaceholder || ({} as any);
+        const recallFeatureEnabled = Boolean(recallConfig.recallIndependentModelToggle);
+        const recallMinRound = Math.max(1, Number(recallConfig.recallEarliestTriggerTurn) || 10);
         const nextRound = (Array.isArray(normalizedMem.recallArchives) ? normalizedMem.recallArchives.length : 0) + 1;
         const recallRoundReady = nextRound >= recallMinRound;
         const recallApi = getRecallApiConfig(apiConfig);
@@ -2033,7 +2032,7 @@ export const useGame = () => {
         pushSection('state_agreements', 'Agreement list', 'System', builtContext.contextPieces.agreementStatus);
         pushSection('memory_short', 'Short-term memory', 'Memory', builtContext.shortMemoryContext);
         if (recallFeatureEnabled) {
-            const fullN = Math.max(1, Number(apiConfig?.featureModelPlaceholderConfig?.fullHistoryRoundForMemoryRetrieval) || 20);
+            const fullN = Math.max(1, Number(apiConfig?.featureModelPlaceholder?.recallFullContextLimitN) || 20);
             const recallMemoryCorpus = constructContextForStorylineMemoryRetrieval(normalizedMem, fullN);
             const recallSystemPrompt = `${storyMemoryRetrievalCOTPrompt}\n\n${storylineMemoryRetrievalOutputFormatPrompt}`;
             pushSection('recall_system', 'Story Memory System Prompt', 'RecallAPI', recallSystemPrompt);
@@ -2075,9 +2074,9 @@ export const useGame = () => {
         }
 
         // 1. Parse input and optional hidden recall tag
-        const recallConfig = apiConfig?.featureModelPlaceholderConfig || ({} as any);
-        const recallFeatureEnabled = Boolean(recallConfig.enableStorylineMemoryIndependentModel);
-        const recallMinRound = Math.max(1, Number(recallConfig.earliestRoundToTriggerStorylineMemory) || 10);
+        const recallConfig = apiConfig?.featureModelPlaceholder || ({} as any);
+        const recallFeatureEnabled = Boolean(recallConfig.recallIndependentModelToggle);
+        const recallMinRound = Math.max(1, Number(recallConfig.recallEarliestTriggerTurn) || 10);
         const normalizedMemBeforeSend = standardizeMemorySystem(memorySystem);
         const nextRound = (Array.isArray(normalizedMemBeforeSend.recallArchives) ? normalizedMemBeforeSend.recallArchives.length : 0) + 1;
         const recallRoundReady = nextRound >= recallMinRound;
@@ -2107,7 +2106,7 @@ export const useGame = () => {
                 }
                 attachedRecallPreview = recalled.previewText;
                 options?.onRecallProgress?.({ phase: 'done', text: recalled.previewText });
-                const silentConfirm = Boolean(apiConfig?.featureModelPlaceholderConfig?.enableSilentConfirmForMemoryRecall);
+                const silentConfirm = Boolean(apiConfig?.featureModelPlaceholder?.recallSilentConfirmation);
                 if (!silentConfirm) {
                     return {
                         cancelled: true,
@@ -2130,8 +2129,8 @@ export const useGame = () => {
         }
 
         // 2. Calculate Game Time String
-        const canonicalTime = normalizeCanonicalGameTime(environment.hour?.toString() || '6');
-        const currentGameTime = canonicalTime || environment.hour?.toString() || `No.${environment.gameDays || 1}Day`;
+        const canonicalTime = normalizeCanonicalGameTime(environment.Hour?.toString() || '6');
+        const currentGameTime = canonicalTime || environment.Hour?.toString() || `No.${environment.gameDays || 1}Day`;
         const historyBeforeSend = [...history];
         const memBeforeSend = normalizedMemBeforeSend;
         pushRollSnapshot({
@@ -2180,13 +2179,16 @@ export const useGame = () => {
         try {
             // 5. Construct System Prompt
             const recallContextActiveForMain = recallFeatureEnabled && Boolean(recallTag);
+            const currentNormalizedEnv = normalizeEnvironment(environment);
+            const nearbyNodes = MapService.getNodesByProximity(currentNormalizedEnv.x || 0, currentNormalizedEnv.y || 0, 100);
+
             const builtContext = buildSystemPrompt(
                 prompts,
                 updatedMemSys,
                 social,
                 {
                     character,
-                    environment: normalizeEnvironment(environment),
+                    environment: { ...currentNormalizedEnv, nearbyNodes },
                     world,
                     battle,
                     playerSect,
@@ -2205,7 +2207,7 @@ export const useGame = () => {
             ].filter(Boolean).join('\n\n');
 
             let streamMarker = 0;
-            const useStream = isStreaming && Boolean(apiConfig?.enableStream);
+            const useStream = isStreaming;
             if (useStream) {
                 streamMarker = Date.now();
                 setHistory([

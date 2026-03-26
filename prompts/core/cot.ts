@@ -25,7 +25,7 @@ export const CoreChainOfThought: PromptStructure = {
 - \`【Bên dưới là các nhân vật đang có mặt】\` (Đây là một tập hợp con của \`gameState.Social\` / \`gameState.Team\`, chỉ mục dùng chung)
 - \`【Cài đặt trò chơi】\` (Bao gồm yêu cầu số chữ, ngôi kể tự sự, công tắc chức năng tùy chọn hành động)
 - \`【Sắp xếp cốt truyện】\`
-- \`【Thế giới】\` / \`【Môi trường hiện tại】\` / \`【Dữ liệu nhân vật người chơi】\` / \`【Chiến đấu】\` / \`【Môn phái người chơi】\` / \`【Danh sách nhiệm vụ】\` / \`【Danh sách hẹn ước】\`
+- \`【Thế giới】\` / \`【Cảnh quan hiện tại】\` / \`【Dữ liệu nhân vật người chơi】\` / \`【Chiến đấu】\` / \`【Môn phái người chơi】\` / \`【Danh sách nhiệm vụ】\` / \`【Danh sách hẹn ước】\`
 - \`【Hồi tưởng cốt truyện tức thì (Script)】\`
 - \`<Nhập liệu người dùng>...</Nhập liệu người dùng>\`
 - Nội dung gợi ý yêu cầu bổ sung (nếu có)
@@ -38,7 +38,7 @@ export const CoreChainOfThought: PromptStructure = {
   - \`gameState.Kungfu\` (Toàn bộ bí tịch, chiêu thức, nội công, công pháp)
   - \`gameState.Equipment\` (Các ô trang bị đang mặc)
   - \`gameState.Combat\` (Trạng thái và kẻ địch hiện tại)
-  - \`gameState.Environment\` (Thời gian, địa điểm, thời tiết, biến môi trường)
+  - \`gameState.Environment\` (Thời gian, địa điểm, thời tiết)
   - \`gameState.Social\` (Danh sách NPC xã hội, hảo cảm, ký ức, quan hệ hôn nhân)
   - \`gameState.Team\` (Danh sách đồng đội, chỉ số chiến đấu đồng đội)
   - \`gameState.World\` (Sự kiện lớn, tin đồn, NPC hoạt động toàn cầu)

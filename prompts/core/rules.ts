@@ -39,12 +39,22 @@ export const CoreRules: PromptStructure = {
 - Tương tác xã hội phải ghi vào \`memories\` và cập nhật \`favorability\`.
 
 ## 4) Tiêu chuẩn văn bản (logs)
-- \`"sender": "Cảnh vật"\` - Miêu tả môi trường.
+- \`"sender": "Cảnh vật"\` - Miêu tả cảnh quan.
 - \`"sender": "Bối cảnh"\` - Miêu tả hành động/tâm trạng (PHẢI bám sát \`corePersonalityTraits\` của NPC).
 - \`"sender": "Tên nhân vật"\` - Lời thoại.
 
 ## 5) Định dạng Phán đoán
 - \`Tên hành động｜Kết quả｜Kích hoạt [Người chơi/NPC]:Tên thực tế｜Giá trị phán đoán X/Độ khó Y｜... \`
+
+## 6) Hệ thống Tính cách và Khí chất (Personality Metrics)
+- **Chỉ số tính cách**: \`righteousness\` (Chính nghĩa), \`evil\` (Tà niệm), \`arrogance\` (Ngạo mạn), \`humility\` (Khiêm tốn), \`coldness\` (Lạnh lùng), \`passion\` (Nhiệt huyết) - Thang điểm 0-100.
+- **Quy tắc cập nhật**:
+  - Hành động giúp người, trừ hại -> Tăng \`righteousness\` (Ví dụ: +5).
+  - Hành động tàn nhẫn, tư lợi, phản trắc -> Tăng \`evil\` (+10).
+  - Coi thường người khác, khoe khoang -> Tăng \`arrogance\`.
+  - Tôn trọng giới hạn, khiêm nhường, nhận lỗi -> Tăng \`humility\`.
+- AI phải phản ánh tính cách hiện tại qua lời thoại và hành động của nhân vật chính trong \`logs\`.
+- Khi tính cách thay đổi vượt ngưỡng (Ví dụ: Evil > 80), AI có thể đề xuất các danh hiệu (\`title\`) ma giáo hoặc thay đổi cách xưng hô của NPC.
 
 </DataSyncProtocol>
     `.trim(),

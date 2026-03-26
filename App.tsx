@@ -854,7 +854,8 @@ const App: React.FC = () => {
                             apiConfig={state.apiConfig}
                             onClose={() => setters.setShowMap(false)}
                             onUpdateWorld={state.setWorld}
-                            workerUrl={state.apiConfig.imageGenWorkerUrl || state.apiConfig.workerUrl}
+                            onUpdateEnv={state.setEnvironment as any}
+                            workerUrl={(state.apiConfig as any).imageGenWorkerUrl || (state.apiConfig as any).workerUrl || ""}
                         />
                     )}
 
@@ -862,12 +863,12 @@ const App: React.FC = () => {
                         <>
                             <SectModal
                                 sectData={state.playerSect}
-                                currentTime={state.environment.hour}
+                                currentTime={state.environment.time}
                                 onClose={() => setters.setShowSect(false)}
                             />
                             <MobileSect
                                 sectData={state.playerSect}
-                                currentTime={state.environment.hour}
+                                currentTime={state.environment.time as any}
                                 onClose={() => setters.setShowSect(false)}
                             />
                         </>
@@ -926,13 +927,13 @@ const App: React.FC = () => {
                                 history={state.history}
                                 memorySystem={state.memorySystem}
                                 onClose={() => setters.setShowMemory(false)}
-                                currentTime={state.environment?.hour}
+                                currentTime={state.environment?.Hour}
                             />
                             <MobileMemory
                                 history={state.history}
                                 memorySystem={state.memorySystem}
                                 onClose={() => setters.setShowMemory(false)}
-                                currentTime={state.environment?.hour}
+                                currentTime={state.environment?.Hour}
                             />
                         </>
                     )}

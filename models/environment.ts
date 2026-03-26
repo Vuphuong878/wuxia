@@ -3,8 +3,10 @@ import { GameTimeObject } from './world';
 
 export interface EnvironmentFestivalInfo {
     name: string;
-    description: string;
-    isToday: boolean;
+    description?: string;
+    introduction?: string;
+    effect?: string;
+    isToday?: boolean;
 }
 
 export interface WeatherInfo {
@@ -33,6 +35,14 @@ export interface EnvironmentData {
     mediumLocation?: string;
     minorLocation?: string;
     specificLocation?: string;
+    
+    // Spatial Coordinates (0-1000)
+    x?: number;
+    y?: number;
+    biomeId?: string;
+    regionId?: string;
+    nearbyNodes?: any[];
+
     envVariables: {
         name: string;
         description: string;

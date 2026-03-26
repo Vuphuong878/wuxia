@@ -62,3 +62,37 @@ ${worldPromptSeed}
 【Quy tắc độ khó được kích hoạt】
 ${enabledDifficultyPrompts || 'Chưa cung cấp'}
 `.trim();
+export const constructStartingLocationPrompt = (charData: CharacterData, worldStructure: string): string => `
+【Nhiệm vụ: Thiết lập 20 Châu lục và Vị trí khởi đầu】
+Dựa trên bối cảnh và thân phận của nhân vật, hãy thực hiện các bước sau:
+1. Chọn ra danh sách 20 CHÂU LỤC (Biomes) phù hợp nhất từ danh sách cấu trúc thế giới bên dưới để kiến tạo nên bản đồ thế giới của nhân vật.
+2. Từ 20 Châu lục đã chọn, hãy xác định DUY NHẤT một Châu lục làm nơi khởi đầu (majorLocation).
+3. Xác định loại địa điểm khởi đầu cụ thể và các chỉ số tính cách ban đầu.
+
+【Thông tin nhân vật】
+- Tên: ${charData.name}
+- Bối cảnh: ${charData.background?.name}
+- Mô tả bối cảnh: ${charData.background?.description}
+- Thiên phú: ${charData.talentList.map(t => t.name).join(', ')}
+
+【Cấu trúc thế giới (Danh sách các Biome/Vùng lớn)】
+${worldStructure}
+
+【Yêu cầu đầu ra】
+CHỈ xuất ra một đối tượng JSON hợp lệ:
+{
+  "selectedContinents": ["Tên châu lục 1", "Tên châu lục 2", ..., "Tên châu lục 20"],
+  "majorLocation": "Tên châu lục khởi đầu (phải nằm trong danh sách 20 cái trên)",
+  "type": "Loại địa điểm khởi đầu (ví dụ: Thành thị, Môn phái, Thôn trang, Sơn động...)",
+  "personalityStats": {
+    "righteousness": number (0-100),
+    "evil": number (0-100),
+    "arrogance": number (0-100),
+    "humility": number (0-100),
+    "coldness": number (0-100),
+    "passion": number (0-100)
+  },
+  "reason": "Giải thích ngắn gọn sự lựa chọn 20 châu lục và vị trí khởi đầu này."
+}
+*Hệ thống sẽ tự động chỉ định tọa độ và địa điểm chi tiết (minorLocation) dựa trên Vùng và Loại địa điểm bạn chọn.*
+`.trim();

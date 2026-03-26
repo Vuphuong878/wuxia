@@ -30,6 +30,8 @@ import { PromptSyncService } from '../services/promptSyncService';
 import { THEMES } from '../styles/themes';
 import { createEmptyApiSettings, normalizeApiSettings, DEFAULT_TEXT_GEN_WORKER_URL, DEFAULT_IMAGE_GEN_WORKER_URL } from '../utils/apiConfig';
 import { estimateHistoryTokens } from '../utils/tokenEstimate';
+import { FULL_WORLD_SKELETON } from '../data/worldData';
+import { WorldDataExporter } from '../services/worldDataExporter';
 
 const normalizeTavernSettings = (raw?: Partial<TavernSettingsStructure> | null): TavernSettingsStructure => ({
     enabled: raw?.enabled ?? false,
@@ -94,6 +96,14 @@ export const useGameState = () => {
             levelUpExp: 0,
             playerBuffs: [],
             personality: '',
+            personalityStats: {
+                righteousness: 50,
+                evil: 0,
+                arrogance: 0,
+                humility: 50,
+                coldness: 0,
+                passion: 50
+            },
             isDead: false,
             id: 'player'
         };
@@ -110,6 +120,14 @@ export const useGameState = () => {
         festival: null,
         currentRegionId: '',
         currentAreaId: '',
+        majorLocation: 'Huyết Nguyệt Cảnh (Vùng Trăng Máu)',
+        mediumLocation: 'Huyết Đông Vực',
+        minorLocation: 'Băng Cước Trấn',
+        specificLocation: 'Băng Cước Trấn',
+        x: 697,
+        y: 500,
+        biomeId: 'huyet_nguyet_canh',
+        regionId: 'huyet_dong_vuc',
         envVariables: null,
         time: 'Sáng',
         season: 'Xuân',
@@ -117,15 +135,18 @@ export const useGameState = () => {
         worldTick: 0
     });
 
-    const createEmptyWorld = (): WorldData => ({
-        activeNpcList: [],
-        maps: [],
-        buildings: [],
-        ongoingEvents: [],
-        settledEvents: [],
-        worldHistory: [],
-        time: { Year: 2026, Month: 3, Day: 23, Hour: 6, Minute: 15 }
-    });
+    const createEmptyWorld = (): WorldData => {
+        const skeletonData = WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
+        return {
+            activeNpcList: [],
+            maps: skeletonData.maps || [],
+            buildings: skeletonData.buildings || [],
+            ongoingEvents: [],
+            settledEvents: [],
+            worldHistory: [],
+            time: { Year: 2026, Month: 3, Day: 23, Hour: 6, Minute: 15 }
+        };
+    };
 
     const createEmptySect = (): DetailedSect => ({
         id: 'none',
@@ -259,7 +280,7 @@ export const useGameState = () => {
     // Config State
     const [apiConfig, setApiConfig] = useState<ApiSettings>(() => createEmptyApiSettings());
     const [visualConfig, setVisualConfig] = useState<VisualSettings>({
-        timeFormat: 'Traditional',
+        timeFormat: 'Truyền thống',
         renderLayers: 30,
         areaSettings: {},
         importedFonts: [],

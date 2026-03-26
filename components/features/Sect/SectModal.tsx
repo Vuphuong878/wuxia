@@ -5,7 +5,7 @@ import { DetailedSectStructure, SectTask, positionLevelOrder, SectTaskStatus } f
 interface Props {
     sectData: DetailedSectStructure;
     currentTime: string;
-    onAcceptTask: (task: SectTask) => void;
+    onAcceptTask?: (task: SectTask) => void;
     onExchange?: (goodsId: string) => void;
     onClose: () => void;
 }

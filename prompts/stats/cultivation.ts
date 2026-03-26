@@ -37,7 +37,7 @@ Giai đoạn này tu sĩ tu luyện "Tiên Nguyên Lực" và nắm giữ các l
 14. Đạo Tổ (Cảnh giới tối cao) - Mỗi một loại quy luật trong vũ trụ chỉ có duy nhất một Đạo Tổ nắm giữ.
 
 ## 3. Công thức Tăng trưởng Tu vi
-- Tăng trưởng dựa trên: \`comprehension\`, môi trường linh khí, dược quán, và võ công tâm pháp.
+- Tăng trưởng dựa trên: \`comprehension\`, dược quán, và võ công tâm pháp.
 - Mỗi lượt tu luyện sử dụng lệnh \`ADD\` vào \`cultivationProgress\`.
 
 ## 4. Đột phá Cảnh giới (Breakthrough)

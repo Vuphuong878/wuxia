@@ -28,6 +28,15 @@ export interface CharacterMoney {
     copper: number;
 }
 
+export interface PersonalityStats {
+    righteousness: number; // Chính nghĩa
+    evil: number; // Tà niệm
+    arrogance: number; // Ngạo mạn
+    humility: number; // Khiêm tốn
+    coldness: number; // Lạnh lùng
+    passion: number; // Nhiệt huyết
+}
+
 export interface CoreStats {
     strength: number;
     agility: number;
@@ -89,5 +98,6 @@ export interface CharacterData extends CoreStats {
     levelUpExp: number;
     playerBuffs: string[]; 
     personality: string;
+    personalityStats: PersonalityStats;
     isDead?: boolean;
 }

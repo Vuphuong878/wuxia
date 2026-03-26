@@ -24,11 +24,20 @@ export const coreWorldMechanics: PromptStructure = {
   - **Mỗi 100 Tick (Đại Kiếp Thế Giới)**: Thay đổi cục diện chính trị toàn lục địa, thiên tai quy mô lớn hoặc sự thức tỉnh của cổ đại ma thần.
 
 ## III. Cơ Chế Bế Quan (Seclusion Mechanics)
-- **Yếu tố duration**: AI quyết định thời gian bế quan dựa trên: (Độ khó công pháp / Căn cốt) * (Linh khí môi trường).
+- **Yếu tố duration**: AI quyết định thời gian bế quan dựa trên: (Độ khó công pháp / Căn cốt).
 - **Rủi ro**: 
   - Đột phá không phải lúc nào cũng thành công. 
   - Nếu bế quan quá lâu mà không có chuẩn bị, có xác suất \`Qi Deviation\` (Tẩu hỏa nhập ma) hoặc \`Heart Demon\` (Tâm ma xâm lấn).
   - Khi bế quan, hãy kích hoạt "Hệ thống Cơ Duyên Động Cho NPC" để cập nhật thế giới bên ngoài.
+  
+## IV. Hệ Thống Không Gian & Tọa Độ (Spatial Grid)
+- **Cơ chế**: Thế giới được chia thành một lưới tọa độ 1000x1000 (X, Y).
+- **Phân cấp**: Biome (Cơ bản) > Region (Vực) > Node (Địa điểm cụ thể).
+- **Phép tịnh tiến**: 
+  - Khi {{user}} di chuyển từ địa điểm A sang địa điểm B, AI **BẮT BUỘC** cập nhật tọa độ \`x, y\` tương ứng trong \`tavern_commands\`.
+  - Khoảng cách giữa các Node ảnh hưởng đến thời gian di chuyển (Time Progress).
+  - Tọa độ giúp AI duy trì tính nhất quán: Không thể từ tọa độ (100, 100) nhảy vọt sang (900, 900) trong một bước di chuyển bộ.
+- **Khám phá**: Khi ở một tọa độ cụ thể, AI có thể mô tả các địa điểm lân cận trong bán kính 20-50 đơn vị tọa độ để gợi ý hướng đi tiếp theo.
 `.trim(),
     type: 'core',
     enabled: true

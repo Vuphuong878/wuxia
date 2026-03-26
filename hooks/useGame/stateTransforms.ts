@@ -85,7 +85,7 @@ const normalizeEnvironment = (rawEnv?: any): EnvironmentData => {
                 : '',
             effect: typeof festivalSource?.effect === 'string' ? festivalSource.effect.trim() : ''
         }
-        : (rawFestivalName ? { name: rawFestivalName, description: '', effect: '' } : null);
+        : (rawFestivalName ? { name: rawFestivalName, description: '', effect: '', rank: 'Bình thường' as const } : null);
     const originalGameDays = typeof source?.gameDays === 'number' && Number.isFinite(source.gameDays)
         ? source.gameDays
         : 1;
@@ -98,7 +98,7 @@ const normalizeEnvironment = (rawEnv?: any): EnvironmentData => {
         };
     const rawEnvVar = source?.envVariables || source?.env;
     const envVariables = typeof rawEnvVar === 'string'
-        ? { name: rawEnvVar.trim(), description: '', effect: '' }
+        ? { name: rawEnvVar.trim(), description: '', effect: '', rank: 'Bình thường' as const }
         : (rawEnvVar && typeof rawEnvVar === 'object'
             ? {
                 name: typeof rawEnvVar?.name === 'string' ? rawEnvVar.name.trim() : '',
@@ -160,7 +160,7 @@ const DefaultCharacterTemplate: CharacterData = {
     title: '',
     realm: '',
     talentList: [],
-    background: { name: '', description: '', effect: '' },
+    background: { name: '', description: '', effect: '', rank: 'Bình thường' },
     sectId: 'none',
     sectPosition: 'None',
     sectContribution: 0,
@@ -207,6 +207,8 @@ const DefaultCharacterTemplate: CharacterData = {
     levelUpExp: 0,
     playerBuffs: [],
     personality: '',
+    karma: 0,
+    personalityStats: { righteousness: 50, evil: 0, arrogance: 0, humility: 50, coldness: 0, passion: 50 },
     isDead: false
 };
 
