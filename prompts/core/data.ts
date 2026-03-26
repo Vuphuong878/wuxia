@@ -22,7 +22,18 @@ export const coreDataFormat: PromptStructure = {
 - \`gameState.World\` (Major events, rumors, global NPCs)
 - \`gameState.Map\` (Coordinate info, buildings, areas)
 - \`gameState.Story\` (Chapters, foreshadowing, story variables)
-- \`gameState.TaskList\` (Active mission list)
+- \`gameState.TaskList\`: Array of {
+                title: string,
+                description: string,
+                type: "Chính tuyến" | "Nhánh" | "Môn phái" | "Kỳ ngộ",
+                issuer: string,
+                location: string,
+                recommendedRealm: string,
+                deadline?: string (YYYY:MM:DD:HH:MM),
+                currentStatus: "Đang thực hiện" | "Có thể nộp" | "Đã hoàn thành",
+                goalList: Array<{ description, currentProgress, totalRequired, isCompleted }>,
+                rewardDescription: string[]
+              }
 - \`gameState.AppointmentList\` (Scheduled meetings/promises)
 
 ## 1. NPC Structure (Social/Team)
