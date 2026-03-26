@@ -302,10 +302,9 @@ const WorldModal: React.FC<Props> = ({ world, environment, onClose }) => {
                             {/* --- CHRONICLE TAB --- */}
                             {activeTab === 'overview' && (
                                 <div className="space-y-6 lg:space-y-10 pb-10">
-                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
                                         {[
                                             { label: 'Cao Thủ', val: `${npcs.length}`, color: 'text-wuxia-gold' },
-                                            { label: 'Đại Địa', val: `${Array.isArray(world.maps) ? world.maps.length : 0}`, color: 'text-wuxia-cyan' },
                                             { label: 'Kiến Trúc Đã Mở', val: `${visitedNodes.length} / ${allNodes.length}`, color: 'text-wuxia-gold' },
                                             { label: 'Khu Vực Đã Mở', val: `${unlockedRegions.size} / 30`, color: 'text-gray-200' },
                                         ].map((stat, i) => (

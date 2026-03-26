@@ -604,6 +604,26 @@ export const applyStateCommand = (
             else if (lSubPath.startsWith("activenpclist")) path = "activeNpcList" + subPath.substring(13);
             else if (!subPath) path = "";
             else path = "maps" + (subPath.startsWith('[') ? subPath : "." + subPath); // Default to maps for legacy "World.MapName"
+
+            // Intercept maps update to synchronize Environment
+            if (path.startsWith("maps") && (normalizedAction === 'push' || normalizedAction === 'set')) {
+                const mapVal = translateObjectKeys(value);
+                if (mapVal && typeof mapVal === 'object' && !Array.isArray(mapVal)) {
+                    if (mapVal.name) {
+                        newEnv.specificLocation = mapVal.name;
+                        newEnv.minorLocation = mapVal.name;
+                        if (mapVal.mediumLocation) newEnv.mediumLocation = mapVal.mediumLocation;
+                        if (mapVal.majorLocation) newEnv.majorLocation = mapVal.majorLocation;
+                        if (typeof mapVal.x === 'number') newEnv.x = mapVal.x;
+                        if (typeof mapVal.y === 'number') newEnv.y = mapVal.y;
+                        if (mapVal.biomeId) newEnv.biomeId = mapVal.biomeId;
+                        if (mapVal.regionId) newEnv.regionId = mapVal.regionId;
+                    }
+                } else if (typeof mapVal === 'string') {
+                    newEnv.specificLocation = mapVal;
+                    newEnv.minorLocation = mapVal;
+                }
+            }
         } else {
             targetObj = newEnv;
             const subPath = key.replace(/^gameState\.(Environment\.|)Map\.?/i, "");

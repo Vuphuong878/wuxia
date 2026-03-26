@@ -33,7 +33,6 @@ export class WorldDataExporter {
             console.error('Invalid skeleton JSON format');
             return { 
                 activeNpcList: [], 
-                maps: [], 
                 buildings: [], 
                 ongoingEvents: [], 
                 settledEvents: [], 
@@ -44,7 +43,6 @@ export class WorldDataExporter {
 
         const lookups = skeletonJson.lookups || {};
         const biomes = skeletonJson.world_skeleton.level_1_biomes || [];
-        const maps: MapStructure[] = [];
         const allBuildings: BuildingStructure[] = [];
 
         biomes.forEach((biome: any) => {
@@ -52,22 +50,6 @@ export class WorldDataExporter {
             const regions = biome.level_2_regions || [];
             
             regions.forEach((region: any, rIdx: number) => {
-                const regionMap: MapStructure = {
-                    id: region.id || `region-${rIdx}`,
-                    name: region.name,
-                    description: region.description || `${region.name} thuộc ${biome.name}`,
-                    coordinate: region.coordinate || `${rIdx}, 0`,
-                    affiliation: {
-                        majorLocation: biome.name,
-                        mediumLocation: region.name,
-                        minorLocation: ''
-                    },
-                    internalBuildings: [],
-                    cities: [] 
-                };
-
-                // Add visual meta for the map component
-                (regionMap as any).visuals = biomeColors;
 
                 (region.level_3_nodes || []).forEach((node: any) => {
                     const building: BuildingStructure = {
@@ -93,22 +75,11 @@ export class WorldDataExporter {
                     (building as any).possibleOrigins = [...new Set([...typeOrigins, ...biomeOrigins])];
 
                     allBuildings.push(building);
-                    regionMap.internalBuildings.push(building);
-                    regionMap.cities?.push({
-                        id: node.id,
-                        name: node.name,
-                        type: node.type,
-                        faction: node.faction,
-                        description: node.description
-                    });
                 });
-
-                maps.push(regionMap);
             });
         });
 
         return {
-            maps,
             buildings: allBuildings,
             activeNpcList: [],
             ongoingEvents: [],

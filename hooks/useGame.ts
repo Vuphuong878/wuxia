@@ -227,7 +227,7 @@ export const useGame = () => {
     // Discovery System: Update visited nodes when character moves
     useEffect(() => {
         if (environment.x === undefined || environment.y === undefined) return;
-        
+
         // Find nodes close to current coordinates
         const nearNodes = MapService.getNodesByProximity(environment.x, environment.y, 50);
         const newlyVisited: string[] = [];
@@ -243,13 +243,13 @@ export const useGame = () => {
         const allNodes = MapService.getAllNodes();
         const visitedSet = new Set(world.visitedNodeIds || []);
         const unvisited = allNodes.filter(n => !visitedSet.has(n.id) && !newlyVisited.includes(n.id));
-        
+
         // Pick 10 random unvisited nodes to simulate wide-spread discovery
         const random10 = unvisited
             .sort(() => Math.random() - 0.5)
             .slice(0, 10)
             .map(n => n.id);
-        
+
         if (newlyVisited.length > 0 || random10.length > 0) {
             setWorld(prev => ({
                 ...prev,
@@ -529,22 +529,21 @@ export const useGame = () => {
     });
 
     const createOpeningBlankWorld = (): WorldDataStructure => {
-        // Transform the full 3400+ node skeleton into the initial world state
+
         return WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
     };
 
     const standardizeWorldStatus = (raw?: any): WorldDataStructure => {
         const worldData = raw && typeof raw === 'object' ? raw : {};
         const buildings = Array.isArray(worldData.buildings) ? worldData.buildings : [];
-        
+
         // Data Migration: If the world has 113 or fewer buildings (legacy WORLD_STRUCTURE size),
         // we auto-expand it to the full 3400+ node skeleton.
         if (buildings.length <= 113) {
-            console.log(`[useGame] World expansion triggered: migrating from ${buildings.length} nodes to 3400+ nodes.`);
+            console.log(`[useGame] World expansion triggered: migrating from ${buildings.length} nodes to nodes.`);
             const fullSkeleton = WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
             return {
                 activeNpcList: Array.isArray(worldData.activeNpcList) ? worldData.activeNpcList : [],
-                maps: fullSkeleton.maps,
                 buildings: fullSkeleton.buildings,
                 ongoingEvents: Array.isArray(worldData.ongoingEvents) ? worldData.ongoingEvents : [],
                 settledEvents: Array.isArray(worldData.settledEvents) ? worldData.settledEvents : [],
@@ -556,7 +555,6 @@ export const useGame = () => {
 
         return {
             activeNpcList: Array.isArray(worldData.activeNpcList) ? worldData.activeNpcList : [],
-            maps: Array.isArray(worldData.maps) ? worldData.maps : [],
             buildings: buildings,
             ongoingEvents: Array.isArray(worldData.ongoingEvents) ? worldData.ongoingEvents : [],
             settledEvents: Array.isArray(worldData.settledEvents) ? worldData.settledEvents : [],
@@ -914,7 +912,7 @@ export const useGame = () => {
         );
         const buildWorldStatusText = (payload: any) => {
             const world = normalizeWorldStatus(payload?.World || payload?.world);
-            
+
             // USE COMPACT SUMMARY INSTEAD OF SENDING 3400+ NODES
             const worldSummary = WorldDataExporter.getStoryContextSummary(FULL_WORLD_SKELETON);
 
@@ -1053,30 +1051,8 @@ export const useGame = () => {
             const world = normalizeWorldStatus(source?.World || source?.world);
 
             const currentSpecificLocation = typeof env?.specificLocation === 'string' ? env.specificLocation.trim() : '';
-            const mapList = Array.isArray(world.maps) ? world.maps : [];
             const buildingList = Array.isArray(world.buildings) ? world.buildings : [];
-
-            const mapText = mapList.length > 0
-                ? mapList.slice(0, 100).map((mapItem: any) => {
-                    const name = typeof mapItem?.name === 'string' ? mapItem.name.trim() : 'Bản đồ không tên';
-                    const coord = typeof mapItem?.coordinate === 'string' ? mapItem.coordinate.trim() : 'Số liệu không rõ';
-                    const desc = typeof mapItem?.description === 'string' ? mapItem.description.trim() : 'Không có mô tả';
-                    const ownership = mapItem?.ownership && typeof mapItem.ownership === 'object'
-                        ? [
-                            mapItem.ownership?.majorLocation || 'Không rõ Đại địa điểm',
-                            mapItem.ownership?.mediumLocation || 'Không rõ Trung địa điểm',
-                            mapItem.ownership?.minorLocation || 'Không rõ Tiểu địa điểm'
-                        ].join(' > ')
-                        : 'Không rõ quy thuộc';
-                    const interiors = Array.isArray(mapItem?.internalBuildings)
-                        ? mapItem.internalBuildings
-                            .map((b: any) => typeof b === 'string' ? b.trim() : (b?.name || '').trim())
-                            .filter((n: string) => n.length > 0)
-                            .join(' | ')
-                        : '';
-                    return `- Tên: ${name} | Tọa độ: ${coord} | Quy thuộc: ${ownership}\n  Mô tả: ${desc}\n  Kiến trúc nội bộ: ${interiors || 'Không có'}`;
-                }).join('\n')
-                : '- Chưa có dữ liệu bản đồ';
+            const mapText = '- (Dữ liệu bản đồ được truy xuất động dựa trên tọa độ)';
 
             const currentLocationNormalization = normalizeText(currentSpecificLocation);
             const hitBuilding = buildingList.filter((building: any) => {
@@ -1594,7 +1570,7 @@ export const useGame = () => {
             // Note: user specifically asked to unlock based on XY, so we don't filter the maps array in world state yet, 
             // but we filter the MapGraph display.
             const worldSkeletonData = WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
-            
+
             // 4.1 Initialize visited nodes (Discovery system - radius 150 around starting XY)
             // This reveals approximately 15-25 nodes depending on density, meeting user requirement.
             const sx = startingLocation.x || 500;
@@ -1604,7 +1580,6 @@ export const useGame = () => {
 
             openingBase.world = {
                 ...openingBase.world,
-                maps: worldSkeletonData.maps || [],
                 buildings: worldSkeletonData.buildings || [],
                 visitedNodeIds: initialVisitedIds,
             };
@@ -1706,7 +1681,7 @@ export const useGame = () => {
 
             const openingMem: MemorySystem = { recallArchives: [], instantMemory: [], shortTermMemory: [], midTermMemory: [], longTermMemory: [] };
             const openingEnv = normalizeEnvironment(contextData?.environment || environment);
-            
+
             const mergedWorldForOpening = contextData.world || world;
 
             const openingStatePayload = {
@@ -1913,11 +1888,11 @@ export const useGame = () => {
         if (response.t_dynamic_location && typeof response.t_dynamic_location === 'object') {
             const loc = response.t_dynamic_location;
             if (loc.name && typeof loc.name === 'string') {
-                let parentNode = MapService.findNodeByName(envBuffer.minorLocation) 
-                              || MapService.findNodeByName(envBuffer.specificLocation) 
-                              || MapService.findNodeByName(envBuffer.mediumLocation)
-                              || MapService.findNodeByName(envBuffer.majorLocation);
-                
+                let parentNode = MapService.findNodeByName(envBuffer.minorLocation)
+                    || MapService.findNodeByName(envBuffer.specificLocation)
+                    || MapService.findNodeByName(envBuffer.mediumLocation)
+                    || MapService.findNodeByName(envBuffer.majorLocation);
+
                 if (!parentNode) {
                     const nearNodes = MapService.getNodesByProximity(envBuffer.x ?? 1500, envBuffer.y ?? 1500, 2000);
                     if (nearNodes.length > 0) parentNode = nearNodes[0];
@@ -2389,7 +2364,7 @@ export const useGame = () => {
             // 9. Increment action count and check for auto-summarization
             const currentActionCount = Number(story.actionCountSinceLastChapter) || 0;
             const nextActionCount = currentActionCount + 1;
-            
+
             if (nextActionCount >= 5) {
                 // Trigger auto summarization (deferred to avoid blocking UI)
                 setTimeout(() => {
@@ -2434,7 +2409,7 @@ export const useGame = () => {
                 // Removed permanent system error message from history as requested
                 // const errorMsg: ChatHistory = { role: 'system', content: `[System error]: ${summary}`, timestamp: Date.now() };
                 // setHistory([...updatedDisplayHistory, errorMsg]);
-                
+
                 return {
                     cancelled: true,
                     errorDetail: detail,
@@ -2453,11 +2428,11 @@ export const useGame = () => {
 
     const handleSummarizeChapter = async () => {
         if (loading || isGenerating) return;
-        
+
         try {
             setLoading(true);
             setIsGenerating(true);
-            
+
             const currentChapter = story.currentChapter;
             if (!currentChapter) return;
 
@@ -2476,7 +2451,7 @@ YÊU CẦU ĐỊNH DẠNG JSON (BẮT BUỘC):
   "shortTerm": "Tóm tắt chương ${currentChapter.index}",
   "tavern_commands": []
 }`;
-            
+
             const aiResult = await aiService.generateStoryResponse(
                 "Bạn là một biên tập viên tiểu thuyết kiếm hiệp chuyên nghiệp. Hãy tóm tắt chương truyện một cách lôi cuốn.",
                 `Nội dung chương hiện tại:\nTitle: ${currentChapter.title}\nBackground: ${currentChapter.backgroundStory}\n\nDiễn biến gần đây:\n${formatHistoryToScript(history.slice(-15))}`,
@@ -2495,7 +2470,7 @@ YÊU CẦU ĐỊNH DẠNG JSON (BẮT BUỘC):
                 const updatedCurrent = { ...prev.currentChapter, summary };
                 const newArchive = [...prev.historicalArchives, updatedCurrent];
                 const nextIndex = newArchive.length + 1;
-                
+
                 return {
                     ...prev,
                     historicalArchives: newArchive,
@@ -2597,7 +2572,7 @@ YÊU CẦU ĐỊNH DẠNG JSON (BẮT BUỘC):
     const saveSettings = async (newConfig: ApiSettings) => {
         const normalized = normalizeApiSettings(newConfig);
         console.log('[useGame] Persisting API settings:', normalized);
-        
+
         // Auto-turn off NSFW prompt when useSystemGemini state changes
         // This prevents accidental NSFW generation when switching environments
         if (apiConfig.useSystemGemini !== normalized.useSystemGemini) {
@@ -2612,7 +2587,7 @@ YÊU CẦU ĐỊNH DẠNG JSON (BẮT BUỘC):
                 await dbService.saveSetting('prompts', newPrompts);
             }
         }
-        
+
         setApiConfig(normalized);
         await dbService.saveSetting('api_settings', normalized);
     };

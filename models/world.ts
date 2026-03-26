@@ -92,7 +92,6 @@ export interface MapCamera {
 
 export interface WorldDataStructure {
     activeNpcList: ActiveNpcStructure[];
-    maps: MapStructure[];
     buildings: BuildingStructure[];
 
     ongoingEvents: WorldEventStructure[];

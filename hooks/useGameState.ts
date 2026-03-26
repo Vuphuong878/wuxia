@@ -139,7 +139,6 @@ export const useGameState = () => {
         const skeletonData = WorldDataExporter.transformSkeleton(FULL_WORLD_SKELETON);
         return {
             activeNpcList: [],
-            maps: skeletonData.maps || [],
             buildings: skeletonData.buildings || [],
             ongoingEvents: [],
             settledEvents: [],
