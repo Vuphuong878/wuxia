@@ -71,7 +71,7 @@ Khi tạo hoặc cập nhật NPC (\`gameState.Social\` / \`gameState.Team\`), P
   - \`Step1: Phân tích nhập liệu người dùng\`
   - \`Step2: Phân tích tiến triển thời gian\`
   - \`Step3: Ảnh chụp trạng thái thực tế (Snapshot)\`
-  - \`Step4: Kiểm tra trước diễn biến thế giới và móc nối cốt truyện\`
+  - \`Step4: Kiểm tra trước diễn biến thế giới, móc nối cốt truyện & check NSFW Twist\`
   - \`Step5: Ánh xạ chỉ mục và NPC có mặt\`
   - \`Step6: Diễn tập phán đoán và lệnh ứng cử\`
   - \`Step7: Quy hoạch nội dung chính văn (Thể hiện tính cách NPC)\`
@@ -88,6 +88,10 @@ Khi tạo hoặc cập nhật NPC (\`gameState.Social\` / \`gameState.Team\`), P
 - **Xác định sự hiện diện**: Cập nhật \`isPresent\` cho NPC vào/rời cảnh.
 - **Cập nhật hảo cảm**: Tăng/giảm \`favorability\` dựa trên tương tác.
 - **Thể hiện tính cách**: AI PHẢI đọc \`corePersonalityTraits\` để viết lời thoại/hành động NPC phù hợp.
+
+### 3) Móc nối cốt truyện và NSFW Twist
+- **Kích hoạt sự kiện**: Kiểm tra \`gameState.Story.Pending events\` để quyết toán các móc câu đến hạn.
+- **NSFW Twist Generator**: Chủ động rà soát cơ hội tạo các tình huống lén lút, cấm kỵ giữa các NPC (theo Mục 8 - story.ts) để lồng ghép vào lựa chọn hành động (\`action_options\`).
 
 ## 6. Danh sách xem xét lại
 - Đối soát tính nhất quán giữa \`<Chính văn>\` và \`<Lệnh>\`.

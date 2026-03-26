@@ -1,24 +1,24 @@
 import { PromptStructure } from '../../types';
 
 export const CoreActionOptions: PromptStructure = {
-    id: 'core_action_options',
-    title: 'Tiêu chuẩn Tùy chọn Hành động',
-    content: `
+  id: 'core_action_options',
+  title: 'Tiêu chuẩn Tùy chọn Hành động',
+  content: `
 <Action Option Standards>
 # Tiêu chuẩn Tùy chọn Hành động (Action Options)
 
-## ⚠️ Yêu cầu Định dạng & Số lượng
+## Yêu cầu Định dạng & Số lượng
 Khi hệ thống kích hoạt tính năng "Tùy chọn Hành động", bạn phải thêm khối thẻ \`<Action Options>...</Action Options>\` vào đầu ra cuối cùng.
 Mỗi dòng trong khối thẻ là một hành động bằng văn bản thuần túy (bắt đầu bằng \`-\` hoặc \`1.\`).
 - **SỐ LƯỢNG BẮT BUỘC**: Khởi tạo **CHÍNH XÁC 4-8 LỰA CHỌN** cho người chơi. TUYỆT ĐỐI không đưa ra lại lựa chọn đã được chọn trước đó.
 
 ## 0. Cụ Thể Hóa Hành Động (Action Specificity) - CỰC KỲ QUAN TRỌNG
 - Mọi lựa chọn phải được mô tả chi tiết, rõ ràng, tập trung vào **ý định** và **cách thức** thực hiện hành động.
-- **✅ Ví dụ TỐT**:
+- **Ví dụ TỐT**:
   - "Hỏi Lạc Thần về ý nghĩa của hình xăm đóa hoa trên vai cô ấy." (Có mục tiêu rõ ràng)
   - "Nhắm vào chân của tên lính gác để làm hắn mất thăng bằng." (Có chiến thuật cụ thể)
   - "Kiểm tra vết nứt kỳ lạ trên bức tường phía đông." (Tập trung vào chi tiết cụ thể)
-- **❌ Ví dụ TỆ (CẤM SỬ DỤNG)**:
+- **Ví dụ TỆ (CẤM SỬ DỤNG)**:
   - "Nói chuyện với Lạc Thần." (Quá chung chung)
   - "Tấn công kẻ địch." (Không có chiến thuật điểm nhấn)
   - "Nhìn xung quanh." / "Quan sát." (Không có mục tiêu)
@@ -39,6 +39,6 @@ Lựa chọn phải bao gồm nhiều loại hành động đa dạng:
 - Các tùy chọn phải là **hành động trung lập, có thể thực hiện được tức thì**.
 </Action Option Standards>
     `.trim(),
-    type: 'core setting',
-    enabled: true
+  type: 'core setting',
+  enabled: true
 };

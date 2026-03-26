@@ -39,6 +39,22 @@ export const StatNpcReference: PromptStructure = {
 - \`{"action": "SET", "key": "gameState.NPCs.NPC001.isPresent", "value": true}\`
 - \`{"action": "ADD", "key": "gameState.NPCs.NPC001.currentHp", "value": -40}\`
 
+## 7. HỆ THỐNG NỘI TÂM ẨN & TÌNH CẢM PHỨC TẠP (CỰC KỲ QUAN TRỌNG)
+- Khi cập nhật tình cảm của một NPC, TUYỆT ĐỐI KHÔNG được phản ứng máy móc. BẮT BUỘC phải thực hiện một bước "suy nghĩ nội tâm" dựa trên 5 lăng kính:
+  1. **"Tính cách cốt lõi"**: Hành động của người chơi được diễn giải qua bản chất của NPC (ví dụ: đa nghi, thực dụng, nhân hậu, thù dai). NPC đa nghi không dễ tin chỉ sau một hành động tốt.
+  2. **"Mục tiêu & động cơ cá nhân"**: Hành động này giúp ích hay cản trở mục tiêu/động cơ riêng của NPC? Hãy suy luận mục tiêu hợp lý cho NPC quan trọng nếu chưa có.
+  3. **"Lịch sử tương tác"**: Hành động này có nhất quán với các hành động trước đây của người chơi không (dựa vào ký ức gần đây)? Một hành động tốt sau nhiều lần lừa dối sẽ bị coi là giả tạo.
+  4. **"Bối cảnh & hoàn cảnh"**: Hành động này có phù hợp với tình huống hiện tại không (chiến đấu, nguy cấp...)?
+  5. **"Mối quan hệ xã hội"**: Hành động của người chơi với đồng minh/kẻ thù của NPC ảnh hưởng thế nào? Giúp đỡ kẻ thù của NPC sẽ khiến họ coi bạn là mối đe dọa.
+- **QUAN TRỌNG**: Quá trình phân tích 5 lăng kính này là **SUY NGHĨ NỘI TÂM**, **TUYỆT ĐỐI KHÔNG được viết ra truyện**. Chỉ thể hiện kết quả qua hành động, lời thoại, cảm xúc của NPC.
+
+## 8. HỆ THỐNG NPC CHỦ ĐỘNG & GIAI ĐOẠN HÀNH ĐỘNG (NÂNG CẤP CỐT LÕI)
+- Sau mỗi hành động của người chơi, lượt đi của AI chia thành HAI giai đoạn:
+  1. **Phản ứng & kết quả**: Mô tả kết quả trực tiếp, ngay lập tức của hành động người chơi (bị động).
+  2. **Hành động chủ động của NPC/thế giới**: Sau khi mô tả kết quả, BẮT BUỘC tự hỏi: "Có NPC/thế lực nào sẽ hành động ngay không?" Sử dụng các cú hích (tình cảm, mục tiêu, bối cảnh, tính cách NPC) để quyết định. Nếu có, mô tả chi tiết. Nếu sự kiện lớn xảy ra không do NPC.
+- **QUY TẮC CẤM**: TUYỆT ĐỐI KHÔNG để người chơi quyết định thay NPC. NPC phải tự hành động hoặc bộc lộ thái độ trong giai đoạn 2 dựa trên tính cách/mục tiêu.
+- **Lưu ý**: Chỉ sau khi hoàn thành cả hai giai đoạn, mới tạo lựa chọn mới cho người chơi.
+
 </npc_attribute_protocol>
 `,
     type: 'num',
